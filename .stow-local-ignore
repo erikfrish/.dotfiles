@@ -1,0 +1,7 @@
+^\.git
+^\.github
+\.swp$
+\.bak$
+.*\.md
+.*\.sh
+.*\.png
