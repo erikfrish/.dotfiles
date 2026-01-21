@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# 1. Запуск приложения
+APP_PATH="$HOME/Applications/band-desktop-*.AppImage"
+$APP_PATH &
+APP_PID=$!
+
+# 2. Ожидание и поиск окна
+FOUND=0
+WINDOW_ADDR=""
+
+for i in {1..30}; do
+    CLIENTS_JSON=$(hyprctl clients -j 2>/dev/null)
+    
+    # Сначала ищем по PID, потом по классу
+    WINDOW_ADDR=$(echo "$CLIENTS_JSON" | jq -r ".[] | select(.pid == $APP_PID) | .address" 2>/dev/null)
+    
+    if [ -z "$WINDOW_ADDR" ]; then
+        WINDOW_ADDR=$(echo "$CLIENTS_JSON" | jq -r '.[] | select(.class == "Band") | .address' 2>/dev/null | head -1)
+    fi
+    
+    if [ -n "$WINDOW_ADDR" ]; then
+        FOUND=1
+        break
+    fi
+    
+    sleep 0.5
+done
+
+# 3. Перемещение и размещение окна
+if [ $FOUND -eq 1 ]; then
+    # Перемещаем на воркспейс 6
+    hyprctl dispatch movetoworkspacesilent "6,address:$WINDOW_ADDR"
+    # sleep 0.2
+    
+    # Фокусируемся на окне и размещаем слева
+    hyprctl dispatch focuswindow "address:$WINDOW_ADDR"
+    # sleep 0.2
+    # Перемещаем в левый верхний угол
+    hyprctl dispatch movewindow l
+    hyprctl dispatch workspace 1
+    
+    echo "Band успешно размещён на воркспейсе 4 слева"
+else
+    echo "Ошибка: окно Band не найдено"
+fi
