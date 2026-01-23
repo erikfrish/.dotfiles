@@ -142,6 +142,8 @@ alias docker_clean_ps='docker rm $(docker ps --filter=status=exited --filter=sta
 alias dcoker_clean_cashe='docker system prune -a'
 alias get_idf='. $HOME/esp/esp-idf/export.sh'
 alias wake_homelab='wakeonlan -i 192.168.1.255 c8:ff:bf:04:e7:64'
+alias ls='eza'
+# alias cat='bat'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

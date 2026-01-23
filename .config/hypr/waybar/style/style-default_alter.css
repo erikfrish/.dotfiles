@@ -94,6 +94,8 @@ tooltip label{
     border-bottom: 3px solid #ffffff;
 }
 
+#custom-notification,
+#custom-screenshot_t,
 #clock,
 #battery,
 #cpu,

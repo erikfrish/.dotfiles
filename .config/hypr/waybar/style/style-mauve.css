@@ -63,7 +63,9 @@
        color: #9CCFD8;
        border-radius: 15px;
    }
-   
+
+   #custom-notification,
+   #custom-screenshot_t,
    #clock,
    #battery,
    #cpu,
@@ -101,7 +103,7 @@
    #custom-weather.rainyNight,
    #custom-weather.showyIcyDay,
    #custom-weather.snowyIcyNight,
-   #custom-weather.default 
+   #custom-weather.default ,
    #idle_inhibitor {
        color: #cba7f7;
        padding: 0px 10px;

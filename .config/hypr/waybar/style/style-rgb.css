@@ -34,6 +34,8 @@ tooltip label{
     color: #cdd6f4;
 }
 
+#custom-notification,
+#custom-screenshot_t,
 #clock,
 #battery,
 #cpu,
@@ -61,7 +63,6 @@ tooltip label{
 #custom-updater,
 #custom-lock,
 #custom-weather, 
-#custom-screenshot_t,
 #idle_inhibitor {
 	border-radius: 8px;
 	margin: 4px 1px;
