@@ -18,6 +18,7 @@
 	"temperature", 
 	"memory", 
 	"custom/weather",
+	"custom/wakatime"
 	],
   
   "modules-center": [
@@ -38,6 +39,6 @@
 	// "wireplumber", 
 	// "custom/screenshot_t",
 	"pulseaudio#microphone", 
-	"custom/power",
-	],
+	"custom/power"
+	]
 }

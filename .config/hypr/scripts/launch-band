@@ -38,6 +38,7 @@ if [ $FOUND -eq 1 ]; then
     # sleep 0.2
     # Перемещаем в левый верхний угол
     hyprctl dispatch movewindow l
+    sleep 0.4
     hyprctl dispatch workspace 1
     
     echo "Band успешно размещён на воркспейсе 4 слева"

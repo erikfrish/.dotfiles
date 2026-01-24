@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# # Получаем время за сегодня через wakatime-cli
+# # Если команда не найдена, выведет пустоту
+# stats=$(wakatime-cli --today 2>/dev/null)
+
+# if [ -n "$stats" ]; then
+#     # Выводим только часы и минуты (например: 3h 15m)
+#     echo "󱑎 $stats"
+# else
+#     echo "󱑎 0m"
+# fi
+
+# Получаем общую статистику за сегодня
+total=$(wakatime-cli --today 2>/dev/null)
+
+if [ -z "$total" ]; then
+    echo '{"text": "Offline", "class": "offline"}'
+    exit 0
+fi
+
+# Получаем детальную разбивку по проектам/языкам для тултипа
+# Мы берем последние 5 строк, чтобы не раздувать окно
+details=$(wakatime-cli --today --hide-filenames --output brief | head -n 5)
+
+# Формируем JSON для Waybar
+# \n в тултипе создаст перенос строки
+echo "{\"text\": \"󱑎  $total\", \"tooltip\": \"Сегодняшняя активность:\n$details\"}"

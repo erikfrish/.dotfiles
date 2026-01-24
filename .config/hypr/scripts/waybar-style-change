@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Check which waybar theme is set
-THEMEIS=$(realpath ~/.config/hypr/waybar/style.css | sed 's/.*-\(.*\)\.css/\1/')
+THEMEIS=$(realpath ~/.config/waybar/style.css | sed 's/.*-\(.*\)\.css/\1/')
 
 # Change theme
 if [ "$THEMEIS" == "default" ]; then
@@ -17,9 +17,9 @@ else
 fi
 
 # Set the waybar theme
-THEMEFILE="$HOME/.config/hypr/waybar/style/style${SWITCHTO}.css"
+THEMEFILE="$HOME/.config/waybar/style/style${SWITCHTO}.css"
 if [ -f "$THEMEFILE" ]; then
-    ln -sf "$THEMEFILE" "$HOME/.config/hypr/waybar/style.css"
+    ln -sf "$THEMEFILE" "$HOME/.config/waybar/style.css"
 
 else
     echo "Error: $THEMEFILE not found"
