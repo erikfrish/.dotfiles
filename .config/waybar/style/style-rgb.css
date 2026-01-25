@@ -1,5 +1,5 @@
-*{
-	font-family: "JetBrainsMono Nerd Font";
+* {
+	font-family: "JetBrainsMono ExtraBold", "Symbols Nerd Font";
 	font-weight: bold;
 	min-height: 0;
 	font-size: 16px;
@@ -9,29 +9,29 @@
 }
 
 window#waybar {
-	 /* Transparent waybar. Make sure to comment out background-color: and border: */
-  background-color: rgba(0,0,0,0);
-  /* background-color: #1e1e2e; */
-  /* border: 2px solid #313244; */
-  transition-property: background-color;
-  transition-duration: .5s;
+	/* Transparent waybar. Make sure to comment out background-color: and border: */
+	background-color: rgba(0, 0, 0, 0);
+	/* background-color: #1e1e2e; */
+	/* border: 2px solid #313244; */
+	transition-property: background-color;
+	transition-duration: .5s;
 }
 
 window#waybar.hidden {
-  opacity: 0.5;
+	opacity: 0.5;
 }
 
 tooltip {
-    background: #1e1e2e;
-    opacity: 0.8;
-    border-radius: 10px;
-    border-width: 2px;
-    border-style: solid;
-    border-color: #11111b;
+	background: #1e1e2e;
+	opacity: 0.8;
+	border-radius: 10px;
+	border-width: 2px;
+	border-style: solid;
+	border-color: #11111b;
 }
 
-tooltip label{
-    color: #cdd6f4;
+tooltip label {
+	color: #cdd6f4;
 }
 
 #custom-wakatime,
@@ -63,13 +63,13 @@ tooltip label{
 #custom-media,
 #custom-updater,
 #custom-lock,
-#custom-weather, 
+#custom-weather,
 #idle_inhibitor {
 	border-radius: 8px;
 	margin: 4px 1px;
 	padding: 0px 4px;
-  	color: #3A3B3C;
-  	border: 1px solid #b4befe;
+	color: #3A3B3C;
+	border: 1px solid #b4befe;
 }
 
 #backlight {
@@ -81,7 +81,7 @@ tooltip label{
 }
 
 #taskbar button.active {
-    background-color: #7f849c;
+	background-color: #7f849c;
 }
 
 #battery {
@@ -89,19 +89,19 @@ tooltip label{
 }
 
 @keyframes blink {
-    	to {
-        	color: #000000;
-    	}
+	to {
+		color: #000000;
+	}
 }
 
 #battery.critical:not(.charging) {
 	background-color: #f38ba8;
-    	color: #f38ba8;
-    	animation-name: blink;
-    	animation-duration: 0.5s;
-    	animation-timing-function: linear;
-    	animation-iteration-count: infinite;
-    	animation-direction: alternate;
+	color: #f38ba8;
+	animation-name: blink;
+	animation-duration: 0.5s;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+	animation-direction: alternate;
 }
 
 #clock {
@@ -123,41 +123,44 @@ tooltip label{
 #tray {
 	background-color: #b4befe;
 }
-#tray > .passive {
-    	-gtk-icon-effect: dim;
+
+#tray>.passive {
+	-gtk-icon-effect: dim;
 }
-#tray > .needs-attention {
-    	-gtk-icon-effect: highlight;
+
+#tray>.needs-attention {
+	-gtk-icon-effect: highlight;
 }
 
 #workspaces button {
-  	border-radius: 8px;
-  	background-color: #d9e0ee;
-  	color: #3A3B3C;
+	border-radius: 8px;
+	background-color: #d9e0ee;
+	color: #3A3B3C;
 }
 
 #workspaces button.active {
-  	background-color: #eba0ac;
-  	color: #3A3B3C;
+	background-color: #eba0ac;
+	color: #3A3B3C;
 }
 
 #taskbar button {
-  	border-radius: 8px;
-  	background-color: #74c7ec;
-  	color: #3A3B3C;
+	border-radius: 8px;
+	background-color: #74c7ec;
+	color: #3A3B3C;
 }
 
 #taskbar button.active {
-  	background-color: #b4befe;
-  	color: #3A3B3C;
+	background-color: #b4befe;
+	color: #3A3B3C;
 }
+
 #custom-menu {
 	background-color: #f5c2e7;
 	padding: 1px;
-	padding-right: 10px;
+	/* padding-right: 10px; */
 	border-radius: 8px;
-  	color: #3A3B3C;
-  	border: 1px solid #b4befe;
+	color: #3A3B3C;
+	border: 1px solid #b4befe;
 }
 
 #custom-power {
@@ -190,11 +193,11 @@ tooltip label{
 }
 
 #temperature {
-  	background-color: #86b4fa;
+	background-color: #86b4fa;
 }
 
 #custom-keybindings {
-  	background-color: #86b4fa;
+	background-color: #86b4fa;
 }
 
 #window {
@@ -208,6 +211,7 @@ tooltip label{
 #pulseaudio.bluetooth {
 	background-color: #f5c2e7;
 }
+
 #pulseaudio.muted {
 	background-color: #313244;
 	color: #cdd6f4;
@@ -216,7 +220,45 @@ tooltip label{
 #network {
 	background-color: #89b4fa;
 }
-#network.disconnected,#network.disabled {
+
+#network.disconnected,
+#network.disabled {
 	background-color: #313244;
 	color: #cdd6f4;
+}
+
+#custom-vpn1,
+#custom-vpn2 {
+	/* Фиксируем ширину, чтобы иконка была в центре "квадрата" */
+	min-width: 40px;
+	padding: 0;
+	margin: 0 4px;
+
+	border-radius: 8px;
+	transition: all 0.3s ease;
+
+	/* Используем font-size для контроля размера "коробки" */
+	font-size: 18px;
+}
+
+/* Если иконка кажется слишком высокой или низкой, 
+   используй небольшой margin-bottom внутри модуля: */
+#custom-vpn1,
+#custom-vpn2 {
+	margin-bottom: 0px;
+}
+
+#custom-vpn1.active {
+	color: #81a1c1;
+	background: rgba(129, 161, 193, 0.15);
+}
+
+#custom-vpn2.active {
+	color: #a3be8c;
+	background: rgba(163, 190, 140, 0.15);
+}
+
+#custom-vpn1.inactive,
+#custom-vpn2.inactive {
+	color: #666666;
 }

@@ -3,6 +3,8 @@
   // Global configuration
   // -------------------------------------------------------------------------
 
+  // "include": "~/.config/waybar/modules",
+
   "layer": "top",
   "position": "top",
 
@@ -22,30 +24,34 @@
   "modules-left": [
     // "custom/rofi",
     "hyprland/workspaces",
-    // "hyprland/submap",
+    "custom/menu",
     "cpu",
     "temperature",
-    // "idle_inhibitor",
     // "mpd"
     // "custom/spotify",
     "custom/storage",
+    "disk",
     "memory",
     // "custom/weather",
-    "custom/menu",
     "custom/wakatime",
+    "hyprland/submap",
   ],
   "modules-center": [
     // "hyprland/window",
     // "clock#date",
-    // "custom/weather",
+    // "custom/weather"
+    // "custom/keybindings",
     "clock",
     // "custom/gammastep"
     "custom/cycle_wall",
     "custom/notification",
   ],
   "modules-right": [
-    // "hyprland/window",
     "tray",
+    "custom/vpn1",
+    "custom/vpn2",
+    // "hyprland/window",
+    // "custom/gammastep",
     "backlight",
     "pulseaudio.bluetooth",
     "pulseaudio",
@@ -53,6 +59,7 @@
     "pulseaudio#microphone",
     // "custom/screenshot_t",
     "battery",
+    "idle_inhibitor",
     "custom/power",
   ],
 
@@ -67,14 +74,6 @@
   "custom/sp2": {
     "format": " |",
     "tooltip": false,
-  },
-
-  "custom/rofi": {
-    "format": "",
-    "tooltip": false,
-    "on-click-right": "nwg-drawer",
-    "on-click": "wofi --show run",
-    "on-click-middle": "pkill -9 wofi",
   },
 
   "hyprland/submap": {
@@ -173,17 +172,49 @@
     "on-click-right": "$HOME/.config/hypr/scripts/layout-switcher",
   },
 
+  "custom/rofi": {
+    "format": "",
+    "tooltip": false,
+    "on-click-right": "nwg-drawer",
+    "on-click": "wofi --show run",
+    "on-click-middle": "pkill -9 wofi",
+  },
+
+  // "battery": {
+  //   "interval": 2,
+  //   "states": {
+  //     "good": 95,
+  //     "warning": 30,
+  //     "critical": 15,
+  //   },
+  //   "format": "{icon} {capacity}%",
+  //   "format-charging": " {capacity}%",
+  //   "format-plugged": " {capacity}%",
+  //   "format-icons": ["", "", "", "", ""],
+  // },
   "battery": {
-    "interval": 2,
+    "interval": 20,
+    "align": 0,
+    "rotate": 0,
+    //"bat": "BAT1",
+    //"adapter": "ACAD",
+    "full-at": 100,
+    "design-capacity": false,
     "states": {
       "good": 95,
       "warning": 30,
       "critical": 15,
     },
-    "format": "{icon} {capacity}%",
-    "format-charging": " {capacity}%",
+    "format": "{icon}  {capacity}%",
+    "format-charging": " {capacity}%",
     "format-plugged": " {capacity}%",
+    "format-full": "{icon} Full",
+    //"format-good": "",
+    "format-alt": "{icon} {time}",
     "format-icons": ["", "", "", "", ""],
+    "format-time": "{H}h {M}min",
+    "tooltip": true,
+    "on-click-right": "~/.config/hypr/scripts/glassmorphism",
   },
 
   "network": {
@@ -200,17 +231,17 @@
     "interval": 10,
   },
 
-//   "network": {
-//     "format": "{ifname}",
-//     "format-wifi": "{essid} ({signalStrength}%)  ",
-//     "format-ethernet": "",
-//     "format-disconnected": "", //An empty format will hide the module.
-//     "tooltip-format": "{ifname} via {gwaddr} ",
-//     "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
-//     "tooltip-format-ethernet": "{ifname} ",
-//     "tooltip-format-disconnected": "Disconnected",
-//     "max-length": 50,
-//   },
+  //   "network": {
+  //     "format": "{ifname}",
+  //     "format-wifi": "{essid} ({signalStrength}%)  ",
+  //     "format-ethernet": "",
+  //     "format-disconnected": "", //An empty format will hide the module.
+  //     "tooltip-format": "{ifname} via {gwaddr} ",
+  //     "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+  //     "tooltip-format-ethernet": "{ifname} ",
+  //     "tooltip-format-disconnected": "Disconnected",
+  //     "max-length": 50,
+  //   },
 
   "custom/storage": {
     "format": " {}",
@@ -246,7 +277,7 @@
     "on-scroll-down": "~/.config/hypr/scripts/brightness --dec",
     "smooth-scrolling-threshold": 1,
   },
-  
+
   "idle_inhibitor": {
     "format": "{icon}",
     "format-icons": {
@@ -255,6 +286,7 @@
     },
     "tooltip": "true",
   },
+
   //   "custom/weather": {
   //     "format": "{}",
   //     "format-alt": "{alt}: {}",
@@ -314,11 +346,11 @@
     "on-click-right": "~/.config/hypr/scripts/glassmorphism",
   },
 
-//   "clock": {
-//     "format": "  {:%H:%M   %e %b}",
-//     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-//     "today-format": "<b>{}</b>",
-//   },
+  //   "clock": {
+  //     "format": "  {:%H:%M   %e %b}",
+  //     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+  //     "today-format": "<b>{}</b>",
+  //   },
 
   "clock#date": {
     "format": "󰥔  {:%H:%M \n %e %b}",
@@ -352,8 +384,8 @@
   },
 
   "cpu": {
-    // "format": "{max_frequency}GHz <span color=\"darkgray\">| {usage}%</span>",
-    "format": " {usage}%",
+    "format": "{max_frequency}GHz <span color=\"darkgray\">| {usage}%</span>",
+    // "format": " {usage}%",
     //"format": " {}%", // Icon: microchip
     "interval": 1,
     "format-alt-click": "click",
@@ -401,29 +433,57 @@
         "exec": "$HOME/.config/waybar/get_kbdlayout.sh"
     },*/
 
+  // "hyprland/workspaces": {
+  //   "all-outputs": true,
+  //   "format": "{name}",
+  //   "format-icons": {
+  //     "1": "一",
+  //     "2": "二",
+  //     "3": "三",
+  //     "4": "四",
+  //     "5": "五",
+  //     "6": "六",
+  //     "7": "七",
+  //     "8": "八",
+  //     "9": "九",
+  //     "10": "十",
+  //   },
+  //   "on-scroll-up": "hyprctl dispatch workspace e+1 1>/dev/null",
+  //   "on-scroll-down": "hyprctl dispatch workspace e-1 1>/dev/null",
+  //   "sort-by-number": true,
+  //   "active-only": false,
+  // },
+
   "hyprland/workspaces": {
-    "all-outputs": true,
     "format": "{name}",
-    "format-icons": {
-      "1": "一",
-      "2": "二",
-      "3": "三",
-      "4": "四",
-      "5": "五",
-      "6": "六",
-      "7": "七",
-      "8": "八",
-      "9": "九",
-      "10": "十",
-    },
-    "on-scroll-up": "hyprctl dispatch workspace e+1 1>/dev/null",
-    "on-scroll-down": "hyprctl dispatch workspace e-1 1>/dev/null",
+    //"format": "{name}: {icon}",
+    //"format": "{icon}",
+    "show-special": false,
+    "on-click": "activate",
+    "all-outputs": true,
     "sort-by-number": true,
-    "active-only": false,
+    "format-icons": {
+      "1": "main  ",
+      "2": "2  ",
+      "3": "3  ",
+      "4": "4  ",
+      "5": "5  ",
+      "6": "6  ",
+      "7": "7  ",
+      "8": "8  ",
+      "9": "9  ",
+      "10": " 10 ",
+      "focused": "",
+      "default": "",
+    },
+    "on-scroll-up": "hyprctl dispatch workspace e+1",
+    "on-scroll-down": "hyprctl dispatch workspace e-1",
   },
 
   "hyprland/window": {
+    // "max-length": 360,
     "max-length": 100,
+    "format": "{}",
     "separate-outputs": true,
   },
 
@@ -437,92 +497,92 @@
     "tooltip-format": "{used} used out of {total} on {path} ({percentage_used}%)",
   },
 
-//   "pulseaudio": {
-//     "format": "{icon} {volume} %",
-//     "format-bluetooth": " {icon} {volume} %",
-//     "format-muted": " mute",
-//     "format-icons": {
-//         "headphone": "",
-//         "hands-free": "",
-//         "headset": "",
-//         "phone": "",
-//         "portable": "",
-//         "car": "",
-//         "default": ["", "", ""],
-//         "ignored-sinks": ["Easy Effects Sink"]
-//     },
-//     "scroll-step": 5.0,
-//     "on-click": "~/.config/hypr/scripts/volume --toggle",
-//     "on-click-right": "pavucontrol",
-//     "on-scroll-up": "~/.config/hypr/scripts/volume --inc",
-//     "on-scroll-down": "~/.config/hypr/scripts/volume --dec",
-//     "smooth-scrolling-threshold": 1
-//   },
-
   "pulseaudio": {
-    "scroll-step": 3, // %, can be a float
-    "format": "{icon} {volume}% {format_source}",
-    "format-bluetooth": "{volume}% {icon} {format_source}",
-    "format-bluetooth-muted": " {icon} {format_source}",
-    "format-muted": " {format_source}",
-    //"format-source": "{volume}% ",
-    //"format-source-muted": "",
-    "format-source": "",
-    "format-source-muted": "",
+    "format": "{icon} {volume} %",
+    "format-bluetooth": " {icon} {volume} %",
+    "format-muted": "󰖁 muted",
     "format-icons": {
       "headphone": "",
-      "hands-free": "",
-      "headset": "",
+      "hands-free": "",
+      "headset": "",
       "phone": "",
       "portable": "",
       "car": "",
       "default": ["", "", ""],
+      "ignored-sinks": ["Easy Effects Sink"],
     },
-    "on-click": "pavucontrol",
-    "on-click-right": "amixer sset Master toggle",
+    "scroll-step": 5.0,
+    "on-click": "~/.config/hypr/scripts/volume --toggle",
+    "on-click-right": "pavucontrol",
+    "on-scroll-up": "~/.config/hypr/scripts/volume --inc",
+    "on-scroll-down": "~/.config/hypr/scripts/volume --dec",
+    "smooth-scrolling-threshold": 1,
   },
+
+  // "pulseaudio": {
+  //   "scroll-step": 3, // %, can be a float
+  //   "format": "{icon} {volume}% {format_source}",
+  //   "format-bluetooth": "{volume}% {icon} {format_source}",
+  //   "format-bluetooth-muted": " {icon} {format_source}",
+  //   "format-muted": " {format_source}",
+  //   //"format-source": "{volume}% ",
+  //   //"format-source-muted": "",
+  //   "format-source": "",
+  //   "format-source-muted": "",
+  //   "format-icons": {
+  //     "headphone": "",
+  //     "hands-free": "",
+  //     "headset": "",
+  //     "phone": "",
+  //     "portable": "",
+  //     "car": "",
+  //     "default": ["", "", ""],
+  //   },
+  //   "on-click": "pavucontrol",
+  //   "on-click-right": "amixer sset Master toggle",
+  // },
 
   "pulseaudio#microphone": {
     "format": "{format_source}",
     "format-source": " {volume} %",
-    "format-source-muted": "",
+    "format-source-muted": " muted",
     "on-click": "~/.config/hypr/scripts/volume --toggle-mic",
     "on-click-right": "pavucontrol",
     "on-scroll-up": "~/.config/hypr/scripts/volume --mic-inc",
     "on-scroll-down": "~/.config/hypr/scripts/volume --mic-dec",
-    "scroll-step": 5
+    "scroll-step": 5,
   },
 
   "bluetooth": {
     // "format": "",
     // "format-disabled": "", // an empty format will hide the module
-    "format": " {status}", 
+    "format": " {status}",
     "format-disabled": " {status}",
     "format-connected": " {num_connections}",
     "tooltip-format": " {device_alias}",
     "tooltip-format-connected": "{device_enumerate}",
     "tooltip-format-enumerate-connected": " {device_alias}",
-    "on-click": "overskride"
+    "on-click": "overskride",
   },
 
-  "custom/cycle_wall":{
-    "format":" ",
+  "custom/cycle_wall": {
+    "format": " ",
     "on-click": "~/.config/hypr/scripts/wallpaper-switcher",
     "on-click-right": "~/.config/hypr/scripts/changeWallpaper2",
     "on-click-middle": "~/.config/hypr/scripts/waybar-style-change",
     "tooltip": true,
-    "tooltip-format": "Change wallpaper or style"
+    "tooltip-format": "Change wallpaper or style",
   },
 
-//   "wireplumber": {
-//     "format": "{icon} {volume} %",
-//     "format-muted": " Mute",
-//     "on-click": "~/.config/hypr/scripts/volume --toggle",
-//     "on-click-right": "pavucontrol",
-//     "on-scroll-up": "~/.config/hypr/scripts/volume --inc",
-//     "on-scroll-down": "~/.config/hypr/scripts/volume --dec",
-//     "format-icons": ["", "", ""]
-//   },
+  //   "wireplumber": {
+  //     "format": "{icon} {volume} %",
+  //     "format-muted": " Mute",
+  //     "on-click": "~/.config/hypr/scripts/volume --toggle",
+  //     "on-click-right": "pavucontrol",
+  //     "on-scroll-up": "~/.config/hypr/scripts/volume --inc",
+  //     "on-scroll-down": "~/.config/hypr/scripts/volume --dec",
+  //     "format-icons": ["", "", ""]
+  //   },
 
   "wireplumber": {
     "on-click": "pavucontrol",
@@ -555,47 +615,45 @@
   "custom/lock": {
     "format": "",
     "on-click": "~/.config/hypr/scripts/lockscreen",
-    "tooltip": false
+    "tooltip": false,
   },
 
   "custom/keybindings": {
-    "format":"",
+    "format": "",
     "tooltip": false,
-    "on-click": "~/.config/hypr/scripts/keyhint"
+    "on-click": "~/.config/hypr/scripts/keyhint",
   },
 
-  "custom/updater":{
+  "custom/updater": {
     "format": " {}",
     "exec": "checkupdates | wc -l",
     "exec-if": "[[ $(checkupdates | wc -l) ]]",
     "interval": 15,
     "on-click": "foot -T update paru -Syu || yay -Syu && notify-send 'The system has been updated'",
-    "on-click-right": "~/.config/hypr/scripts/changeWallpaper"
+    "on-click-right": "~/.config/hypr/scripts/changeWallpaper",
   },
 
-  
-
-  "wlr/workspaces": {
-    "format": "{name}",
-    //"format": "{name}: {icon}",
-    "on-click": "activate",
-    "all-outputs": true,
-    "sort-by-number": true,
-    "format-icons": {
-      "1": "1  ",
-      "2": "2  ",
-      "3": "3  ",
-      "4": "4  ",
-      "5": "5  ",
-      "6": "6  ",
-      "7": "7  ",
-      "8": "8  ",
-      "9": "9  ",
-      "10": " 10 ",
-    },
-    "on-scroll-up": "hyprctl dispatch workspace e+1",
-    "on-scroll-down": "hyprctl dispatch workspace e-1",
-  },
+  // "wlr/workspaces": {
+  //   "format": "{name}",
+  //   //"format": "{name}: {icon}",
+  //   "on-click": "activate",
+  //   "all-outputs": true,
+  //   "sort-by-number": true,
+  //   "format-icons": {
+  //     "1": "1  ",
+  //     "2": "2  ",
+  //     "3": "3  ",
+  //     "4": "4  ",
+  //     "5": "5  ",
+  //     "6": "6  ",
+  //     "7": "7  ",
+  //     "8": "8  ",
+  //     "9": "9  ",
+  //     "10": " 10 ",
+  //   },
+  //   "on-scroll-up": "hyprctl dispatch workspace e+1",
+  //   "on-scroll-down": "hyprctl dispatch workspace e-1",
+  // },
 
   "wlr/taskbar": {
     "format": "{icon} {name} ",
@@ -618,22 +676,38 @@
       "inhibited-notification": "<span foreground='red'><sup></sup></span>",
       "inhibited-none": "",
       "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
-      "dnd-inhibited-none": ""
+      "dnd-inhibited-none": "",
     },
     "return-type": "json",
     "exec-if": "which swaync-client",
     "exec": "swaync-client -swb",
     "on-click": "swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw",
-    "escape": true
+    "escape": true,
   },
 
   "custom/wakatime": {
     "format": "{text}",
     "return-type": "json",
-    "interval": 300, 
+    "interval": 300,
     "exec": "~/.config/hypr/scripts/wakatime",
     "on-click": "xdg-open https://wakapi.dev/summary?interval=yesterday",
-    "tooltip": true
-  }
+    "tooltip": true,
+  },
+
+  "custom/vpn1": {
+    "format": "{}",
+    "exec": "sh -c 'if nmcli connection show --active | grep -q \"vpnchik\"; then echo \"{\\\"text\\\": \\\"\\\", \\\"class\\\": \\\"active\\\", \\\"tooltip\\\": \\\"Личный VPN: Включен\\\"}\"; else echo \"{\\\"text\\\": \\\"\\\", \\\"class\\\": \\\"inactive\\\", \\\"tooltip\\\": \\\"Личный VPN: Выключен\\\"}\"; fi'",
+    "return-type": "json",
+    "interval": 2,
+    "on-click": "nmcli connection up vpnchik || nmcli connection down vpnchik",
+  },
+
+  "custom/vpn2": {
+    "format": "{}",
+    "exec": "sh -c 'if nmcli connection show --active | grep -q \"wb\"; then echo \"{\\\"text\\\": \\\"\\\", \\\"class\\\": \\\"active\\\", \\\"tooltip\\\": \\\"Рабочий VPN: Включен\\\"}\"; else echo \"{\\\"text\\\": \\\"\\\", \\\"class\\\": \\\"inactive\\\", \\\"tooltip\\\": \\\"Рабочий VPN: Выключен\\\"}\"; fi'",
+    "return-type": "json",
+    "interval": 2,
+    "on-click": "nmcli connection up wb || nmcli connection down wb",
+  },
 }
