@@ -1,6 +1,6 @@
 * {
     font-family: "JetBrainsMono ExtraBold", "Symbols Nerd Font";
-    font-weight: bold;
+    /* font-weight: bold; */
     min-height: 0;
     font-size: 16px;
     padding: 0;
@@ -198,6 +198,7 @@ tooltip label {
    используй небольшой margin-bottom внутри модуля: */
 #custom-vpn1,
 #custom-vpn2 {
+    min-width: 33px;
     margin-bottom: 0px;
 }
 

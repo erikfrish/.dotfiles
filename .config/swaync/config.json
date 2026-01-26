@@ -60,18 +60,13 @@
           "command": "hyprctl dispatch exit"
         },
         {
-          "label": "󰆴",
-          "command": "swaync-client -C"
-        },
-        {
           "label": "󰖁",
           "command": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
           "type": "toggle"
         },
         {
-          "label": "",
-          "command": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
-          "type": "toggle"
+          "label": "󰆴",
+          "command": "swaync-client -C"
         },
         {
           "label": "󰖩",
@@ -86,17 +81,22 @@
           "command": "swaync-client -t -sw && kooha"
         },
         {
+          "label": "󰖔",
+          "label-active": "󰖔",
+          "command": "pkill gammastep || gammastep",
+          "type": "toggle"
+        },
+        {
+          "label": "",
+          "command": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+          "type": "toggle"
+        },
+        {
           "label": "󰂛",
           "label-active": "󰂚",
           "command": "swaync-client -d",
           "type": "toggle",
           "active": false
-        },
-        {
-          "label": "󰖔",
-          "label-active": "󰖔",
-          "command": "pkill gammastep || gammastep",
-          "type": "toggle"
         }
       ]
     }

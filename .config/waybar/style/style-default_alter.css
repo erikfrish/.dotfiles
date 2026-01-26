@@ -25,7 +25,7 @@
     /* font-family: "JetBrainsMono Nerd Font","Font Awesome 6 Free", FontAwesome, Roboto, Helvetica, Arial, sans-serif; */
     /* font-family: "JetBrainsMono Nerd Font Retina"; */
     /* font-family: "Fira Sans Semibold", "Font Awesome 6 Free", FontAwesome, Roboto, Helvetica, Arial, sans-serif; */
-    font-weight: bold;
+    /* font-weight: bold; */
     min-height: 0;
     font-size: 16px;
     padding: 0;
@@ -318,6 +318,16 @@ label:focus {
     padding-bottom: 5px;
 }
 
+#custom-wakatime {
+    /* background-color: #a9b1d6; */
+    padding: 0px 8px;
+    color: #cfc6ff;
+    font-family: "Iosevka nerd font";
+    /* font-size: 90%; */
+    font-weight: bold;
+    /* vertical-align: center; */
+}
+
 #custom-vpn1,
 #custom-vpn2 {
     /* Фиксируем ширину, чтобы иконка была в центре "квадрата" */
@@ -336,6 +346,8 @@ label:focus {
    используй небольшой margin-bottom внутри модуля: */
 #custom-vpn1,
 #custom-vpn2 {
+    font-family: "Symbols Nerd Font";
+    min-width: 33px;
     margin-bottom: 0px;
 }
 

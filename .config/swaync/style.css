@@ -10,6 +10,7 @@
 @define-color text-color-disabled #828282;
 @define-color bg-selected #7e9cd8;
 @define-color border-green #76946a;
+@define-color border-blue #7e9cd8;
 @define-color red-base #c34043;
 @define-color red-hover #e46876;
 @define-color green-base #98bb6c;
@@ -24,6 +25,31 @@
 .control-center .notification-row:hover {
   opacity: 1;
   background: @noti-bg-darker;
+}
+
+/* Убираем отступы у самого контейнера списка */
+.control-center-list {
+  background: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+/* Убираем "фантомные" границы прокрутки */
+.control-center-list-contents {
+  background: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+/* Прячем полосу прокрутки совсем (она появится автоматически, если список станет длинным) */
+scrollbar {
+  background: transparent;
+  opacity: 0;
+}
+
+/* Нацеливаемся на внутренний контейнер GTK */
+viewport {
+  background: transparent;
 }
 
 .notification-row {
@@ -124,6 +150,7 @@
   font-weight: 700;
   background: transparent;
   color: @green-base;
+  /* color: @bg-selected; */
   text-shadow: none;
 }
 
@@ -146,7 +173,8 @@
 
 .control-center {
   background: @cc-bg;
-  border: 2px solid @border-green;
+  /* border: 2px solid @border-green; */
+  border: 2px solid @border-blue;
 }
 
 .widget-title {
@@ -200,9 +228,11 @@
   background: @noti-bg-darker;
 }
 
+/* widget button */
 .widget-buttons-grid>flowbox>flowboxchild>button {
   margin: 3px;
-  padding: 4px 30px;
+  padding: 4px 20px;
+  ;
   background: @cc-bg;
   color: @text-color;
   transition: background-color 0.15s ease-in-out;

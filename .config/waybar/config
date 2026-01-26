@@ -42,7 +42,7 @@
     // "custom/weather"
     // "custom/keybindings",
     "clock",
-    // "custom/gammastep"
+    "custom/gammastep",
     "custom/cycle_wall",
     "custom/notification",
   ],
@@ -50,6 +50,7 @@
     "tray",
     "custom/vpn1",
     "custom/vpn2",
+    // "network",
     // "hyprland/window",
     // "custom/gammastep",
     "backlight",
@@ -82,7 +83,7 @@
   },
 
   "custom/screenshot_t": {
-    "format": " ",
+    "format": "",
     "on-click": "~/.config/hypr/scripts/screenshot_full",
     "on-click-right": "~/.config/hypr/scripts/screenshot_area",
   },
@@ -499,7 +500,7 @@
 
   "pulseaudio": {
     "format": "{icon} {volume} %",
-    "format-bluetooth": " {icon} {volume} %",
+    "format-bluetooth": "{icon} {volume} %",
     "format-muted": "󰖁 muted",
     "format-icons": {
       "headphone": "",

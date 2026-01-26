@@ -7,6 +7,7 @@
     padding: 0;
     transition-property: background-color;
     transition-duration: 0.5s;
+    min-height: 0;
 }
 
 /* Reset all styles */
@@ -32,7 +33,7 @@ window#waybar.hidden {
 }
 
 #workspaces button {
-    padding: 3px 5px;
+    padding: 0px 0px;
     /* Adjusted padding to reduce height */
     margin: 3px 5px;
     /* Reduced margin slightly */
@@ -347,7 +348,10 @@ label:focus {
 /* Если иконка кажется слишком высокой или низкой, 
    используй небольшой margin-bottom внутри модуля: */
 #custom-vpn1,
-#custom-vpn2 {
+#custom-vpn2 { 
+    font-family: "Font Awesome 6 Free", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+    /* min-width: 33px; */
+    padding-right: 1px;
     margin-bottom: 0px;
 }
 

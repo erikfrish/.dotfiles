@@ -157,6 +157,7 @@ tooltip {
    используй небольшой margin-bottom внутри модуля: */
 #custom-vpn1,
 #custom-vpn2 {
+    min-width: 33px;
     margin-bottom: 0px;
 }
 
