@@ -1,34 +1,35 @@
 #!/bin/bash
 
-# Check which waybar theme is set
-THEMEIS=$(realpath ~/.config/waybar/style.css | sed 's/.*-\(.*\)\.css/\1/')
+CONFIG_DIR="$HOME/.config/waybar"
+THEME_DIR="$CONFIG_DIR/style"
 
-# Change theme
-if [ "$THEMEIS" == "default" ]; then
-    SWITCHTO="-b&w"
-elif [ "$THEMEIS" == "b&w" ]; then
-    SWITCHTO="-rgb"
-elif [ "$THEMEIS" == "rgb" ]; then
-    SWITCHTO="-default_alter"
-elif [ "$THEMEIS" == "default_alter" ]; then
-    SWITCHTO="-mauve"
+# На что реально указывает style.css
+CURRENT_THEME=$(basename "$(realpath "$CONFIG_DIR/style.css")" .css)
+
+# Список всех тем, кроме style.css
+THEMES=($(ls "$THEME_DIR"/*.css | grep -v 'style\.css' | xargs -n1 basename | sed 's/\.css$//' | sort))
+
+# Находим индекс текущей темы
+CURRENT_INDEX=-1
+for i in "${!THEMES[@]}"; do
+    if [[ "${THEMES[$i]}" == "$CURRENT_THEME" ]]; then
+        CURRENT_INDEX=$i
+        break
+    fi
+done
+
+# Выбираем следующую тему по кругу
+if [[ $CURRENT_INDEX -ge 0 ]]; then
+    NEXT_INDEX=$(( (CURRENT_INDEX + 1) % ${#THEMES[@]} ))
 else
-    SWITCHTO="-default"
+    NEXT_INDEX=0
 fi
 
-# Set the waybar theme
-THEMEFILE="$HOME/.config/waybar/style/style${SWITCHTO}.css"
-if [ -f "$THEMEFILE" ]; then
-    ln -sf "$THEMEFILE" "$HOME/.config/waybar/style.css"
+NEXT_THEME="${THEMES[$NEXT_INDEX]}"
 
-else
-    echo "Error: $THEMEFILE not found"
-    exit 1
-fi
+# Создаём симлинк
+ln -sf "$THEME_DIR/$NEXT_THEME.css" "$CONFIG_DIR/style.css"
 
-# Restart waybar
+# Перезапускаем waybar
 killall waybar
-exec ~/.config/hypr/scripts/statusbar
-
-
-
+exec "$HOME/.config/hypr/scripts/statusbar"

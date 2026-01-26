@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Если передан аргумент "next", переключаем на следующую раскладку
+if [ "$1" == "next" ]; then
+    hyprctl switchxkblayout all next
+fi
+
+# Получаем текущую раскладку (универсально)
+layout=$(hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .active_keymap' | cut -c1-2 | tr '[:upper:]' '[:lower:]')
+
+# Если вдруг пусто (бывает на кастомных девайсах), берем первую из списка
+if [ -z "$layout" ]; then
+    layout=$(hyprctl devices -j | jq -r '.keyboards[0].active_keymap' | cut -c1-2 | tr '[:upper:]' '[:lower:]')
+fi
+
+echo "$layout"

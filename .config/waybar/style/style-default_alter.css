@@ -105,6 +105,9 @@ tooltip label {
     border-bottom: 3px solid #ffffff;
 }
 
+#custom-menu,
+#custom-cycle_wall,
+#custom-vpn1,#custom-vpn2,
 #custom-wakatime,
 #custom-notification,
 #custom-screenshot_t,
@@ -128,7 +131,8 @@ tooltip label {
 #window,
 #custom-cycle_wall,
 #custom-screen_locker,
-#custom-weather {
+#custom-weather,
+#language {
     padding: 1px 6px 0px 6px;
     margin: 4px 3px 5px 3px;
     /*color: @fgcolor;*/
@@ -234,6 +238,7 @@ label:focus {
 }
 
 #custom-power {
+    padding: 0px 8px;
     color: #cc3436;
 }
 

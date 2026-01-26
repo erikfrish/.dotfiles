@@ -53,7 +53,7 @@
         },
         {
           "label": "󰌾",
-          "command": "swaylock -f -c 000000"
+          "command": "pidof hyprlock || hyprlock --grace 10"
         },
         {
           "label": "󰍃",

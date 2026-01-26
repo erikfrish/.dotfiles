@@ -15,7 +15,7 @@
     border: none;
     border-radius: 3px;
     min-height: 0;
-    margin: 0.2em 0.3em 0.2em 0.3em;
+    /* margin: 0.2em 0.3em 0.2em 0.3em; */
 }
 
 /* The whole bar */
@@ -78,6 +78,12 @@ window#waybar.hidden {
     opacity: 1;
 }
 
+#custom-menu,
+#custom-notification,
+#custom-wakatime,
+#custom-vpn1,
+#custom-vpn2,
+#custom-cycle_wall,
 #clock,
 #battery,
 #cpu,
@@ -94,7 +100,7 @@ window#waybar.hidden {
 #mpd,
 #bluetooth,
 #custom-hyprPicker,
-#custom-power-menu,
+#custom-power,
 #custom-spotify,
 #custom-weather,
 #custom-weather.severe,
@@ -106,7 +112,8 @@ window#waybar.hidden {
 #custom-weather.rainyNight,
 #custom-weather.showyIcyDay,
 #custom-weather.snowyIcyNight,
-#custom-weather.default {
+#custom-weather.default,
+#language {
     background-color: #111827;
     border-radius: 14px;
     padding: 6px;
@@ -145,15 +152,30 @@ window#waybar.hidden {
 }
 
 #custom-power {
+    min-width: 28px;
     background-color: #111827;
+    color: #850000;
     border-radius: 14px;
-    padding: 6px;
+    padding: 0px;
+    padding-right: 2px;
 }
 
 #custom-storage {
     background-color: #111827;
     border-radius: 14px;
     padding: 6px;
+}
+
+#custom-menu {
+    color: #0ac681;
+}
+
+#custom-wakatime {
+    /* font-family: "Fira Sans", "Font Awesome 6 Free", FontAwesome, Roboto, Helvetica, Arial, sans-serif; */
+    font-family: "Iosevka Nerd Font Propo";
+    background-color: #111827;
+    border-radius: 14px;
+    padding: 0 8px;
 }
 
 #custom-launcher {
@@ -299,7 +321,11 @@ label:focus {
 }
 
 #idle_inhibitor {
+    color: #d8d8d8;
+    min-width: 26px;
     background-color: #2d3436;
+    padding-left: 0;
+    padding-right: 1px;
 }
 
 #idle_inhibitor.activated {
@@ -308,10 +334,11 @@ label:focus {
 }
 
 #language {
-    background: #00b093;
-    color: #740864;
-    padding: 0 0px;
+    /* background: #00b093; */
+    /* color: #740864; */
+    padding: 0 3px;
     margin: 0 5px;
+    padding-top: 2px;
     min-width: 16px;
 }
 
@@ -336,9 +363,10 @@ label:focus {
     /* Фиксируем ширину, чтобы иконка была в центре "квадрата" */
     min-width: 40px;
     padding: 0;
-    margin: 0 4px;
+    padding-top: 2px;
+    /* margin: 0 4px; */
 
-    border-radius: 8px;
+    /* border-radius: 8px; */
     transition: all 0.3s ease;
 
     /* Используем font-size для контроля размера "коробки" */
@@ -348,7 +376,7 @@ label:focus {
 /* Если иконка кажется слишком высокой или низкой, 
    используй небольшой margin-bottom внутри модуля: */
 #custom-vpn1,
-#custom-vpn2 { 
+#custom-vpn2 {
     font-family: "Font Awesome 6 Free", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
     /* min-width: 33px; */
     padding-right: 1px;

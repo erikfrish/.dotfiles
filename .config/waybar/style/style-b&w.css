@@ -78,6 +78,7 @@ tooltip label {
     /*box-shadow:inherit;*/
 }
 
+#custom-vpn1,#custom-vpn2,
 #custom-wakatime,
 #custom-notification,
 #custom-screenshot_t,
@@ -121,7 +122,8 @@ tooltip label {
 #custom-weather.showyIcyDay,
 #custom-weather.snowyIcyNight,
 #custom-weather.default,
-#idle_inhibitor {
+#idle_inhibitor,
+#language {
     padding: 0 10px;
 }
 
@@ -134,12 +136,13 @@ tooltip label {
     /*background-color: rgba(0,119,179,0.6);*/
     /*border-radius: 50px;*/
     margin: 5px 5px;
-    padding: 1px 3px;
+    padding: 1px 8px;
 }
 
 /*-----Indicators----*/
 #idle_inhibitor.activated {
-    color: #2dcc36;
+    /* color: #2dcc36; */
+    color: #844001;
 }
 
 #pulseaudio.muted {

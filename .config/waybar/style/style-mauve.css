@@ -67,6 +67,7 @@ tooltip {
     border-radius: 15px;
 }
 
+#custom-vpn1,#custom-vpn2,
 #custom-wakatime,
 #custom-notification,
 #custom-screenshot_t,
@@ -108,7 +109,8 @@ tooltip {
 #custom-weather.showyIcyDay,
 #custom-weather.snowyIcyNight,
 #custom-weather.default,
-#idle_inhibitor {
+#idle_inhibitor,
+#language {
     color: #cba7f7;
     padding: 0px 10px;
     border-radius: 10px;

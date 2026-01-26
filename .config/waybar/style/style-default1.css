@@ -69,6 +69,7 @@ tooltip label {
   background-color: #eb4d4b;
 }
 
+#custom-vpn1,#custom-vpn2,
 #custom-wakatime,
 #custom-notification,
 #custom-screenshot_t,
@@ -106,7 +107,8 @@ tooltip label {
 #custom-weather.showyIcyDay,
 #custom-weather.snowyIcyNight,
 #custom-weather.default,
-#custom-updater {
+#custom-updater,
+#language {
   padding: 0px 10px;
   color: #e5e5e5;
   /* color: #bf616a; */

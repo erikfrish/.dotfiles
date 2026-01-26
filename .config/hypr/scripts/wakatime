@@ -1,28 +1,19 @@
 #!/bin/bash
 
-# # Получаем время за сегодня через wakatime-cli
-# # Если команда не найдена, выведет пустоту
-# stats=$(wakatime-cli --today 2>/dev/null)
+# Получаем полный вывод
+raw_stats=$(wakatime-cli --today 2>/dev/null | xargs)
 
-# if [ -n "$stats" ]; then
-#     # Выводим только часы и минуты (например: 3h 15m)
-#     echo "󱑎 $stats"
-# else
-#     echo "󱑎 0m"
-# fi
-
-# Получаем общую статистику за сегодня
-total=$(wakatime-cli --today 2>/dev/null)
-
-if [ -z "$total" ]; then
-    echo '{"text": "Offline", "class": "offline"}'
+if [ -z "$raw_stats" ] || [ "$raw_stats" == "0 secs" ]; then
+    echo "{\"text\": \"󱑎 0m\", \"tooltip\": \"Нет данных\"}"
     exit 0
 fi
 
-# Получаем детальную разбивку по проектам/языкам для тултипа
-# Мы берем последние 5 строк, чтобы не раздувать окно
-details=$(wakatime-cli --today --hide-filenames --output brief | head -n 5)
+# Вытаскиваем только время кодинга (все до первой запятой)
+# Например из "4 hrs 39 mins coding, 0 hrs 3 mins..." сделает "4h 39m"
+coding_time=$(echo "$raw_stats" | cut -d',' -f1 | sed 's/ hrs/h/g; s/ mins/m/g; s/ coding//g')
 
-# Формируем JSON для Waybar
-# \n в тултипе создаст перенос строки
-echo "{\"text\": \"󱑎  $total\", \"tooltip\": \"Сегодняшняя активность:\n$details\"}"
+# Получаем детальную разбивку для тултипа (проекты и языки)
+details=$(wakatime-cli --today --hide-filenames --output brief 2>/dev/null | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+
+# Собираем JSON
+echo "{\"text\": \"$coding_time\", \"tooltip\": \"Общее время: $raw_stats\\n\\nДетали по проектам:\\n$details\"}"
