@@ -588,7 +588,7 @@
   },
 
   "custom/cycle_wall": {
-    "format": " ",
+    "format": "",
     "on-click": "~/.config/hypr/scripts/wallpaper_switcher",
     "on-click-right": "~/.config/hypr/scripts/change_wallpaper",
     "on-click-middle": "~/.config/hypr/scripts/waybar_style_change",

@@ -177,3 +177,7 @@ tooltip {
 #custom-vpn2.inactive {
     color: #8981c1;
 }
+
+#custom-notification {
+    min-width: 50px;
+}

@@ -353,3 +353,7 @@ label:focus {
 #custom-vpn2.inactive {
   color: #666666;
 }
+
+#custom-notification {
+    min-width: 50px;
+}

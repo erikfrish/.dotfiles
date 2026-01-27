@@ -1,48 +1,76 @@
 #!/bin/bash
 
-DIR=$HOME/Pictures/Wallpapers/
-PICS=($(find ${DIR} -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" \)))
-RANDOMPICS=${PICS[ $RANDOM % ${#PICS[@]} ]}
+DIR="$HOME/Pictures/Wallpapers"
+
+# Корректно собираем файлы в массив (даже если в именах пробелы)
+mapfile -t PICS < <(find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" -o -name "*.webp" \))
+
+# Выбираем случайную картинку и получаем её ПОЛНЫЙ путь
+RANDOM_INDEX=$(( RANDOM % ${#PICS[@]} ))
+SELECTED_PIC=$(realpath "${PICS[$RANDOM_INDEX]}")
+
+# Функция специально для hyprpaper
+change_hyprpaper(){
+  pkill swww
+  pkill swaybg
+  
+  # Запускаем, если не запущен
+  if ! pgrep -x "hyprpaper" > /dev/null; then
+    hyprpaper &
+    sleep 0.5
+  fi
+
+  # 1. Сначала preload (обязательно полный путь)
+  hyprctl hyprpaper preload "$SELECTED_PIC"
+  
+  # 2. Получаем список мониторов
+  MONITORS=$(hyprctl monitors | grep "Monitor" | awk '{print $2}')
+  
+  # 3. Применяем на все мониторы
+  for MONITOR in $MONITORS; do
+    # Синтаксис: монитор,путь (БЕЗ пробела после запятой)
+    hyprctl hyprpaper wallpaper "$MONITOR,$SELECTED_PIC"
+  done
+  
+  # 4. Чистим память (выгружаем всё, что не используется прямо сейчас)
+  hyprctl hyprpaper unload unused
+}
 
 change_swaybg(){
   pkill swww
-  pkill swaybg
-  swaybg -m fill -i ${RANDOMPICS}
+  pkill hyprpaper
+  swaybg -m fill -i "$SELECTED_PIC"
 }
 
 change_swww(){
   pkill swaybg
+  pkill hyprpaper
   swww query || swww init
-  swww img ${RANDOMPICS} --transition-fps 30 --transition-type any --transition-duration 3
+  swww img "$SELECTED_PIC" --transition-fps 30 --transition-type any --transition-duration 3
 }
 
+# Если ничего не указано, проверяем что сейчас запущено
 change_current(){
-  if pidof swaybg >/dev/null; then
+  if pidof hyprpaper >/dev/null; then
+    change_hyprpaper
+  elif pidof swaybg >/dev/null; then
     change_swaybg
   else
     change_swww
-  fi
-}
-
-switch(){
-  if pidof swaybg >/dev/null; then
-    change_swww
-  else
-    change_swaybg
   fi
 }
 
 case "$1" in
-	"swaybg")
-		change_swaybg
-		;;
-	"swww")
-		change_swww
-		;;
-  "s")
-		switch
-		;;
-	*)
-		change_current
-		;;
+  "hypr")
+    change_hyprpaper
+    ;;
+  "swaybg")
+    change_swaybg
+    ;;
+  "swww")
+    change_swww
+    ;;
+  *)
+    change_current
+    ;;
 esac

@@ -1,89 +1,60 @@
 #!/bin/bash
 
-# WALLPAPERS PATH
-# DIR=$HOME/.config/hypr/Wallpapers
-DIR=$HOME/Pictures/Wallpapers
+CONF="$HOME/.config/hypr/hyprpaper.conf"
+DIR="$HOME/Pictures/Wallpapers"
 
-
-# Transition config (type swww img --help for more settings
-FPS=30
-TYPE="simple"
-DURATION=3
-
-# wofi window config (in %)
-WIDTH=20
-HEIGHT=30
-
-SWWW_PARAMS="--transition-fps $FPS --transition-type $TYPE --transition-duration $DURATION"
-
-
-PICS=($(ls ${DIR} | grep -e ".jpg$" -e ".jpeg$" -e ".png$" -e ".gif$"))
-
-RANDOM_PIC=${PICS[ $RANDOM % ${#PICS[@]} ]}
-RANDOM_PIC_NAME="${#PICS[@]}. random"
-
-# WOFI STYLES
-CONFIG="$HOME/.config/wofi/config"
-STYLE="$HOME/.config/wofi/style.css"
-COLORS="$HOME/.config/wofi/colors"
-
-# to check if swaybg is running
-
-if [[ $(pidof swaybg) ]]; then
-  pkill swaybg
+# 1. Форсируем IPC в конфиге и запускаем hyprpaper
+if [ -f "$CONF" ]; then
+    sed -i 's/ipc = off/ipc = on/g' "$CONF"
 fi
 
-## Wofi Command
-wofi_command="wofi --show dmenu \
-			--prompt choose...
-			--conf $CONFIG --style $STYLE --color $COLORS \
-			--width=$WIDTH% --height=$HEIGHT% \
-			--cache-file=/dev/null \
-			--hide-scroll --no-actions \
-			--matching=fuzzy"
+if ! pgrep -x "hyprpaper" > /dev/null; then
+    hyprpaper &
+    sleep 0.5
+fi
 
+# 2. Собираем файлы
+mapfile -t PICS < <(find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.webp" \))
+
+# 3. Функция генерации меню с фиксом амперсанда
 menu(){
-    # Here we are looping in the PICS array that is composed of all images in the $DIR
-    # folder 
-    for i in ${!PICS[@]}; do
-        # keeping the .gif to make sue you know it is animated
-        if [[ -z $(echo ${PICS[$i]} | grep .gif$) ]]; then
-            printf "$i. $(echo ${PICS[$i]} | cut -d. -f1)\n" # n°. <name_of_file_without_identifier>
-        else
-            printf "$i. ${PICS[$i]}\n"
-        fi
+    for i in "${!PICS[@]}"; do
+        # Заменяем & на &amp; чтобы wofi не давился
+        filename=$(basename "${PICS[$i]}" | sed 's/&/\&amp;/g')
+        echo "$i. $filename"
     done
-
-    printf "$RANDOM_PIC_NAME"
+    echo "RANDOM"
 }
 
-swww query || swww init
+# 4. Команда wofi (убрал --no-markup и временно --color, если он бьет ошибки)
+wofi_command="wofi --show dmenu --prompt 'Wallpaper' --width=25% --height=35% --cache-file=/dev/null"
 
-main() {
-    choice=$(menu | ${wofi_command})
-
-    # no choice case
-    if [[ -z $choice ]]; then return; fi
-
-    # random choice case
-    if [ "$choice" = "$RANDOM_PIC_NAME" ]; then
-        swww img ${DIR}/${RANDOM_PIC} $SWWW_PARAMS
-        return
-    fi
+apply() {
+    local file=$(realpath "$1")
     
-    pic_index=$(echo $choice | cut -d. -f1)
-    swww img ${DIR}/${PICS[$pic_index]} $SWWW_PARAMS
+    # Preload и Wallpaper
+    hyprctl hyprpaper preload "$file"
+    
+    # Получаем мониторы
+    MONITORS=$(hyprctl monitors | grep "Monitor" | awk '{print $2}')
+    for mon in $MONITORS; do
+        hyprctl hyprpaper wallpaper "$mon,$file"
+    done
+    
+    hyprctl hyprpaper unload unused
 }
 
-# Check if wofi is already running
-if pidof wofi >/dev/null; then
-    killall wofi
-    exit 0
-else
-    main
-fi
+# 5. Запуск
+choice=$(menu | $wofi_command)
 
-# Uncomment to launch something if a choice was made 
-# if [[ -n "$choice" ]]; then
-    # Restart Waybar
-# fi
+if [[ -z $choice ]]; then exit 0; fi
+
+if [[ "$choice" == "RANDOM" ]]; then
+    target="${PICS[$RANDOM % ${#PICS[@]}]}"
+    apply "$target"
+else
+    # Извлекаем индекс (цифры в начале)
+    idx=$(echo "$choice" | grep -o '^[0-9]\+')
+    target="${PICS[$idx]}"
+    apply "$target"
+fi
