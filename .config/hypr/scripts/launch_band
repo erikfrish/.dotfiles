@@ -1,45 +1,50 @@
 #!/bin/bash
 
-# 1. Запуск приложения
-APP_PATH="$HOME/Applications/band-desktop-*.AppImage"
-$APP_PATH &
-APP_PID=$!
+# 1. Поиск пути к AppImage
+APP_PATH=( $HOME/Applications/band-desktop-*.AppImage )
+# Проверяем, существует ли файл
+if [ ! -f "${APP_PATH[0]}" ]; then
+    echo "Ошибка: AppImage не найден в $HOME/Applications/"
+    exit 1
+fi
 
-# 2. Ожидание и поиск окна
-FOUND=0
+# 2. Запуск приложения (если еще не запущено)
+if ! pgrep -f "band-desktop" > /dev/null; then
+    "${APP_PATH[0]}" --silent & 
+    APP_PID=$!
+else
+    echo "Band уже запущен"
+fi
+
+# 3. Ожидание появления окна
 WINDOW_ADDR=""
+for i in {1..40}; do
+    # Ищем по классу (обычно "band-desktop" или "Band")
+    # Также проверяем initialClass, если обычный class еще пустой
+    CLIENTS_JSON=$(hyprctl clients -j)
+    WINDOW_ADDR=$(echo "$CLIENTS_JSON" | jq -r '.[] | select(.class == "Band" or .initialClass == "Band") | .address' | head -1)
 
-for i in {1..30}; do
-    CLIENTS_JSON=$(hyprctl clients -j 2>/dev/null)
-    
-    # Сначала ищем по PID, потом по классу
-    WINDOW_ADDR=$(echo "$CLIENTS_JSON" | jq -r ".[] | select(.pid == $APP_PID) | .address" 2>/dev/null)
-    
-    if [ -z "$WINDOW_ADDR" ]; then
-        WINDOW_ADDR=$(echo "$CLIENTS_JSON" | jq -r '.[] | select(.class == "Band") | .address' 2>/dev/null | head -1)
-    fi
-    
-    if [ -n "$WINDOW_ADDR" ]; then
-        FOUND=1
+    if [ -n "$WINDOW_ADDR" ] && [ "$WINDOW_ADDR" != "null" ]; then
         break
     fi
-    
     sleep 0.5
 done
 
-# 3. Перемещение и размещение окна
-if [ $FOUND -eq 1 ]; then
-    # Перемещаем на воркспейс 6
-    hyprctl dispatch movetoworkspacesilent "6,address:$WINDOW_ADDR"
-    # sleep 0.2
+# 4. Манипуляции с окном
+if [ -n "$WINDOW_ADDR" ] && [ "$WINDOW_ADDR" != "null" ]; then
+    # Перемещаем на воркспейс 6 тихо
+    hyprctl dispatch movetoworkspacesilent 6,address:$WINDOW_ADDR
     
-    # Фокусируемся на окне и размещаем слева
-    hyprctl dispatch focuswindow "address:$WINDOW_ADDR"
-    # sleep 0.2
-    # Перемещаем в левый верхний угол
+    # Даем Hyprland время "проглотить" изменения
+    sleep 0.3
+    
+    # Фокусируем и выравниваем
+    hyprctl dispatch focuswindow address:$WINDOW_ADDR
     hyprctl dispatch movewindow l
     
-    # echo "Band успешно размещён на воркспейсе 4 слева"
+    # Возвращаемся на 1 воркспейс, если нужно
+    sleep 0.2
+    hyprctl dispatch workspace 1
 else
-    # echo "Ошибка: окно Band не найдено"
+    echo "Ошибка: окно Band не появилось вовремя"
 fi
