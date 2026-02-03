@@ -4,7 +4,7 @@
 raw_stats=$(wakatime-cli --today 2>/dev/null | xargs)
 
 if [ -z "$raw_stats" ] || [ "$raw_stats" == "0 secs" ]; then
-    echo "{\"text\": \"󱑎 0m\", \"tooltip\": \"Нет данных\"}"
+    echo "{\"text\": \"0m\", \"tooltip\": \"Нет данных\"}"
     exit 0
 fi
 

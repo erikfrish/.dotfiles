@@ -76,62 +76,9 @@ ENABLE_CORRECTION="false"
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
 plugins=(vscode git golang history)
 # plugins=(macos brew iterm2 chucknorris)
 
-source /usr/share/cachyos-zsh-config/cachyos-config.zsh
-
-source $ZSH/oh-my-zsh.sh
-
-# User configuration
-source $ZSH/oh-my-zsh.sh
-# source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
-# source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-# source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-# source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-# zstyle :omz:plugins:iterm2 shell-integration yes
-# export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
-# export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
-
-export GOPATH="$HOME/go"
-export PATH="$GOPATH/bin/:$PATH"
-export PATH="$PATH:$HOME/.local/bin"
-
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='nvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch $(uname -m)"
-
-# Set personal aliases, overriding those provided by Oh My Zsh libs,
-# plugins, and themes. Aliases can be placed here, though Oh My Zsh
-# users are encouraged to define aliases within a top-level file in
-# the $ZSH_CUSTOM folder, with .zsh extension. Examples:
-# - $ZSH_CUSTOM/aliases.zsh
-# - $ZSH_CUSTOM/macos.zsh
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
-# alias ls="ls -a -l -G"
 
 alias zshconfig="nvim ~/.zshrc"
 alias vi="nvim"
@@ -146,11 +93,25 @@ alias ls='eza'
 alias files='yazi'
 # alias cat='bat'
 
+source /usr/share/cachyos-zsh-config/cachyos-config.zsh
+source $ZSH/oh-my-zsh.sh
+
+# User configuration
+# source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+# source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# zstyle :omz:plugins:iterm2 shell-integration yes
+# export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
+# export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+
+export GOPATH="$HOME/go"
+export PATH="$GOPATH/bin/:$PATH"
+export PATH="$PATH:$HOME/.local/bin"
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 export IDF_PATH=~/esp/esp-idf
 ___MY_VMOPTIONS_SHELL_FILE="${HOME}/.jetbrains.vmoptions.sh"; if [ -f "${___MY_VMOPTIONS_SHELL_FILE}" ]; then . "${___MY_VMOPTIONS_SHELL_FILE}"; fi
-
-
-export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"

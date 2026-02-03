@@ -1,13 +1,49 @@
 #!/bin/bash
 
 DIR="$HOME/Pictures/Wallpapers"
+ENV_VAR="HYPR_WALLPAPER_INDEX"
 
 # Корректно собираем файлы в массив (даже если в именах пробелы)
-mapfile -t PICS < <(find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" -o -name "*.webp" \))
+# Сортируем, чтобы порядок был предсказуемым
+mapfile -t PICS < <(find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" -o -name "*.webp" \) | sort)
 
-# Выбираем случайную картинку и получаем её ПОЛНЫЙ путь
-RANDOM_INDEX=$(( RANDOM % ${#PICS[@]} ))
-SELECTED_PIC=$(realpath "${PICS[$RANDOM_INDEX]}")
+# Если нет файлов - выходим
+if [ ${#PICS[@]} -eq 0 ]; then
+  echo "No wallpapers found in $DIR" >&2
+  exit 1
+fi
+
+# Файл для хранения индекса последнего использованного обоя
+STATE_FILE="$HOME/.config/hypr/last_wallpaper_index"
+mkdir -p "$(dirname "$STATE_FILE")"
+
+# Читаем предыдущий индекс (если есть)
+prev_index=$(systemctl --user show-environment \
+  | sed -n "s/^$ENV_VAR=//p")
+
+case "$prev_index" in
+  ''|*[!0-9]*) prev_index=-1;;
+esac
+
+
+count=${#PICS[@]}
+
+if [ "$count" -le 1 ]; then
+  NEXT_INDEX=0
+else
+  if ! printf '%s' "$prev_index" | grep -Eq '^[0-9]+$' || [ "$prev_index" -ge "$count" ]; then
+    prev_index=-1
+  fi
+  NEXT_INDEX=$(( (prev_index + 1) % count ))
+  # На всякий случай, если получилось тот же самый (маловероятно), сдвигаем ещё на один
+  if [ "$NEXT_INDEX" -eq "$prev_index" ] && [ "$count" -gt 1 ]; then
+    NEXT_INDEX=$(( (NEXT_INDEX + 1) % count ))
+  fi
+fi
+
+systemctl --user set-environment "$ENV_VAR=$NEXT_INDEX"
+
+SELECTED_PIC=$(realpath "${PICS[$NEXT_INDEX]}")
 
 # Функция специально для hyprpaper
 change_hyprpaper(){

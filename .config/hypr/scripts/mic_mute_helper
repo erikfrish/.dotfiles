@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+USER_NAME=erikfrish
+USER_ID=$(id -u "$USER_NAME")
+export XDG_RUNTIME_DIR="/run/user/$USER_ID"
+
+# mute toggle
+wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+
+# return state for HA
+if wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | grep -q MUTED; then
+  echo 0
+else
+  echo 1
+fi
