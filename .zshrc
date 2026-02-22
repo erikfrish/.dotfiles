@@ -92,9 +92,11 @@ alias wake_homelab='wakeonlan -i 192.168.1.255 c8:ff:bf:04:e7:64'
 alias ls='eza'
 alias files='yazi'
 # alias cat='bat'
+alias goupdate='curl -sL https://raw.githubusercontent.com/DieTime/go-up/master/go-up.sh | bash'
 
 source /usr/share/cachyos-zsh-config/cachyos-config.zsh
 source $ZSH/oh-my-zsh.sh
+source /opt/esp-idf/export.sh > /dev/null 2>&1
 
 # User configuration
 # source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
