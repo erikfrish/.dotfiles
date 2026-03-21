@@ -117,3 +117,9 @@ export PATH="$PATH:$HOME/.local/bin"
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 export IDF_PATH=~/esp/esp-idf
 ___MY_VMOPTIONS_SHELL_FILE="${HOME}/.jetbrains.vmoptions.sh"; if [ -f "${___MY_VMOPTIONS_SHELL_FILE}" ]; then . "${___MY_VMOPTIONS_SHELL_FILE}"; fi
+
+if [ -f "$HOME/.config/opencode/.env" ]; then
+  set -a
+  . "$HOME/.config/opencode/.env"
+  set +a
+fi
