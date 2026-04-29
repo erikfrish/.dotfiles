@@ -70,8 +70,8 @@ Created deployment script: `~/.dotfiles/.config/ly/apply.sh`
 - `ly@tty2` enabled (active) — **will switch to tty1 after reboot**
 - `sddm` disabled (will stop at next reboot)
 
-### Phase 3: Audio Configuration (MULTIPLE ISSUES - DIAGNOSIS COMPLETE)
-**Status:** ⚠️ WORKING BUT POOR QUALITY (causes identified)
+### Phase 3: Audio Configuration
+**Status:** ✅ WORKING, ENHANCED PROFILE AVAILABLE
 
 #### What Was Wrong (Part 1: Routing)
 Initially tried complex audio routing:
@@ -81,22 +81,23 @@ Initially tried complex audio routing:
 - **Symptom:** Can't select output device; sound appears to work but outputs nowhere
 
 #### Solution Applied (Part 1)
-1. **Removed** automatic EasyEffects routing
-2. **Set** physical Speaker sink as default
-3. **Kept** EasyEffects running but non-intrusive (service-mode, hidden window)
-4. **Allowed** manual device selection via script
+1. **Set** physical Speaker sink as safe fallback
+2. **Started** EasyEffects in service mode
+3. **Loaded** `thinkpad-speakers` convolver preset
+4. **Set** `easyeffects_sink` as default only after EasyEffects is available
+5. **Added** a dynamic audio profile switcher; no more hardcoded PipeWire node IDs
 
-**Current autostart.conf (simplified):**
+**Current autostart.conf:**
 ```bash
-exec-once = easyeffects --service-mode --hide-window &
+exec-once = sh -c 'easyeffects --service-mode --hide-window & sleep 2; easyeffects --load-preset thinkpad-speakers >/dev/null 2>&1 || true; pactl set-default-sink easyeffects_sink 2>/dev/null || pactl set-default-sink alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__Speaker__sink'
 ```
 
 #### What's Wrong (Part 2: Audio Quality Issues - NOW DISCOVERED)
 Sound quality is poor due to **multiple hardware/firmware limitations**:
 
-1. **Speaker Volume Limit**: Only 72% (-18dB) max volume
-   - Root cause: ALSA firmware/driver limitation on Arrow Lake cAVS + Realtek ALC257
-   - This severely limits dynamic range and causes distortion
+1. **Speaker Volume Was Too Low**: Speaker mixer was 72% (-18dB)
+   - Fixed with `amixer -c 0 sset Speaker 87`
+   - Current state: 100% (0dB)
 
 2. **Known ThinkPad T14P Issues** (from ArchWiki research):
    - TLP audio power saving causes pops/crackles if enabled (`SOUND_POWER_SAVE_ON_BAT=0` fixes it)
@@ -114,26 +115,18 @@ Sound quality is poor due to **multiple hardware/firmware limitations**:
 ```
 Master: 100% [0.00dB] ✓
 Pre-Mixer Analog: 100% [0.00dB] ✓
-Speaker: 72% [-18.00dB] ⚠️ (CAPPED)
+Speaker: 100% [0.00dB] ✓
 Digital Mic (Dmic0): 100% [0.00dB] ✓
 ```
 
-**Audio Device IDs:**
-```
-343 = Arrow Lake cAVS Speaker (DEFAULT)
-142 = HDMI 1
-383 = HDMI 2
-388 = HDMI 3
-```
-
-**Manual device switcher:** `~/.local/bin/select_audio_output`
+**Audio profile switcher:** `~/.local/bin/audio_output`
 ```bash
-$ select_audio_output
-Available audio output devices:
-  343. Arrow Lake cAVS Speaker [vol: 0.90]
-  142. Arrow Lake cAVS HDMI 1 [vol: 1.00]
-  ...
-Enter device name (Speaker/HDMI1/HDMI2/HDMI3): _
+audio_output enhanced  # EasyEffects convolver -> Speaker
+audio_output speaker   # Raw physical speakers
+audio_output hdmi1
+audio_output hdmi2
+audio_output hdmi3
+audio_output status
 ```
 
 ### Phase 4: Wallpaper Management
@@ -143,7 +136,7 @@ Updated `~/.dotfiles/.config/hypr/scripts/change_wallpaper`:
 - Changed from `swww` → `awww` (modern Wayland wallpaper daemon)
 - File: `~/.dotfiles/.config/hypr/scripts/change_wallpaper`
 
-**Wallpaper directory:** `~/Pictures/Wallpapers` (needs manual setup)
+**Wallpaper directory:** `~/Pictures/Wallpapers` (created)
 
 ---
 
@@ -160,17 +153,19 @@ Updated `~/.dotfiles/.config/hypr/scripts/change_wallpaper`:
 - Audio device selection
 - **Audio Quality IMPROVED:**
   - Speaker volume increased to 100% (max: 87/87)
-  - EasyEffects preset "thinkpad-speakers" loaded
-  - ALSA config created (~/.asoundrc → ~/.dotfiles/.config/asound.conf)
+  - EasyEffects preset `thinkpad-speakers` loaded
+  - Confirmed PipeWire graph: app → `easyeffects_sink` → convolver → physical `Speaker`
+  - Removed experimental `~/.asoundrc` direct-hardware override because it bypassed PipeWire and could break mixing
+  - Fixed volume controls after EasyEffects: Hypr/Waybar volume script now uses `wpctl @DEFAULT_AUDIO_SINK@`
 
 ### ⚠️ Partially Working
-- EasyEffects preset (convolver with speaker optimization) now active
+- EasyEffects preset (convolver with speaker optimization) now active when `easyeffects_sink` is selected
 - Waybar may reference missing scripts (needs verification)
 
 ### 📋 Needs Attention
 1. Apply ly config: `sudo ~/.config/ly/apply.sh`
 2. Verify Waybar script references
-3. Create `~/Pictures/Wallpapers` directory
+3. Add wallpapers to `~/Pictures/Wallpapers`
 4. Test full reboot cycle with audio improvements
 5. Monitor audio quality for pops/crackles
 
@@ -180,8 +175,9 @@ Updated `~/.dotfiles/.config/hypr/scripts/change_wallpaper`:
 - Originally attempted: EasyEffects convolver (currently working!)
 - Discovered: Speaker volume was capped at 72%, increased to 100%
 - Discovered: TLP audio power saving issue (not present, TLP not installed)
-- Applied: ALSA config for direct hardware routing + EasyEffects combo
-- **Reasoning:** Combination of firmware speaker optimization + PipeWire mixing + EasyEffects EQ = best quality on limited hardware
+- Removed: ALSA config for direct hardware routing (`~/.asoundrc`) because it was risky and not needed under PipeWire
+- Applied: EasyEffects convolver + PipeWire routing
+- **Reasoning:** Keep PipeWire/WirePlumber in charge of device selection; use EasyEffects only as an optional/enhanced sink.
 
 **Arrow Lake (MTL) Audio Hardware Limitations:**
 - Intel cAVS DSP supports modern SOF drivers (2025.12.2)
@@ -191,10 +187,11 @@ Updated `~/.dotfiles/.config/hypr/scripts/change_wallpaper`:
 
 **EasyEffects Preset (NOW ACTIVE):**
 ```
-Location: ~/.config/easyeffects/ (loaded at runtime)
+Runtime config: ~/.config/easyeffects/db/easyeffectsrc
 Preset: thinkpad-speakers
 Contains: Convolver filter + speaker optimization kernel
-Status: Loaded and active via --service-mode
+Kernel: ~/.local/share/easyeffects/irs/T14S_G3_Music_Movies.irs
+Status: Loaded via --service-mode; active when default sink is easyeffects_sink
 ```
 
 ---
@@ -205,13 +202,15 @@ Status: Loaded and active via --service-mode
 |------|---------|--------|
 | `~/.dotfiles/.config/hypr/config/input.conf` | Natural scroll | ✅ |
 | `~/.dotfiles/.config/hypr/config/autostart.conf` | Auto-launch apps | ✅ (simplified) |
+| `~/.dotfiles/.config/hypr/scripts/volume` | Volume/mic controls via WirePlumber | ✅ |
+| `~/.dotfiles/.config/waybar/config` | Waybar volume module follows EasyEffects sink | ✅ |
 | `~/.dotfiles/.config/hypr/hyprlock.conf` | Lock screen theme | ✅ |
 | `~/.dotfiles/.config/hypr/scripts/change_wallpaper` | Wallpaper daemon | ✅ (awww) |
 | `~/.dotfiles/.config/ly/config.ini` | Display manager theme | ✅ (ready to deploy) |
 | `~/.dotfiles/.config/ly/apply.sh` | Deploy ly to /etc/ly | ✅ |
-| `~/.dotfiles/.config/asound.conf` | ALSA hardware routing | ✅ (new) |
+| `~/.dotfiles/.local/bin/audio_output` | Dynamic audio profile switcher | ✅ |
 | `~/.vscode/argv.json` | VS Code encryption | ✅ |
-| `~/.local/bin/select_audio_output` | Audio device switcher | ✅ (new) |
+| `~/.local/bin/select_audio_output` | Symlink to `audio_output` | ✅ |
 
 ---
 
@@ -221,18 +220,17 @@ Status: Loaded and active via --service-mode
 - [ ] Deploy ly: `sudo ~/.config/ly/apply.sh`
 - [ ] Test audio playback
 - [ ] Verify Waybar functionality
-- [ ] Create `~/Pictures/Wallpapers`
+- [x] Create `~/Pictures/Wallpapers`
 
 ### After Reboot
 - [ ] Verify ly displays at login (tty1)
 - [ ] Check audio device selection works
 - [ ] Test wallpaper rotation
 
-### Audio Quality Improvements (to investigate)
-1. **Increase Speaker Volume (ASAP)**
+### Audio Quality Notes
+1. **Speaker Volume**
    ```bash
-   amixer -c 0 sset Speaker 87  # Max level
-   alsactl store  # Save permanently
+   amixer -c 0 sset Speaker 87  # Max level, already applied
    ```
 
 2. **Check for Audio Firmware Updates**
@@ -241,14 +239,14 @@ Status: Loaded and active via --service-mode
    pacman -Q sof-firmware  # Check version
    ```
 
-3. **Try EasyEffects Preset**
-   - Load: `easyeffects --load-preset thinkpad-speakers`
-   - This adds convolver + EQ to improve speaker quality
+3. **Use EasyEffects Preset**
+   - Load enhanced profile: `audio_output enhanced`
+   - Bypass processing: `audio_output speaker`
+   - This adds the ThinkPad convolver to improve speaker quality
 
-4. **Advanced: ALSA Configuration**
-   - Create `/etc/asound.conf` with speaker boost
-   - Add pre-emphasis EQ for ThinkPad speakers
-   - Disable auto-mute if causing issues
+4. **Avoid ALSA Direct-Hardware Overrides**
+   - Do not set `pcm.!default` to `hw:0,0` under PipeWire
+   - It bypasses PipeWire mixing and can cause app/device selection problems
 
 5. **Check Kernel Messages**
    ```bash
