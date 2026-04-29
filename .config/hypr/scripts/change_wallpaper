@@ -47,7 +47,7 @@ SELECTED_PIC=$(realpath "${PICS[$NEXT_INDEX]}")
 
 # Функция специально для hyprpaper
 change_hyprpaper(){
-  pkill swww
+  pkill awww-daemon
   pkill swaybg
   
   # Запускаем, если не запущен
@@ -73,16 +73,16 @@ change_hyprpaper(){
 }
 
 change_swaybg(){
-  pkill swww
+  pkill awww-daemon
   pkill hyprpaper
   swaybg -m fill -i "$SELECTED_PIC"
 }
 
-change_swww(){
+change_awww(){
   pkill swaybg
   pkill hyprpaper
-  swww query || swww init
-  swww img "$SELECTED_PIC" --transition-fps 30 --transition-type any --transition-duration 3
+  awww query || { awww-daemon & sleep 0.5; }
+  awww img "$SELECTED_PIC" --transition-fps 30 --transition-type any --transition-duration 3
 }
 
 # Если ничего не указано, проверяем что сейчас запущено
@@ -92,7 +92,7 @@ change_current(){
   elif pidof swaybg >/dev/null; then
     change_swaybg
   else
-    change_swww
+    change_awww
   fi
 }
 
@@ -103,8 +103,8 @@ case "$1" in
   "swaybg")
     change_swaybg
     ;;
-  "swww")
-    change_swww
+  "awww"|"swww")
+    change_awww
     ;;
   *)
     change_current
