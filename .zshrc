@@ -76,7 +76,7 @@ ENABLE_CORRECTION="false"
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
-plugins=(vscode git golang history)
+plugins=(vscode git golang history sudo)
 # plugins=(macos brew iterm2 chucknorris)
 
 
@@ -93,6 +93,8 @@ alias ls='eza'
 alias files='yazi'
 # alias cat='bat'
 alias goupdate='curl -sL https://raw.githubusercontent.com/DieTime/go-up/master/go-up.sh | bash'
+alias oc='opencode'
+alias tsh='tsh-17'
 
 source /usr/share/cachyos-zsh-config/cachyos-config.zsh
 source $ZSH/oh-my-zsh.sh
@@ -112,6 +114,7 @@ source /opt/esp-idf/export.sh > /dev/null 2>&1
 export GOPATH="$HOME/go"
 export PATH="$GOPATH/bin/:$PATH"
 export PATH="$PATH:$HOME/.local/bin"
+export PATH="$PATH:/home/erikfrish/.cargo/bin"
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export LIBVIRT_DEFAULT_URI="qemu:///system"
