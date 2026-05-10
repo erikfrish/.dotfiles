@@ -5,8 +5,8 @@
 Старая схема работала так:
 
 - `~/.gitconfig` включает SSH-подпись коммитов: `commit.gpgsign = true`, `gpg.format = ssh`.
-- Git не хранит фиксированный `user.signingKey`, а вызывает `gpg.ssh.defaultKeyCommand = ~/.ssh/scripts/current_yubikey.sh`.
-- `current_yubikey.sh` смотрит `ykman list -s`, находит подключенный YubiKey по serial number и печатает `key::<public key>` для git.
+- Git не хранит фиксированный `user.signingKey`, а вызывает `gpg.ssh.defaultKeyCommand = ~/.ssh/scripts/current_yubikey`.
+- `current_yubikey` смотрит `ykman list -s`, находит подключенный YubiKey по serial number и печатает `key::<public key>` для git.
 - `~/.ssh/config` перечисляет оба аппаратных `IdentityFile`, поэтому SSH может использовать вставленный ключ.
 - Активный SSH-agent socket лежит в env: `SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/ssh-agent.socket`. Это продублировано в `.zprofile` и `.config/environment.d/profile.conf`.
 
@@ -27,6 +27,22 @@
 cd ~/.dotfiles
 stow .
 yubikey-pool-setup
+```
+
+Если на машине уже есть обычные `~/.gitconfig` или `~/.ssh/config`, сначала сохранить их как локальные overrides:
+
+```sh
+mv ~/.gitconfig ~/.gitconfig.local
+mv ~/.ssh/config ~/.ssh/config.local
+cd ~/.dotfiles
+stow .
+```
+
+Общие настройки лежат в stow-managed `~/.gitconfig` и `~/.ssh/config`. Локальные отличия машины лежат вне git:
+
+```text
+~/.gitconfig.local
+~/.ssh/config.local
 ```
 
 Если не нужно трогать systemd user service:
@@ -98,6 +114,8 @@ Setup выставляет глобальные git-настройки:
 [gpg "ssh"]
   sshProgram = ssh
   defaultKeyCommand = ~/.ssh/scripts/current_yubikey
+[core]
+  sshCommand = env -u GIT_ASKPASS -u SSH_AUTH_SOCK SSH_ASKPASS=/bin/true SSH_ASKPASS_REQUIRE=never ssh -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o ControlMaster=auto -o ControlPath=~/.ssh/ssh-conn-%C -o ControlPersist=4h
 ```
 
 SSH получает список ключей через include-файл:
@@ -107,3 +125,13 @@ Include ~/.ssh/config.d/yubikey-pool.conf
 ```
 
 `~/.ssh/config.d/yubikey-pool.conf` генерируется из `~/.ssh/yubikeys.tsv` и содержит `IdentityFile` для каждого ключа из пула.
+
+SSH multiplexing включен для переиспользования уже открытой сессии:
+
+```sshconfig
+ControlMaster auto
+ControlPath ~/.ssh/ssh-conn-%C
+ControlPersist 4h
+```
+
+Для GitHub persist длиннее, для остальных хостов короче. Это снижает количество повторных YubiKey touch/password prompts.

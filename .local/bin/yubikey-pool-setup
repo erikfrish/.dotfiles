@@ -32,7 +32,7 @@ need_cmd() {
 expand_path() {
   case "$1" in
     '~') printf '%s\n' "$HOME" ;;
-    '~/'*) printf '%s/%s\n' "$HOME" "${1#~/}" ;;
+    '~/'*) printf '%s/%s\n' "$HOME" "${1#\~/}" ;;
     *) printf '%s\n' "$1" ;;
   esac
 }
@@ -50,6 +50,20 @@ link_if_safe() {
     return 0
   fi
   ln -s "$source" "$target"
+}
+
+ensure_pool_file() {
+  if [ -e "$POOL_FILE" ] || [ -L "$POOL_FILE" ]; then
+    return 0
+  fi
+
+  if [ -e "$SOURCE_POOL_FILE" ]; then
+    link_if_safe "$SOURCE_POOL_FILE" "$POOL_FILE"
+    return 0
+  fi
+
+  printf '# serial\tname\tidentity_file\tpublic_key_file\n' > "$POOL_FILE"
+  chmod 600 "$POOL_FILE"
 }
 
 ensure_line() {
@@ -111,10 +125,11 @@ need_cmd grep
 need_cmd ssh-add
 need_cmd ykman
 
-mkdir -p "$HOME/.ssh/scripts" "$SSH_INCLUDE_DIR" "$HOME/.config/environment.d" "$HOME/.config/systemd/user"
+mkdir -p "$HOME/.ssh/scripts" "$HOME/.ssh/controlmasters" "$SSH_INCLUDE_DIR" "$HOME/.config/environment.d" "$HOME/.config/systemd/user"
 chmod 700 "$HOME/.ssh"
+chmod 700 "$HOME/.ssh/controlmasters"
 
-link_if_safe "$SOURCE_POOL_FILE" "$POOL_FILE"
+ensure_pool_file
 link_if_safe "$DOTFILES_DIR/.ssh/scripts/current_yubikey" "$CURRENT_KEY_SCRIPT"
 link_if_safe "$DOTFILES_DIR/.ssh/scripts/start_ssh_agent" "$START_AGENT_SCRIPT"
 chmod +x "$DOTFILES_DIR/.ssh/scripts/current_yubikey" "$DOTFILES_DIR/.ssh/scripts/start_ssh_agent"
@@ -126,6 +141,7 @@ git config --global commit.gpgsign true
 git config --global gpg.format ssh
 git config --global gpg.ssh.sshProgram ssh
 git config --global gpg.ssh.defaultKeyCommand "$CURRENT_KEY_SCRIPT"
+git config --global core.sshCommand 'env -u GIT_ASKPASS -u SSH_AUTH_SOCK SSH_ASKPASS=/bin/true SSH_ASKPASS_REQUIRE=never ssh -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o ControlMaster=auto -o ControlPath=~/.ssh/ssh-conn-%C -o ControlPersist=4h'
 
 ensure_line "$HOME/.config/environment.d/profile.conf" 'SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/ssh-agent.socket'
 ensure_line "$HOME/.zprofile" 'export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"'

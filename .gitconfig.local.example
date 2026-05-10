@@ -1,0 +1,8 @@
+[user]
+	email = erikfrish@gmail.com
+	name = erikfrish
+
+# Machine/company-specific overrides live here and are not tracked.
+# Example:
+# [url "git@gitlab.wildberries.ru:"]
+# 	insteadOf = https://gitlab.wildberries.ru
