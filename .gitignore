@@ -1,3 +1,4 @@
 .env
 .env.local
 ignore_me
+.ssh/yubikeys.tsv
