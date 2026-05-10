@@ -14,6 +14,10 @@
 
 ## Файлы
 
+- `.gitconfig` - общие git-настройки: SSH signing, `core.sshCommand`, include локальных overrides.
+- `.ssh/config` - общие SSH-настройки: YubiKey identity files, multiplexing, GitHub host policy, include локальных overrides.
+- `.gitconfig.local.example` - пример локального git override.
+- `.ssh/config.local.example` - пример локального SSH override.
 - `.ssh/yubikeys.tsv` - пул известных аппаратных ключей: `serial`, `name`, `identity_file`, `public_key_file`.
 - `.ssh/scripts/current_yubikey` - динамически выбирает подключенный ключ из пула.
 - `.ssh/scripts/start_ssh_agent` - добавляет ключи из пула в активный SSH-agent.
@@ -104,7 +108,7 @@ yubikey-pool-add --verify-required yubik_5c_nfc
 
 ## Как это связано с git и SSH
 
-Setup выставляет глобальные git-настройки:
+Setup и stow-managed `.gitconfig` выставляют общие git-настройки:
 
 ```ini
 [commit]
@@ -121,6 +125,8 @@ Setup выставляет глобальные git-настройки:
 SSH получает список ключей через include-файл:
 
 ```sshconfig
+Include ~/.ssh/config.local
+Include ~/.ssh/wb/config
 Include ~/.ssh/config.d/yubikey-pool.conf
 ```
 

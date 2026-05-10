@@ -1,140 +1,178 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 iDIR="$HOME/.config/hypr/mako/icons"
-sink='@DEFAULT_AUDIO_SINK@'
-source='@DEFAULT_AUDIO_SOURCE@'
-speaker_sink='alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__Speaker__sink'
 max_volume=150
+max_volume_wp=1.5
+step=5
 
-target_sink() {
-	if [[ "$(pactl get-default-sink 2>/dev/null)" == "easyeffects_sink" ]]; then
-		echo "$speaker_sink"
-	else
-		pactl get-default-sink
-	fi
-}
-
-target_source() {
-	pactl get-default-source
+have() {
+  command -v "$1" >/dev/null 2>&1
 }
 
 refresh_waybar() {
-	pkill -RTMIN+8 waybar 2>/dev/null || true
-}
-
-volume_percent() {
-	pactl get-sink-volume "$1" | awk -F/ 'NR == 1 { gsub(/ /, "", $2); gsub(/%/, "", $2); print $2 }'
-}
-
-is_muted() {
-	pactl get-sink-mute "$1" | grep -q yes
-}
-
-get_volume() {
-	local active_sink
-	active_sink=$(target_sink)
-	if is_muted "$active_sink"; then
-		echo 0
-	else
-		volume_percent "$active_sink"
-	fi
-}
-
-get_icon() {
-	current=$(get_volume)
-	if [[ "$current" -eq 0 ]]; then
-		echo "$iDIR/volume-mute.png"
-	elif [[ "$current" -le 30 ]]; then
-		echo "$iDIR/volume-low.png"
-	elif [[ "$current" -le 60 ]]; then
-		echo "$iDIR/volume-mid.png"
-	else
-		echo "$iDIR/volume-high.png"
-	fi
+  pkill -RTMIN+8 waybar 2>/dev/null || true
 }
 
 notify_user() {
-	notify-send -h string:x-canonical-private-synchronous:sys-notify -u low -i "$(get_icon)" "Volume : $(get_volume) %"
-}
-
-inc_volume() {
-	local active_sink
-	local current
-	local next
-	active_sink=$(target_sink)
-	current=$(volume_percent "$active_sink")
-	next=$((current + 5))
-	if ((next > max_volume)); then
-		next=$max_volume
-	fi
-	pactl set-sink-volume "$active_sink" "${next}%" && notify_user && refresh_waybar
-}
-
-dec_volume() {
-	local active_sink
-	active_sink=$(target_sink)
-	pactl set-sink-volume "$active_sink" -5% && notify_user && refresh_waybar
-}
-
-toggle_mute() {
-	local active_sink
-	active_sink=$(target_sink)
-	pactl set-sink-mute "$active_sink" toggle
-	if is_muted "$active_sink"; then
-		notify-send -h string:x-canonical-private-synchronous:sys-notify -u low -i "$iDIR/volume-mute.png" "Volume Switched OFF"
-	else
-		notify-send -h string:x-canonical-private-synchronous:sys-notify -u low -i "$(get_icon)" "Volume Switched ON"
-	fi
-	refresh_waybar
-}
-
-toggle_mic() {
-	local active_source
-	active_source=$(target_source)
-	pactl set-source-mute "$active_source" toggle
-	if pactl get-source-mute "$active_source" | grep -q yes; then
-		notify-send -h string:x-canonical-private-synchronous:sys-notify -u low -i "$iDIR/microphone-mute.png" "Microphone Switched OFF"
-	else
-		notify-send -h string:x-canonical-private-synchronous:sys-notify -u low -i "$iDIR/microphone.png" "Microphone Switched ON"
-	fi
-}
-
-get_mic_icon() {
-	echo "$iDIR/microphone.png"
+  have notify-send || return 0
+  notify-send -h string:x-canonical-private-synchronous:sys-notify -u low -i "$(get_icon)" "Volume : $(get_volume) %"
 }
 
 notify_mic_user() {
-	notify-send -h string:x-canonical-private-synchronous:sys-notify -u low -i "$(get_mic_icon)" "Mic-Level : $(pactl get-source-volume "$(target_source)" | awk -F/ 'NR == 1 { gsub(/ /, "", $2); gsub(/%/, "", $2); print $2 }') %"
+  have notify-send || return 0
+  notify-send -h string:x-canonical-private-synchronous:sys-notify -u low -i "$iDIR/microphone.png" "Mic-Level : $(get_mic_volume) %"
+}
+
+real_default_sink() {
+  pactl list sinks short 2>/dev/null | awk '$2 !~ /(^easyeffects_sink$|Easy Effects Sink)/ { print $2; exit }'
+}
+
+avoid_effects_sink() {
+  local default_sink fallback_sink
+  have pactl || return 0
+  default_sink=$(pactl get-default-sink 2>/dev/null || true)
+  case "$default_sink" in
+    easyeffects_sink|"Easy Effects Sink")
+      fallback_sink=$(real_default_sink)
+      [ -n "$fallback_sink" ] && pactl set-default-sink "$fallback_sink" 2>/dev/null || true
+      ;;
+  esac
+}
+
+wp_volume_line() {
+  wpctl get-volume "$1" 2>/dev/null || true
+}
+
+wp_volume_percent() {
+  wp_volume_line "$1" | awk '{ for (i = 1; i <= NF; i++) if ($i ~ /^[0-9]+(\.[0-9]+)?$/) { printf "%d\n", ($i * 100) + 0.5; exit } }'
+}
+
+wp_is_muted() {
+  wp_volume_line "$1" | grep -q '\[MUTED\]'
+}
+
+pactl_default_sink() {
+  pactl get-default-sink 2>/dev/null
+}
+
+pactl_default_source() {
+  pactl get-default-source 2>/dev/null
+}
+
+pactl_volume_percent() {
+  pactl get-${2}-volume "$1" 2>/dev/null | awk -F/ 'NR == 1 { gsub(/ /, "", $2); gsub(/%/, "", $2); print $2 }'
+}
+
+pactl_is_muted() {
+  pactl get-${2}-mute "$1" 2>/dev/null | grep -q yes
+}
+
+get_volume() {
+  avoid_effects_sink
+  if have wpctl; then
+    if wp_is_muted '@DEFAULT_AUDIO_SINK@'; then
+      echo 0
+    else
+      wp_volume_percent '@DEFAULT_AUDIO_SINK@'
+    fi
+    return
+  fi
+
+  local sink
+  sink=$(pactl_default_sink)
+  if pactl_is_muted "$sink" sink; then
+    echo 0
+  else
+    pactl_volume_percent "$sink" sink
+  fi
+}
+
+get_mic_volume() {
+  if have wpctl; then
+    wp_volume_percent '@DEFAULT_AUDIO_SOURCE@'
+    return
+  fi
+
+  pactl_volume_percent "$(pactl_default_source)" source
+}
+
+get_icon() {
+  local current
+  current=$(get_volume)
+  if [[ "$current" -eq 0 ]]; then
+    echo "$iDIR/volume-mute.png"
+  elif [[ "$current" -le 30 ]]; then
+    echo "$iDIR/volume-low.png"
+  elif [[ "$current" -le 60 ]]; then
+    echo "$iDIR/volume-mid.png"
+  else
+    echo "$iDIR/volume-high.png"
+  fi
+}
+
+inc_volume() {
+  avoid_effects_sink
+  if have wpctl; then
+    wpctl set-volume -l "$max_volume_wp" '@DEFAULT_AUDIO_SINK@' "${step}%+" && notify_user && refresh_waybar
+  else
+    pactl set-sink-volume "$(pactl_default_sink)" "+${step}%" && notify_user && refresh_waybar
+  fi
+}
+
+dec_volume() {
+  avoid_effects_sink
+  if have wpctl; then
+    wpctl set-volume '@DEFAULT_AUDIO_SINK@' "${step}%-" && notify_user && refresh_waybar
+  else
+    pactl set-sink-volume "$(pactl_default_sink)" "-${step}%" && notify_user && refresh_waybar
+  fi
+}
+
+toggle_mute() {
+  avoid_effects_sink
+  if have wpctl; then
+    wpctl set-mute '@DEFAULT_AUDIO_SINK@' toggle
+  else
+    pactl set-sink-mute "$(pactl_default_sink)" toggle
+  fi
+  notify_user
+  refresh_waybar
+}
+
+toggle_mic() {
+  if have wpctl; then
+    wpctl set-mute '@DEFAULT_AUDIO_SOURCE@' toggle
+  else
+    pactl set-source-mute "$(pactl_default_source)" toggle
+  fi
 }
 
 inc_mic_volume() {
-	local active_source
-	local current
-	local next
-	active_source=$(target_source)
-	current=$(pactl get-source-volume "$active_source" | awk -F/ 'NR == 1 { gsub(/ /, "", $2); gsub(/%/, "", $2); print $2 }')
-	next=$((current + 5))
-	if ((next > 100)); then
-		next=100
-	fi
-	pactl set-source-volume "$active_source" "${next}%" && notify_mic_user
+  if have wpctl; then
+    wpctl set-volume -l 100% '@DEFAULT_AUDIO_SOURCE@' "${step}%+" && notify_mic_user
+  else
+    pactl set-source-volume "$(pactl_default_source)" "+${step}%" && notify_mic_user
+  fi
 }
 
 dec_mic_volume() {
-	local active_source
-	active_source=$(target_source)
-	pactl set-source-volume "$active_source" -5% && notify_mic_user
+  if have wpctl; then
+    wpctl set-volume '@DEFAULT_AUDIO_SOURCE@' "${step}%-" && notify_mic_user
+  else
+    pactl set-source-volume "$(pactl_default_source)" "-${step}%" && notify_mic_user
+  fi
 }
 
 case "${1:-}" in
-	--get) get_volume ;;
-	--inc) inc_volume ;;
-	--dec) dec_volume ;;
-	--toggle) toggle_mute ;;
-	--toggle-mic) toggle_mic ;;
-	--get-icon) get_icon ;;
-	--get-mic-icon) get_mic_icon ;;
-	--mic-inc) inc_mic_volume ;;
-	--mic-dec) dec_mic_volume ;;
-	*) get_volume ;;
+  --get) get_volume ;;
+  --inc) inc_volume ;;
+  --dec) dec_volume ;;
+  --toggle) toggle_mute ;;
+  --toggle-mic) toggle_mic ;;
+  --get-icon) get_icon ;;
+  --get-mic-icon) echo "$iDIR/microphone.png" ;;
+  --mic-inc) inc_mic_volume ;;
+  --mic-dec) dec_mic_volume ;;
+  *) get_volume ;;
 esac

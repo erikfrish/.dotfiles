@@ -54,7 +54,6 @@
     // "hyprland/window",
     "custom/gammastep",
     "backlight",
-    "pulseaudio.bluetooth",
     "custom/audio-volume",
     // "wireplumber",
     "pulseaudio#microphone",
@@ -521,7 +520,7 @@
 
   "custom/audio-volume": {
     "exec": "~/.config/hypr/scripts/volume --get",
-    "format": " {} %",
+    "format": " {}%",
     "interval": "once",
     "signal": 8,
     "on-click": "~/.config/hypr/scripts/volume --toggle",
@@ -535,7 +534,6 @@
     "format": "{icon} {volume} %",
     "format-bluetooth": "{icon} {volume} %",
     "format-muted": "󰖁 muted",
-    "ignored-sinks": ["Easy Effects Sink", "easyeffects_sink"],
     "format-icons": {
       "headphone": "",
       "hands-free": "",
