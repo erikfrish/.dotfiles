@@ -118,6 +118,7 @@ tooltip label {
 #temperature,
 #backlight,
 #network,
+#custom-audio-volume,
 #pulseaudio,
 #wireplumber,
 #custom-media,
@@ -218,10 +219,12 @@ label:focus {
     color: @alert;
 }
 
+#custom-audio-volume,
 #pulseaudio {
     color: @accent4;
 }
 
+#custom-audio-volume.muted,
 #pulseaudio-muted {
     color: @accent2;
 }

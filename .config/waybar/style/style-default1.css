@@ -81,6 +81,7 @@ tooltip label {
 #temperature,
 #backlight,
 #network,
+#custom-audio-volume,
 #pulseaudio,
 #wireplumber,
 #custom-media,
@@ -204,6 +205,7 @@ tooltip label {
   margin-right: 0;
 }
 
+#custom-audio-volume,
 #pulseaudio {
   color: #FFD580;
 }

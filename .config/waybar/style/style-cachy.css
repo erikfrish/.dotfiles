@@ -93,6 +93,7 @@ window#waybar.hidden {
 #temperature,
 #backlight,
 #network,
+#custom-audio-volume,
 #pulseaudio,
 #wireplumber,
 #custom-media,
@@ -229,6 +230,7 @@ window#waybar.hidden {
     margin-right: 0;
 }
 
+#custom-audio-volume,
 #pulseaudio {
     color: #7d9bba;
 }

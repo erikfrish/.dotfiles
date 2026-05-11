@@ -90,6 +90,7 @@ tooltip label {
 #temperature,
 #backlight,
 #network,
+#custom-audio-volume,
 #pulseaudio,
 #wireplumber,
 #mode,
@@ -146,6 +147,7 @@ tooltip label {
     color: #844001;
 }
 
+#custom-audio-volume.muted,
 #pulseaudio.muted {
     color: #cc3436;
 }

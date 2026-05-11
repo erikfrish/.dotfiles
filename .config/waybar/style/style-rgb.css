@@ -46,6 +46,7 @@ tooltip label {
 #temperature,
 #backlight,
 #network,
+#custom-audio-volume,
 #pulseaudio,
 #wireplumber,
 #mode,
@@ -207,14 +208,17 @@ tooltip label {
 	color: #ffffff;
 }
 
+#custom-audio-volume,
 #pulseaudio {
 	background-color: #fab387;
 }
 
+#custom-audio-volume.bluetooth,
 #pulseaudio.bluetooth {
 	background-color: #f5c2e7;
 }
 
+#custom-audio-volume.muted,
 #pulseaudio.muted {
 	background-color: #313244;
 	color: #cdd6f4;
