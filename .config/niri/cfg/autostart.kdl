@@ -1,0 +1,22 @@
+spawn-at-startup "xwayland-satellite"
+spawn-at-startup "waybar"
+spawn-at-startup "fcitx5" "-d"
+spawn-at-startup "nm-applet" "--indicator"
+spawn-at-startup "blueman-applet"
+spawn-at-startup "/usr/lib/polkit-kde-authentication-agent-1"
+spawn-at-startup "hypridle"
+
+spawn-sh-at-startup "systemctl --user start gammastep.service swaync.service arch-update-tray.service"
+spawn-sh-at-startup "dbus-update-activation-environment --systemd SSH_AUTH_SOCK XDG_RUNTIME_DIR WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP"
+spawn-sh-at-startup "wl-clip-persist --clipboard regular"
+spawn-sh-at-startup "wl-paste --type text --watch cliphist store"
+spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
+spawn-sh-at-startup "wl-paste --watch cliphist store"
+spawn-sh-at-startup "rm -f /tmp/niri.wob; mkfifo /tmp/niri.wob; tail -f /tmp/niri.wob | wob -c ~/.config/wob/wob.ini"
+spawn-sh-at-startup "swayosd-server & ~/.config/hypr/scripts/lang_switch_osd"
+spawn-sh-at-startup "~/.config/hypr/scripts/change_wallpaper awww"
+
+// Keep Hyprland's preferred startup apps, best-effort.
+spawn-sh-at-startup "zen-browser"
+spawn-sh-at-startup "code"
+spawn-sh-at-startup "forkgram"

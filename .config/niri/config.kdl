@@ -1,0 +1,9 @@
+// Niri entrypoint. Keep detailed settings in cfg/*.kdl.
+
+include "./cfg/input.kdl"
+include "./cfg/display.kdl"
+include "./cfg/layout.kdl"
+include "./cfg/environment.kdl"
+include "./cfg/autostart.kdl"
+include "./cfg/rules.kdl"
+include "./cfg/keybinds.kdl"

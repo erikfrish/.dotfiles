@@ -1,0 +1,13 @@
+environment {
+    XDG_SESSION_TYPE "wayland"
+    XDG_CURRENT_DESKTOP "niri"
+    SSH_AUTH_SOCK "/run/user/1000/ssh-agent.socket"
+    SDL_VIDEODRIVER "wayland,x11"
+    GTK_THEME "adw-gtk3-dark"
+    QT_STYLE_OVERRIDE "Adwaita-Dark"
+    LIBVA_DRIVER_NAME "nvidia"
+    GBM_BACKEND "nvidia-drm"
+    __GLX_VENDOR_LIBRARY_NAME "nvidia"
+    WLR_NO_HARDWARE_CURSORS "1"
+    EGL_PLATFORM "wayland"
+}
