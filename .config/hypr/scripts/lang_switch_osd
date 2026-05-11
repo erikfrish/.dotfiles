@@ -1,20 +1,87 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-watch_layout() {
-  socat -U - "UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock" |
+lock_file="${XDG_RUNTIME_DIR:-/tmp}/lang_switch_osd.lock"
+exec 9>"$lock_file"
+flock -n 9 || exit 0
+
+trim() {
+  printf '%s' "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+}
+
+normalize_layout() {
+  layout=$(trim "$1")
+  case "$(printf '%s' "$layout" | tr '[:upper:]' '[:lower:]')" in
+    *russian*|*ru*) printf 'RU\n' ;;
+    *english*|*us*) printf 'EN\n' ;;
+    *) printf '%s\n' "$(printf '%s' "$layout" | cut -c1-2 | tr '[:lower:]' '[:upper:]')" ;;
+  esac
+}
+
+show_layout() {
+  short=$(normalize_layout "$1")
+  [ -n "$short" ] && swayosd-client --custom-message "$short" >/dev/null 2>&1 || true
+}
+
+watch_niri_layout() {
+  names=$(niri msg -j keyboard-layouts 2>/dev/null | jq -c '.names // []')
+
+  niri msg -j event-stream 2>/dev/null |
+  while read -r line; do
+    event=$(printf '%s' "$line" | jq -r 'keys[0]')
+
+    case "$event" in
+      KeyboardLayoutsChanged)
+        names=$(printf '%s' "$line" | jq -c '.KeyboardLayoutsChanged.keyboard_layouts.names // []')
+        idx=$(printf '%s' "$line" | jq -r '.KeyboardLayoutsChanged.keyboard_layouts.current_idx')
+        ;;
+      KeyboardLayoutSwitched)
+        idx=$(printf '%s' "$line" | jq -r '.KeyboardLayoutSwitched.idx')
+        ;;
+      *)
+        continue
+        ;;
+    esac
+
+    layout=$(jq -r --argjson names "$names" --argjson idx "$idx" -n '$names[$idx] // empty')
+    [ -n "$layout" ] && show_layout "$layout"
+  done
+}
+
+watch_hypr_layout() {
+  socket="$XDG_RUNTIME_DIR/hypr/${HYPRLAND_INSTANCE_SIGNATURE:-}/.socket2.sock"
+  [ -S "$socket" ] || return 1
+
+  socat -U - "UNIX-CONNECT:$socket" |
   while read -r line; do
     case "$line" in
-      activelayout*)
-        LAYOUT=${line#*,}
-        SHORT=$(echo "$LAYOUT" | cut -c1-2 | tr '[:lower:]' '[:upper:]')
-
-        swayosd-client \
-          --custom-message "$SHORT" \
-          # --custom-icon input-keyboard
-        ;;
+      activelayout*) show_layout "${line#*,}" ;;
     esac
   done
 }
 
-watch_layout &
+watch_caps_lock() {
+  leds=(/sys/class/leds/*::capslock)
+  [ -e "${leds[0]}" ] || return 0
+
+  led_name=${leds[0]##*/}
+  last=$(<"${leds[0]}/brightness")
+
+  while sleep 0.2; do
+    current=$(<"${leds[0]}/brightness")
+    if [ "$current" != "$last" ]; then
+      last=$current
+      swayosd-client --caps-lock-led "$led_name" >/dev/null 2>&1 || swayosd-client --caps-lock >/dev/null 2>&1 || true
+    fi
+  done
+}
+
+watch_caps_lock &
+
+if niri msg keyboard-layouts >/dev/null 2>&1; then
+  watch_niri_layout &
+elif hyprctl -j devices >/dev/null 2>&1; then
+  watch_hypr_layout &
+fi
+
 wait

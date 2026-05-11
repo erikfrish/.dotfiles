@@ -1,9 +1,9 @@
 * {
     font-family: "JetBrainsMono ExtraBold", "Symbols Nerd Font";
-    font-size: 16px;
+    font-size: 14px;
     padding: 0;
-    margin-top: 1px;
-    margin-bottom: 1px;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 window#waybar {
@@ -43,9 +43,9 @@ tooltip {
 }
 
 #workspaces button {
-    padding: 2px;
+    padding: 1px;
     color: #6E6A86;
-    margin-right: 5px;
+    margin-right: 3px;
 }
 
 #workspaces button.active {
@@ -111,13 +111,12 @@ tooltip {
 #custom-weather.snowyIcyNight,
 #custom-weather.default,
 #idle_inhibitor,
+#custom-language,
 #language {
     color: #cba7f7;
-    padding: 0px 10px;
+    padding: 0px 7px;
     border-radius: 10px;
 }
-
-
 
 #temperature.critical {
     background-color: #ff0000;
@@ -145,7 +144,7 @@ tooltip {
 #custom-vpn1,
 #custom-vpn2 {
     /* Фиксируем ширину, чтобы иконка была в центре "квадрата" */
-    min-width: 40px;
+    min-width: 34px;
     padding: 0;
     margin: 0 4px;
 
@@ -153,14 +152,14 @@ tooltip {
     transition: all 0.3s ease;
 
     /* Используем font-size для контроля размера "коробки" */
-    font-size: 18px;
+    font-size: 15px;
 }
 
 /* Если иконка кажется слишком высокой или низкой, 
    используй небольшой margin-bottom внутри модуля: */
 #custom-vpn1,
 #custom-vpn2 {
-    min-width: 33px;
+    min-width: 29px;
     margin-bottom: 0px;
 }
 
@@ -180,5 +179,5 @@ tooltip {
 }
 
 #custom-notification {
-    min-width: 50px;
+    min-width: 42px;
 }

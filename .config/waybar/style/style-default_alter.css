@@ -132,6 +132,7 @@ tooltip label {
 #custom-cycle_wall,
 #custom-screen_locker,
 #custom-weather,
+#custom-language,
 #language {
     padding: 1px 6px 0px 6px;
     margin: 4px 3px 5px 3px;
@@ -306,15 +307,6 @@ label:focus {
 
 #mpd.paused {
     background-color: #51a37a;
-}
-
-#custom-language {
-    /* background: #bbccdd;
-    color: #333333;
-    padding: 0 5px;
-    margin: 4px 3px 6px 3px; */
-    color: @accent5;
-    min-width: 16px;
 }
 
 #custom-separator {

@@ -13,7 +13,8 @@ spawn-sh-at-startup "wl-paste --type text --watch cliphist store"
 spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
 spawn-sh-at-startup "wl-paste --watch cliphist store"
 spawn-sh-at-startup "rm -f /tmp/niri.wob; mkfifo /tmp/niri.wob; tail -f /tmp/niri.wob | wob -c ~/.config/wob/wob.ini"
-spawn-sh-at-startup "swayosd-server & ~/.config/hypr/scripts/lang_switch_osd"
+spawn-at-startup "swayosd-server"
+spawn-sh-at-startup "~/.config/hypr/scripts/lang_switch_osd"
 spawn-sh-at-startup "~/.config/hypr/scripts/change_wallpaper awww"
 
 // Keep Hyprland's preferred startup apps, best-effort.

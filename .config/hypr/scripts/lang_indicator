@@ -1,16 +1,43 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Если передан аргумент "next", переключаем на следующую раскладку
-if [ "$1" == "next" ]; then
-    hyprctl switchxkblayout all next
+is_niri() {
+  niri msg keyboard-layouts >/dev/null 2>&1
+}
+
+is_hyprland() {
+  hyprctl -j devices >/dev/null 2>&1
+}
+
+normalize_layout() {
+  case "$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')" in
+    *russian*|*ru*) printf 'ru\n' ;;
+    *english*|*us*) printf 'en\n' ;;
+    *) printf '%s\n' "$(printf '%s' "$1" | cut -c1-2 | tr '[:upper:]' '[:lower:]')" ;;
+  esac
+}
+
+if [ "${1:-}" = "next" ]; then
+  if is_niri; then
+    niri msg action switch-layout next >/dev/null 2>&1 || true
+  elif is_hyprland; then
+    hyprctl switchxkblayout all next >/dev/null 2>&1 || true
+  fi
 fi
 
-# Получаем текущую раскладку (универсально)
-layout=$(hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .active_keymap' | cut -c1-2 | tr '[:upper:]' '[:lower:]')
-
-# Если вдруг пусто (бывает на кастомных девайсах), берем первую из списка
-if [ -z "$layout" ]; then
-    layout=$(hyprctl devices -j | jq -r '.keyboards[0].active_keymap' | cut -c1-2 | tr '[:upper:]' '[:lower:]')
+if is_niri; then
+  layout=$(niri msg keyboard-layouts | awk '/^ \*/ { sub(/^ \* [0-9]+ /, ""); print; exit }')
+  normalize_layout "$layout"
+  exit 0
 fi
 
-echo "$layout"
+if is_hyprland; then
+  layout=$(hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .active_keymap' | head -n1)
+  if [ -z "$layout" ]; then
+    layout=$(hyprctl devices -j | jq -r '.keyboards[0].active_keymap')
+  fi
+  normalize_layout "$layout"
+  exit 0
+fi
+
+printf -- '--\n'

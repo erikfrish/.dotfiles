@@ -23,6 +23,7 @@
 
   "modules-left": [
     // "custom/rofi",
+    "niri/workspaces",
     "hyprland/workspaces",
     "custom/menu",
     "cpu",
@@ -60,8 +61,8 @@
     // "custom/screenshot_t",
     "battery",
     "idle_inhibitor",
-    "hyprland/language",
-    // "custom/language",
+    // "hyprland/language",
+    "custom/language",
     "custom/power",
   ],
 
@@ -97,6 +98,10 @@
     "exec": "~/.config/hypr/scripts/lang_indicator",
     "interval": 1,
     "format": "{}",
+    "on-click": "~/.config/hypr/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "on-scroll-up": "~/.config/hypr/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "on-scroll-down": "~/.config/hypr/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "signal": 1,
   },
 
   "custom/screenshot_t": {
@@ -499,6 +504,30 @@
     },
     "on-scroll-up": "hyprctl dispatch workspace e+1",
     "on-scroll-down": "hyprctl dispatch workspace e-1",
+  },
+
+  "niri/workspaces": {
+    "format": "{icon}",
+    "on-click": "activate",
+    "all-outputs": true,
+    "format-icons": {
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8",
+      "9": "9",
+      "10": "10",
+      "focused": "",
+      "active": "",
+      "empty": "",
+      "default": "",
+    },
+    "on-scroll-up": "niri msg action focus-workspace-up",
+    "on-scroll-down": "niri msg action focus-workspace-down",
   },
 
   "hyprland/window": {

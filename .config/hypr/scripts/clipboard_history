@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+config="$HOME/.config/wofi/config-clipboard"
+style="$HOME/.config/wofi/style-compact.css"
+colors="$HOME/.config/wofi/colors"
+
+if pidof wofi >/dev/null 2>&1; then
+  pkill wofi
+  exit 0
+fi
+
+cliphist list |
+  wofi --dmenu \
+    --allow-images \
+    --conf "$config" \
+    --style "$style" \
+    --color "$colors" \
+    --pre-display-cmd "echo '%s' | cut -f 2" |
+  cliphist decode |
+  wl-copy
