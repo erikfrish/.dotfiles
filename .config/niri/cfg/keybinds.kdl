@@ -90,14 +90,16 @@ binds {
     Mod+Shift+9 { move-window-to-workspace 9; }
     Mod+Shift+0 { move-window-to-workspace 10; }
 
-    Mod+Period { focus-workspace-down; }
-    Mod+Comma { focus-workspace-up; }
-    Mod+Alt+Down { focus-workspace-down; }
-    Mod+Alt+Up { focus-workspace-up; }
+    Mod+Period { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-down"; }
+    Mod+Comma { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-up"; }
+    Mod+Alt+Down { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-down"; }
+    Mod+Alt+Up { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-up"; }
     Mod+Ctrl+Down { move-window-to-workspace-down; }
     Mod+Ctrl+Up { move-window-to-workspace-up; }
-    Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
-    Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
+    Mod+WheelScrollDown cooldown-ms=150 { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-down"; }
+    Mod+WheelScrollUp cooldown-ms=150 { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-up"; }
+    Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-window-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp cooldown-ms=150 { move-window-to-workspace-up; }
 
     Print { screenshot; }
     Shift+Print { screenshot-screen; }

@@ -74,14 +74,19 @@ pactl_is_muted() {
 }
 
 get_volume() {
+  local volume
   avoid_effects_sink
   if have wpctl; then
     if wp_is_muted '@DEFAULT_AUDIO_SINK@'; then
       echo 0
+      return
     else
-      wp_volume_percent '@DEFAULT_AUDIO_SINK@'
+      volume=$(wp_volume_percent '@DEFAULT_AUDIO_SINK@')
+      if [ -n "$volume" ]; then
+        echo "$volume"
+        return
+      fi
     fi
-    return
   fi
 
   local sink
@@ -94,13 +99,17 @@ get_volume() {
 }
 
 get_mic_volume() {
+  local volume
   if have wpctl; then
     if wp_is_muted '@DEFAULT_AUDIO_SOURCE@'; then
       echo 0
       return
     fi
-    wp_volume_percent '@DEFAULT_AUDIO_SOURCE@'
-    return
+    volume=$(wp_volume_percent '@DEFAULT_AUDIO_SOURCE@')
+    if [ -n "$volume" ]; then
+      echo "$volume"
+      return
+    fi
   fi
 
   local source
@@ -128,9 +137,7 @@ get_icon() {
 
 inc_volume() {
   avoid_effects_sink
-  if have wpctl; then
-    wpctl set-volume -l "$max_volume_wp" '@DEFAULT_AUDIO_SINK@' "${step}%+"
-  else
+  if ! have wpctl || ! wpctl set-volume -l "$max_volume_wp" '@DEFAULT_AUDIO_SINK@' "${step}%+"; then
     pactl set-sink-volume "$(pactl_default_sink)" "+${step}%"
   fi
   show_wob "$(get_volume)"
@@ -139,9 +146,7 @@ inc_volume() {
 
 dec_volume() {
   avoid_effects_sink
-  if have wpctl; then
-    wpctl set-volume '@DEFAULT_AUDIO_SINK@' "${step}%-"
-  else
+  if ! have wpctl || ! wpctl set-volume '@DEFAULT_AUDIO_SINK@' "${step}%-"; then
     pactl set-sink-volume "$(pactl_default_sink)" "-${step}%"
   fi
   show_wob "$(get_volume)"
@@ -150,9 +155,7 @@ dec_volume() {
 
 toggle_mute() {
   avoid_effects_sink
-  if have wpctl; then
-    wpctl set-mute '@DEFAULT_AUDIO_SINK@' toggle
-  else
+  if ! have wpctl || ! wpctl set-mute '@DEFAULT_AUDIO_SINK@' toggle; then
     pactl set-sink-mute "$(pactl_default_sink)" toggle
   fi
   show_wob "$(get_volume)"
@@ -160,9 +163,7 @@ toggle_mute() {
 }
 
 toggle_mic() {
-  if have wpctl; then
-    wpctl set-mute '@DEFAULT_AUDIO_SOURCE@' toggle
-  else
+  if ! have wpctl || ! wpctl set-mute '@DEFAULT_AUDIO_SOURCE@' toggle; then
     pactl set-source-mute "$(pactl_default_source)" toggle
   fi
   show_wob "$(get_mic_volume)"
@@ -170,9 +171,7 @@ toggle_mic() {
 }
 
 inc_mic_volume() {
-  if have wpctl; then
-    wpctl set-volume -l 1.0 '@DEFAULT_AUDIO_SOURCE@' "${step}%+"
-  else
+  if ! have wpctl || ! wpctl set-volume -l 1.0 '@DEFAULT_AUDIO_SOURCE@' "${step}%+"; then
     pactl set-source-volume "$(pactl_default_source)" "+${step}%"
   fi
   show_wob "$(get_mic_volume)"
@@ -180,9 +179,7 @@ inc_mic_volume() {
 }
 
 dec_mic_volume() {
-  if have wpctl; then
-    wpctl set-volume '@DEFAULT_AUDIO_SOURCE@' "${step}%-"
-  else
+  if ! have wpctl || ! wpctl set-volume '@DEFAULT_AUDIO_SOURCE@' "${step}%-"; then
     pactl set-source-volume "$(pactl_default_source)" "-${step}%"
   fi
   show_wob "$(get_mic_volume)"
@@ -196,7 +193,7 @@ case "${1:-}" in
   --toggle) toggle_mute ;;
   --toggle-mic) toggle_mic ;;
   --get-icon) get_icon ;;
-  --get-mic-icon) echo "$iDIR/microphone.png" ;;
+  --get-mic-icon) echo "microphone-sensitivity-high-symbolic" ;;
   --mic-inc) inc_mic_volume ;;
   --mic-dec) dec_mic_volume ;;
   *) get_volume ;;

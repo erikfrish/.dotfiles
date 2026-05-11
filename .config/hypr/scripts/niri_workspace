@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+focused_workspace_json() {
+  niri msg -j workspaces | jq -r '.[] | select(.is_focused)'
+}
+
+focused_idx() {
+  focused_workspace_json | jq -r '.idx'
+}
+
+focused_output() {
+  focused_workspace_json | jq -r '.output'
+}
+
+last_idx_on_focused_output() {
+  local output
+  output=$(focused_output)
+  niri msg -j workspaces | jq -r --arg output "$output" '[.[] | select(.output == $output) | .idx] | max'
+}
+
+create_workspace_above() {
+  local idx last
+  idx=$(focused_idx)
+  last=$(last_idx_on_focused_output)
+
+  niri msg action focus-workspace "$last"
+  niri msg action focus-workspace-down
+  niri msg action move-workspace-to-index "$idx"
+}
+
+case "${1:-}" in
+  focus-up)
+    if [ "$(focused_idx)" -eq 1 ]; then
+      create_workspace_above
+    else
+      niri msg action focus-workspace-up
+    fi
+    ;;
+  focus-down)
+    niri msg action focus-workspace-down
+    ;;
+  *)
+    printf 'usage: %s {focus-up|focus-down}\n' "$0" >&2
+    exit 2
+    ;;
+esac

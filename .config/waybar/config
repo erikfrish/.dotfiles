@@ -526,8 +526,8 @@
       "empty": "",
       "default": "",
     },
-    "on-scroll-up": "niri msg action focus-workspace-up",
-    "on-scroll-down": "niri msg action focus-workspace-down",
+    "on-scroll-up": "~/.config/hypr/scripts/niri_workspace focus-up",
+    "on-scroll-down": "~/.config/hypr/scripts/niri_workspace focus-down",
   },
 
   "hyprland/window": {
