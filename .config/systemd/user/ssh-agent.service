@@ -1,6 +1,8 @@
 [Unit]
 Description=SSH key agent
 Documentation=man:ssh-agent(1)
+Conflicts=ssh-agent.socket
+Before=sockets.target
 
 [Service]
 Type=simple
