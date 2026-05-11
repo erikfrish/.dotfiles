@@ -1,3 +1,10 @@
+// Zen Browser opens at half-screen by default. Force it to fill the column
+// like VS Code does, without entering fullscreen mode.
+window-rule {
+    match app-id=r#"^zen$"#
+    default-column-width { proportion 1.0; }
+}
+
 window-rule {
     match app-id=r#"^org\.pulseaudio\.pavucontrol$"#
     open-floating true

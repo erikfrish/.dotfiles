@@ -18,4 +18,4 @@ fi
 
 sudo install -Dm644 "$source_config" "$target_config"
 printf 'Installed %s to %s\n' "$source_config" "$target_config"
-printf 'Restart ly or reboot for the display manager to pick up the new config.\n'
+printf 'Restart ly or reboot for changes to take effect.\n'
