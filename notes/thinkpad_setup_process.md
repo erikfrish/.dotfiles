@@ -16,6 +16,8 @@ Machine-specific files are intentionally ignored:
 ~/.ssh/yubikeys.tsv
 ```
 
+Comment convention: shared configs should explain the reason for non-obvious settings, especially compatibility helpers, cross-compositor behavior, and machine-independent defaults. Avoid comments that only restate the option name.
+
 ## SSH And Git
 
 Common config is tracked:
@@ -88,6 +90,50 @@ bindel = ,XF86AudioMute, exec, ~/.config/hypr/scripts/volume --toggle
 bind = , XF86AudioMicMute, exec, ~/.config/hypr/scripts/volume --toggle-mic
 ```
 
+## Keyboard Layout
+
+Russian layout uses a tracked user XKB symbols file:
+
+```text
+.config/xkb/symbols/dotfiles
+```
+
+Hyprland and Niri use `us,dotfiles` with the `,ru_ctrl_shortcuts` variant. Regular typing stays Russian, but `Ctrl`/`Ctrl+Shift` on Russian letters resolves to the matching Latin keysyms, so common application shortcuts keep working without switching to `us`.
+
+Waybar power button launches:
+
+```text
+.config/hypr/scripts/power_menu
+```
+
+That wrapper temporarily switches to `us` before opening `wlogout` and restores the previous layout afterward, because `wlogout` single-letter hotkeys are not `Ctrl` shortcuts and are not covered by the XKB shortcut layer.
+
+## Niri Autostart Apps
+
+Niri app placement is handled by:
+
+```text
+.config/hypr/scripts/niri_autostart_apps
+```
+
+Startup placement:
+
+- Workspace 1: `zen-browser`.
+- Workspace 2: `code`.
+- Workspace 3: Band and Forkgram/Telegram.
+
+The script moves windows by Niri window id after they appear and ensures Telegram is to the right of Band on the chat workspace.
+
+## Shell
+
+Preferred login shell is `zsh`. CachyOS zsh config enables Oh My Zsh correction internally, so the tracked `.zshrc` disables it again immediately after sourcing `/usr/share/cachyos-zsh-config/cachyos-config.zsh` with `unsetopt correct correct_all` and then unsets `ENABLE_CORRECTION`.
+
+If the login shell is still different on a machine, change it locally:
+
+```sh
+chsh -s /bin/zsh
+```
+
 ## VSCode
 
 User-level VSCode config is tracked in the correct Stow path:
@@ -98,6 +144,16 @@ User-level VSCode config is tracked in the correct Stow path:
 ```
 
 There is no repository-local `.vscode/settings.json` for these shared settings.
+
+## Terminal
+
+Alacritty config is tracked at:
+
+```text
+.config/alacritty/alacritty.toml
+```
+
+Alacritty keeps only terminal-specific bindings. Russian-layout shortcut handling is intentionally centralized in the shared XKB layout instead of duplicated per app.
 
 ## Remote Machines
 

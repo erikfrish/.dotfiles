@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Niri does not have Hyprland-style "launch this app directly on workspace N"
+# exec rules. This script starts the daily apps, waits until their windows exist,
+# then moves each window by id. That avoids racing on app startup and keeps the
+# chat workspace ordered with Band on the left and Telegram on the right.
+
+windows_json() {
+    niri msg -j windows
+}
+
+window_id() {
+    local jq_filter="$1"
+    windows_json | jq -r "map(select($jq_filter)) | .[0].id // empty"
+}
+
+wait_window() {
+    local jq_filter="$1"
+    local id=""
+
+    # Give Electron/browser apps up to ~20s to create their first window.
+    for _ in {1..80}; do
+        id=$(window_id "$jq_filter")
+        if [ -n "$id" ]; then
+            printf '%s\n' "$id"
+            return 0
+        fi
+        sleep 0.25
+    done
+
+    return 1
+}
+
+launch_band() {
+    local app_path
+
+    app_path=$(printf '%s\n' "$HOME"/Applications/band-desktop-*.AppImage | head -n1)
+    [ -f "$app_path" ] || return 1
+
+    if [ -z "$(window_id '.app_id == "Band"')" ]; then
+        "$app_path" --silent >/dev/null 2>&1 &
+    fi
+}
+
+move_to_workspace() {
+    local id="$1"
+    local workspace="$2"
+
+    niri msg action move-window-to-workspace --window-id "$id" --focus false "$workspace" >/dev/null
+}
+
+window_workspace_id() {
+    local id="$1"
+    windows_json | jq -r --argjson id "$id" '.[] | select(.id == $id) | .workspace_id // empty'
+}
+
+window_x() {
+    local id="$1"
+    windows_json | jq -r --argjson id "$id" '.[] | select(.id == $id) | .layout.pos_in_scrolling_layout[0] // empty'
+}
+
+ensure_telegram_right_of_band() {
+    local band_id="$1"
+    local telegram_id="$2"
+    local band_workspace telegram_workspace band_x telegram_x
+
+    # Niri exposes each window position in the scrolling layout. If Telegram is
+    # not to the right yet, focus it and move its column right a few times.
+    for _ in {1..8}; do
+        band_workspace=$(window_workspace_id "$band_id")
+        telegram_workspace=$(window_workspace_id "$telegram_id")
+        [ -n "$band_workspace" ] && [ "$band_workspace" = "$telegram_workspace" ] || break
+
+        band_x=$(window_x "$band_id")
+        telegram_x=$(window_x "$telegram_id")
+        [ -n "$band_x" ] && [ -n "$telegram_x" ] || break
+
+        if awk "BEGIN { exit !($telegram_x > $band_x) }"; then
+            return 0
+        fi
+
+        niri msg action focus-window --id "$telegram_id" >/dev/null
+        niri msg action move-column-right >/dev/null
+        sleep 0.2
+    done
+}
+
+niri msg action focus-workspace 1 >/dev/null
+
+# Workspace 1: browser.
+if [ -z "$(window_id '.app_id == "zen"')" ]; then
+    zen-browser >/dev/null 2>&1 &
+fi
+browser_id=$(wait_window '.app_id == "zen"' || true)
+[ -n "${browser_id:-}" ] && move_to_workspace "$browser_id" 1
+
+# Workspace 2: IDE.
+if [ -z "$(window_id '.app_id == "code"')" ]; then
+    code >/dev/null 2>&1 &
+fi
+code_id=$(wait_window '.app_id == "code"' || true)
+[ -n "${code_id:-}" ] && move_to_workspace "$code_id" 2
+
+# Workspace 3: chats. Band should be left, Telegram/Forkgram should be right.
+launch_band || true
+band_id=$(wait_window '.app_id == "Band"' || true)
+[ -n "${band_id:-}" ] && move_to_workspace "$band_id" 3
+
+if [ -z "$(window_id '(.app_id | test("forkgram|tdesktop"; "i"))')" ]; then
+    forkgram >/dev/null 2>&1 &
+fi
+telegram_id=$(wait_window '(.app_id | test("forkgram|tdesktop"; "i"))' || true)
+[ -n "${telegram_id:-}" ] && move_to_workspace "$telegram_id" 3
+
+if [ -n "${band_id:-}" ] && [ -n "${telegram_id:-}" ]; then
+    ensure_telegram_right_of_band "$band_id" "$telegram_id"
+fi
+
+# Leave the session where work usually starts.
+niri msg action focus-workspace 1 >/dev/null

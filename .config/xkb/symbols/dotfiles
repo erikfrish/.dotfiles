@@ -1,0 +1,56 @@
+// User XKB snippets shared by Niri and Hyprland.
+//
+// Why this exists:
+// Russian layout normally emits Cyrillic keysyms, so app shortcuts like
+// Ctrl+Shift+V become Ctrl+Shift+М and many apps do not treat that as Paste.
+// This variant keeps regular typing identical to ru(winkeys), but maps
+// Ctrl/Shift+Ctrl levels back to the physical QWERTY Latin keysyms.
+// Result: shortcuts keep working while the active layout is Russian.
+
+partial alphanumeric_keys
+xkb_symbols "ru_ctrl_shortcuts" {
+    include "ru(winkeys)"
+    name[Group1] = "Russian (Ctrl shortcuts)";
+
+    // Levels 1/2 are normal/shifted Russian. Levels 5/6 are Ctrl/Ctrl+Shift.
+    key.type[Group1] = "EIGHT_LEVEL_BY_CTRL";
+
+    // Top letter row: йцукен -> qwerty for Ctrl-based shortcuts.
+    key <TLDE> { [ Cyrillic_io,       Cyrillic_IO,       NoSymbol, NoSymbol, grave,      asciitilde ] };
+    key <AD01> { [ Cyrillic_shorti,   Cyrillic_SHORTI,   NoSymbol, NoSymbol, q,          Q          ] };
+    key <AD02> { [ Cyrillic_tse,      Cyrillic_TSE,      NoSymbol, NoSymbol, w,          W          ] };
+    key <AD03> { [ Cyrillic_u,        Cyrillic_U,        NoSymbol, NoSymbol, e,          E          ] };
+    key <AD04> { [ Cyrillic_ka,       Cyrillic_KA,       NoSymbol, NoSymbol, r,          R          ] };
+    key <AD05> { [ Cyrillic_ie,       Cyrillic_IE,       NoSymbol, NoSymbol, t,          T          ] };
+    key <AD06> { [ Cyrillic_en,       Cyrillic_EN,       NoSymbol, NoSymbol, y,          Y          ] };
+    key <AD07> { [ Cyrillic_ghe,      Cyrillic_GHE,      NoSymbol, NoSymbol, u,          U          ] };
+    key <AD08> { [ Cyrillic_sha,      Cyrillic_SHA,      NoSymbol, NoSymbol, i,          I          ] };
+    key <AD09> { [ Cyrillic_shcha,    Cyrillic_SHCHA,    NoSymbol, NoSymbol, o,          O          ] };
+    key <AD10> { [ Cyrillic_ze,       Cyrillic_ZE,       NoSymbol, NoSymbol, p,          P          ] };
+    key <AD11> { [ Cyrillic_ha,       Cyrillic_HA,       NoSymbol, NoSymbol, bracketleft, braceleft  ] };
+    key <AD12> { [ Cyrillic_hardsign, Cyrillic_HARDSIGN, NoSymbol, NoSymbol, bracketright,braceright ] };
+
+    // Home row: фывапролджэ -> asdfghjkl;' for Ctrl-based shortcuts.
+    key <AC01> { [ Cyrillic_ef,       Cyrillic_EF,       NoSymbol, NoSymbol, a,          A          ] };
+    key <AC02> { [ Cyrillic_yeru,     Cyrillic_YERU,     NoSymbol, NoSymbol, s,          S          ] };
+    key <AC03> { [ Cyrillic_ve,       Cyrillic_VE,       NoSymbol, NoSymbol, d,          D          ] };
+    key <AC04> { [ Cyrillic_a,        Cyrillic_A,        NoSymbol, NoSymbol, f,          F          ] };
+    key <AC05> { [ Cyrillic_pe,       Cyrillic_PE,       NoSymbol, NoSymbol, g,          G          ] };
+    key <AC06> { [ Cyrillic_er,       Cyrillic_ER,       NoSymbol, NoSymbol, h,          H          ] };
+    key <AC07> { [ Cyrillic_o,        Cyrillic_O,        NoSymbol, NoSymbol, j,          J          ] };
+    key <AC08> { [ Cyrillic_el,       Cyrillic_EL,       NoSymbol, NoSymbol, k,          K          ] };
+    key <AC09> { [ Cyrillic_de,       Cyrillic_DE,       NoSymbol, NoSymbol, l,          L          ] };
+    key <AC10> { [ Cyrillic_zhe,      Cyrillic_ZHE,      NoSymbol, NoSymbol, semicolon,  colon      ] };
+    key <AC11> { [ Cyrillic_e,        Cyrillic_E,        NoSymbol, NoSymbol, apostrophe, quotedbl   ] };
+
+    // Bottom row: ячсмитьбю -> zxcvbnm,. for Ctrl-based shortcuts.
+    key <AB01> { [ Cyrillic_ya,       Cyrillic_YA,       NoSymbol, NoSymbol, z,          Z          ] };
+    key <AB02> { [ Cyrillic_che,      Cyrillic_CHE,      NoSymbol, NoSymbol, x,          X          ] };
+    key <AB03> { [ Cyrillic_es,       Cyrillic_ES,       NoSymbol, NoSymbol, c,          C          ] };
+    key <AB04> { [ Cyrillic_em,       Cyrillic_EM,       NoSymbol, NoSymbol, v,          V          ] };
+    key <AB05> { [ Cyrillic_i,        Cyrillic_I,        NoSymbol, NoSymbol, b,          B          ] };
+    key <AB06> { [ Cyrillic_te,       Cyrillic_TE,       NoSymbol, NoSymbol, n,          N          ] };
+    key <AB07> { [ Cyrillic_softsign, Cyrillic_SOFTSIGN, NoSymbol, NoSymbol, m,          M          ] };
+    key <AB08> { [ Cyrillic_be,       Cyrillic_BE,       NoSymbol, NoSymbol, comma,      less       ] };
+    key <AB09> { [ Cyrillic_yu,       Cyrillic_YU,       NoSymbol, NoSymbol, period,     greater    ] };
+};

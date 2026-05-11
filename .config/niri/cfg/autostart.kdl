@@ -1,24 +1,32 @@
+// Core session services and tray applets.
 spawn-at-startup "xwayland-satellite"
 spawn-at-startup "waybar"
 spawn-at-startup "fcitx5" "-d"
 spawn-at-startup "nm-applet" "--indicator"
 spawn-at-startup "blueman-applet"
+
+// Authentication prompts for privileged actions such as fingerprint enrollment.
 spawn-sh-at-startup "pgrep -f /usr/lib/polkit-kde-authentication-agent-1 >/dev/null || /usr/lib/polkit-kde-authentication-agent-1"
 spawn-at-startup "hypridle"
 
+// User services shared with Hyprland.
 spawn-sh-at-startup "systemctl --user start gammastep.service swaync.service arch-update-tray.service"
 spawn-sh-at-startup "dbus-update-activation-environment --systemd SSH_AUTH_SOCK XDG_RUNTIME_DIR WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP"
+
+// Clipboard history. cliphist stores text and image selections from wl-paste.
 spawn-sh-at-startup "wl-clip-persist --clipboard regular"
 spawn-sh-at-startup "wl-paste --type text --watch cliphist store"
 spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
 spawn-sh-at-startup "wl-paste --watch cliphist store"
+
+// OSD stack: wob for volume/brightness values, swayosd for layout/Caps Lock.
 spawn-sh-at-startup "rm -f /tmp/niri.wob; mkfifo /tmp/niri.wob; tail -f /tmp/niri.wob | wob -c ~/.config/wob/wob.ini"
 spawn-at-startup "swayosd-server"
 spawn-sh-at-startup "~/.config/hypr/scripts/lang_switch_osd"
+
+// Niri-specific helpers.
 spawn-sh-at-startup "~/.config/hypr/scripts/niri_pip_sticky"
 spawn-sh-at-startup "~/.config/hypr/scripts/change_wallpaper awww"
 
-// Keep Hyprland's preferred startup apps, best-effort.
-spawn-sh-at-startup "zen-browser"
-spawn-sh-at-startup "code"
-spawn-sh-at-startup "forkgram"
+// Session apps: browser on workspace 1, IDE on 2, chats on 3.
+spawn-sh-at-startup "~/.config/hypr/scripts/niri_autostart_apps"

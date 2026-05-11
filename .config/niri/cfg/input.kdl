@@ -1,16 +1,30 @@
 input {
     keyboard {
         xkb {
-            layout "us,ru"
+            // Use a tracked user XKB layout for Russian.
+            // The custom variant keeps normal Russian typing, but makes
+            // Ctrl/Ctrl+Shift shortcuts resolve as if the physical key was
+            // pressed on the US layout. This avoids switching layouts for
+            // copy/paste/search/terminal shortcuts.
+            layout "us,dotfiles"
+            variant ",ru_ctrl_shortcuts"
+
+            // Keep the familiar Super+Space layout switch.
             options "grp:win_space_toggle"
         }
+
+        // Always start sessions with NumLock enabled.
         numlock
     }
 
     touchpad {
+        // Physical two-finger click is right click; tap-to-click stays off by
+        // omission so accidental touches do not click.
         click-method "clickfinger"
         natural-scroll
     }
 
+    // Mouse hover moves focus, but scrolling over another window should not
+    // steal focus from the current one.
     focus-follows-mouse max-scroll-amount="0%"
 }

@@ -359,7 +359,8 @@
   "custom/power": {
     "format": "󰐥",
     "tooltip": false,
-    "on-click": "sh -c '(sleep 0.1s; wlogout --protocol layer-shell)' & disown",
+    // Wrapper keeps wlogout hotkeys usable when the current layout is Russian.
+    "on-click": "sh -c '(sleep 0.1s; ~/.config/hypr/scripts/power_menu)' & disown",
     "on-click-right": "~/.config/hypr/scripts/glassmorphism",
   },
 

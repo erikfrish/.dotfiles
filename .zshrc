@@ -10,7 +10,6 @@ fi
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
-ENABLE_CORRECTION="false"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -51,8 +50,7 @@ ZSH_THEME="risto" # set by `omz`
 # Uncomment the following line to disable auto-setting terminal title.
 # DISABLE_AUTO_TITLE="true"
 
-# Uncomment the following line to enable command auto-correction.
-ENABLE_CORRECTION="false"
+# Command auto-correction is intentionally disabled.
 
 # Uncomment the following line to display red dots whilst waiting for completion.
 # You can also set it to another string to have that shown instead of the default red dots.
@@ -96,8 +94,10 @@ alias goupdate='curl -sL https://raw.githubusercontent.com/DieTime/go-up/master/
 alias oc='opencode'
 alias tsh='tsh-17'
 
+ENABLE_CORRECTION="false"
 source /usr/share/cachyos-zsh-config/cachyos-config.zsh
-source $ZSH/oh-my-zsh.sh
+unsetopt correct correct_all 2>/dev/null
+unset ENABLE_CORRECTION
 source /opt/esp-idf/export.sh > /dev/null 2>&1
 
 # User configuration

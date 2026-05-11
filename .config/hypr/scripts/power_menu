@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# wlogout binds actions to plain letters (l/h/e/s/u/r). Unlike Ctrl-based app
+# shortcuts, plain-letter binds cannot be fixed by the Russian Ctrl shortcut XKB
+# variant, so this wrapper opens wlogout on the US layout and restores the
+# previous layout when the menu exits.
+
+previous_layout=""
+
+current_layout_index() {
+    if niri msg keyboard-layouts >/dev/null 2>&1; then
+        niri msg keyboard-layouts | awk '/^ \*/ { print $2; exit }'
+        return
+    fi
+
+    if hyprctl -j devices >/dev/null 2>&1; then
+        layout=$(hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .active_keymap' | head -n1)
+        case "$(printf '%s' "$layout" | tr '[:upper:]' '[:lower:]')" in
+            *russian*) printf '1\n' ;;
+            *) printf '0\n' ;;
+        esac
+    fi
+}
+
+switch_layout() {
+    local index="$1"
+
+    if niri msg keyboard-layouts >/dev/null 2>&1; then
+        niri msg action switch-layout "$index" >/dev/null 2>&1 || true
+        return
+    fi
+
+    if hyprctl -j devices >/dev/null 2>&1; then
+        hyprctl switchxkblayout all "$index" >/dev/null 2>&1 || true
+    fi
+}
+
+restore_layout() {
+    if [ -n "$previous_layout" ]; then
+        switch_layout "$previous_layout"
+    fi
+}
+
+previous_layout=$(current_layout_index || true)
+trap restore_layout EXIT
+
+switch_layout 0
+wlogout --protocol layer-shell

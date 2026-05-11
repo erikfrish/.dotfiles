@@ -1,24 +1,27 @@
 #!/bin/bash
 
+# Interactive wallpaper picker used from Waybar. It keeps Hyprland on hyprpaper
+# and uses awww everywhere else, which makes the same menu work in Niri.
+
 DIR="$HOME/Pictures/Wallpapers"
 WOFI_CONFIG="$HOME/.config/wofi/config-clipboard"
 WOFI_STYLE="$HOME/.config/wofi/style-compact.css"
 WOFI_COLORS="$HOME/.config/wofi/colors"
 
-# 1. Собираем файлы
+# Wallpaper files shown in the Wofi menu. Keep this flat so the menu stays fast
+# and predictable even when ~/Pictures is synced from Nextcloud.
 mapfile -t PICS < <(find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.webp" \))
 
-# 2. Функция генерации меню с фиксом амперсанда
 menu(){
     for i in "${!PICS[@]}"; do
-        # Заменяем & на &amp; чтобы wofi не давился
+        # Wofi parses markup, so literal ampersands in filenames must be escaped.
         filename=$(basename "${PICS[$i]}" | sed 's/&/\&amp;/g')
         echo "$i. $filename"
     done
     echo "RANDOM"
 }
 
-# 3. Команда wofi
+# Match the compact clipboard/menu style instead of using Wofi defaults.
 wofi_command=(
     wofi --dmenu
     --conf "$WOFI_CONFIG"
@@ -36,6 +39,7 @@ apply_hyprpaper() {
     local file="$1"
     local CONF="$HOME/.config/hypr/hyprpaper.conf"
 
+    # hyprctl hyprpaper requires IPC. Some older configs had it disabled.
     if [ -f "$CONF" ]; then
         sed -i 's/ipc = off/ipc = on/g' "$CONF"
     fi
@@ -58,6 +62,8 @@ apply_hyprpaper() {
 apply_awww() {
     local file="$1"
 
+    # Niri uses awww. Stop other background setters so they do not immediately
+    # repaint over the selected image.
     pkill swaybg
     pkill hyprpaper
     awww query || { awww-daemon & sleep 0.5; }
@@ -75,7 +81,6 @@ apply() {
     fi
 }
 
-# 4. Запуск
 choice=$(menu | "${wofi_command[@]}")
 
 if [[ -z $choice ]]; then exit 0; fi
@@ -84,7 +89,8 @@ if [[ "$choice" == "RANDOM" ]]; then
     target="${PICS[$RANDOM % ${#PICS[@]}]}"
     apply "$target"
 else
-    # Извлекаем индекс (цифры в начале)
+    # Menu entries start with the array index; the displayed filename may contain
+    # spaces or punctuation, so only parse the leading number.
     idx=$(echo "$choice" | grep -o '^[0-9]\+')
     target="${PICS[$idx]}"
     apply "$target"
