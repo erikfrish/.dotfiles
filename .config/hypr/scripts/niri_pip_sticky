@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+lock_file="${XDG_RUNTIME_DIR:-/tmp}/niri_pip_sticky.lock"
+exec 9>"$lock_file"
+flock -n 9 || exit 0
+
+pip_title_re='([Pp][Ii][Pp]|[Pp]icture.?in.?[Pp]icture)'
+log_file=/tmp/niri_pip_sticky.log
+
+log() {
+  printf '%s %s\n' "$(date '+%F %T')" "$*" >>"$log_file"
+}
+
+sync_pip_to_focused_workspace() {
+  local state focused_idx focused_workspace_id pip_windows
+  state=$(niri msg -j workspaces && niri msg -j windows)
+
+  focused_idx=$(printf '%s\n' "$state" | jq -sr '.[0][] | select(.is_focused) | .idx')
+  focused_workspace_id=$(printf '%s\n' "$state" | jq -sr '.[0][] | select(.is_focused) | .id')
+  [ -n "$focused_idx" ] || return 0
+
+  pip_windows=$(
+    printf '%s\n' "$state" |
+      jq -sr --arg re "$pip_title_re" --argjson focused_workspace_id "$focused_workspace_id" '
+      .[1][]
+      | select((.title // "") | test($re))
+      | {id, title, workspace_id, needs_move: (.workspace_id != $focused_workspace_id)}
+    '
+  )
+
+  [ -n "$pip_windows" ] || return 0
+  log "matched PiP on focused workspace idx=$focused_idx id=$focused_workspace_id: $(printf '%s' "$pip_windows" | jq -c -s '.')"
+
+  printf '%s\n' "$pip_windows" |
+  jq -r 'select(.needs_move) | .id' |
+  while read -r window_id; do
+    [ -n "$window_id" ] || continue
+    log "moving PiP window_id=$window_id to workspace idx=$focused_idx"
+    niri msg action move-window-to-floating --id "$window_id" >/dev/null 2>&1 || true
+    niri msg action move-window-to-workspace --window-id "$window_id" --focus false "$focused_idx" >/dev/null 2>&1 || true
+  done
+}
+
+sync_pip_to_focused_workspace
+
+while sleep 1; do
+  sync_pip_to_focused_workspace
+done &
+
+niri msg -j event-stream 2>/dev/null |
+while read -r line; do
+  case "$(printf '%s' "$line" | jq -r 'keys[0]')" in
+    WorkspacesChanged|WindowsChanged)
+      sync_pip_to_focused_workspace
+      ;;
+  esac
+done

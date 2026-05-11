@@ -7,7 +7,7 @@ show=drun
 prompt=Apps
 #normal_window=true
 layer=overlay
-term=foot
+term=alacritty
 columns=1
 lines=15
 
@@ -43,4 +43,3 @@ filter_rate=100
 ## Keys
 key_expand=Tab
 key_exit=Escape
-

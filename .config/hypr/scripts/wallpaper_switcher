@@ -1,22 +1,14 @@
 #!/bin/bash
 
-CONF="$HOME/.config/hypr/hyprpaper.conf"
 DIR="$HOME/Pictures/Wallpapers"
+WOFI_CONFIG="$HOME/.config/wofi/config-clipboard"
+WOFI_STYLE="$HOME/.config/wofi/style-compact.css"
+WOFI_COLORS="$HOME/.config/wofi/colors"
 
-# 1. Форсируем IPC в конфиге и запускаем hyprpaper
-if [ -f "$CONF" ]; then
-    sed -i 's/ipc = off/ipc = on/g' "$CONF"
-fi
-
-if ! pgrep -x "hyprpaper" > /dev/null; then
-    hyprpaper &
-    sleep 0.5
-fi
-
-# 2. Собираем файлы
+# 1. Собираем файлы
 mapfile -t PICS < <(find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.webp" \))
 
-# 3. Функция генерации меню с фиксом амперсанда
+# 2. Функция генерации меню с фиксом амперсанда
 menu(){
     for i in "${!PICS[@]}"; do
         # Заменяем & на &amp; чтобы wofi не давился
@@ -26,26 +18,65 @@ menu(){
     echo "RANDOM"
 }
 
-# 4. Команда wofi (убрал --no-markup и временно --color, если он бьет ошибки)
-wofi_command="wofi --show dmenu --prompt 'Wallpaper' --width=25% --height=35% --cache-file=/dev/null"
+# 3. Команда wofi
+wofi_command=(
+    wofi --dmenu
+    --conf "$WOFI_CONFIG"
+    --style "$WOFI_STYLE"
+    --color "$WOFI_COLORS"
+    --prompt 'Wallpaper'
+    --cache-file=/dev/null
+)
 
-apply() {
-    local file=$(realpath "$1")
-    
-    # Preload и Wallpaper
+is_hyprland() {
+    [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && hyprctl monitors >/dev/null 2>&1
+}
+
+apply_hyprpaper() {
+    local file="$1"
+    local CONF="$HOME/.config/hypr/hyprpaper.conf"
+
+    if [ -f "$CONF" ]; then
+        sed -i 's/ipc = off/ipc = on/g' "$CONF"
+    fi
+
+    if ! pgrep -x "hyprpaper" > /dev/null; then
+        hyprpaper &
+        sleep 0.5
+    fi
+
     hyprctl hyprpaper preload "$file"
-    
-    # Получаем мониторы
+
     MONITORS=$(hyprctl monitors | grep "Monitor" | awk '{print $2}')
     for mon in $MONITORS; do
         hyprctl hyprpaper wallpaper "$mon,$file"
     done
-    
+
     hyprctl hyprpaper unload unused
 }
 
-# 5. Запуск
-choice=$(menu | $wofi_command)
+apply_awww() {
+    local file="$1"
+
+    pkill swaybg
+    pkill hyprpaper
+    awww query || { awww-daemon & sleep 0.5; }
+    awww img "$file" --transition-fps 30 --transition-type any --transition-duration 3
+}
+
+apply() {
+    local file
+    file=$(realpath "$1")
+
+    if is_hyprland; then
+        apply_hyprpaper "$file"
+    else
+        apply_awww "$file"
+    fi
+}
+
+# 4. Запуск
+choice=$(menu | "${wofi_command[@]}")
 
 if [[ -z $choice ]]; then exit 0; fi
 

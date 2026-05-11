@@ -111,11 +111,9 @@
   },
 
   "clock": {
-    //"format": "{:%I:%M %p}",
-    "format": " {:%H:%M}",
+    "format": " {:%H:%M   %F, %a}",
+    "format-alt": " {:%H:%M}",
     "timezone": "Europe/Moscow",
-    //"format-alt": " {:%I:%M %p   %Y, %d %B, %A}",
-    "format-alt": " {:%H:%M   %Y, %d %B, %A}",
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
     "calendar": {
       "mode": "year",
@@ -130,13 +128,6 @@
         "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
         "today": "<span color='#ff6699'><b><u>{}</u></b></span>",
       },
-    },
-    "actions": {
-      "on-click-right": "mode",
-      "on-click-forward": "tz_up",
-      "on-click-backward": "tz_down",
-      "on-scroll-up": "shift_up",
-      "on-scroll-down": "shift_down",
     },
   },
 
@@ -178,7 +169,7 @@
   //     "format-critical": "{temperatureC}°C {icon}",
   //     "format": "{temperatureC}°C {icon}",
   //     "format-icons": [""],
-  //     "on-click-right": "foot --title btop sh -c 'btop'"
+  //     "on-click-right": "alacritty --title btop -e btop"
   //   },
 
   "memory": {
@@ -690,7 +681,7 @@
     "exec": "checkupdates | wc -l",
     "exec-if": "[[ $(checkupdates | wc -l) ]]",
     "interval": 15,
-    "on-click": "foot -T update paru -Syu || yay -Syu && notify-send 'The system has been updated'",
+    "on-click": "alacritty --title update -e sh -c 'paru -Syu || yay -Syu' && notify-send 'The system has been updated'",
     "on-click-right": "~/.config/hypr/scripts/changeWallpaper",
   },
 

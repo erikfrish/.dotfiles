@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+target_user="${SUDO_USER:-${USER:-$(id -un)}}"
+
+pause() {
+  printf '\nPress Enter to close...'
+  read -r _ || true
+}
+
+choose() {
+  local prompt="$1"
+  shift
+  local items=("$@")
+  local choice
+
+  printf '\n%s\n' "$prompt" >&2
+  local i
+  for i in "${!items[@]}"; do
+    printf '  %d. %s\n' "$((i + 1))" "${items[$i]}" >&2
+  done
+  printf '  0. cancel\n\n' >&2
+
+  while true; do
+    printf '> ' >&2
+    read -r choice
+
+    case "$choice" in
+      ''|*[!0-9]*)
+        printf 'Enter a number.\n' >&2
+        ;;
+      0)
+        exit 0
+        ;;
+      *)
+        if ((choice >= 1 && choice <= ${#items[@]})); then
+          printf '%s\n' "${items[$((choice - 1))]}"
+          return 0
+        fi
+        printf 'Choose 0-%d.\n' "${#items[@]}" >&2
+        ;;
+    esac
+  done
+}
+
+run_cmd() {
+  printf '\nRunning:'
+  printf ' %q' "$@"
+  printf '\n\n'
+  "$@"
+  pause
+}
+
+choose_finger() {
+  choose 'Finger:' \
+    'right-thumb' \
+    'right-index-finger' \
+    'right-middle-finger' \
+    'right-ring-finger' \
+    'right-little-finger' \
+    'left-thumb' \
+    'left-index-finger' \
+    'left-middle-finger' \
+    'left-ring-finger' \
+    'left-little-finger'
+}
+
+clear
+printf 'Fingerprint manager for %s\n' "$target_user"
+
+action=$(choose 'Action:' \
+  'list enrolled fingerprints' \
+  'enroll finger' \
+  'verify finger' \
+  'delete finger' \
+  'delete all fingerprints')
+
+case "$action" in
+  'list enrolled fingerprints')
+    run_cmd fprintd-list "$target_user"
+    ;;
+  'enroll finger')
+    finger=$(choose_finger)
+    run_cmd fprintd-enroll -f "$finger" "$target_user"
+    ;;
+  'verify finger')
+    finger=$(choose_finger)
+    run_cmd fprintd-verify -f "$finger" "$target_user"
+    ;;
+  'delete finger')
+    finger=$(choose_finger)
+    run_cmd fprintd-delete "$target_user" -f "$finger"
+    ;;
+  'delete all fingerprints')
+    run_cmd fprintd-delete "$target_user"
+    ;;
+esac

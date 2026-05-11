@@ -4,7 +4,7 @@ show=dmenu
 prompt=Clipboard
 normal_window=false
 layer=overlay
-term=foot
+term=alacritty
 columns=1
 
 width=42%

@@ -4,7 +4,7 @@ show=drun
 prompt=Apps
 normal_window=false
 layer=overlay
-term=foot
+term=alacritty
 columns=2
 
 width=46%
