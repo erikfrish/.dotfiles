@@ -2,6 +2,11 @@ binds {
     // Show Niri's built-in cheat sheet for the bindings below.
     Mod+Shift+Slash { show-hotkey-overlay; }
 
+    // Layout toggle. Using a Niri keybind instead of XKB grp:win_space_toggle
+    // so the space keypress is consumed and XWayland apps properly receive the
+    // layout change notification.
+    Mod+Space { switch-layout "next"; }
+
     // App launchers. Keep these aligned with Hyprland defaults where possible.
     Mod+I hotkey-overlay-title="Open VSCode" { spawn "code"; }
     Mod+O hotkey-overlay-title="Open Overview" { toggle-overview; }
@@ -40,17 +45,31 @@ binds {
     XF86AudioNext allow-when-locked=true { spawn-sh "playerctl next"; }
     XF86AudioPrev allow-when-locked=true { spawn-sh "playerctl previous"; }
 
-    // Niri is column-first: left/right move between columns, up/down inside a
-    // column. Vim-style aliases mirror the arrow bindings.
+    // Niri is column-first: left/right move between columns, up/down between
+    // workspaces. This matches Hyprland's workspace-nav muscle memory.
+    // No modifier arrows: focus. Ctrl+arrows: move window.
     Mod+Left { focus-column-left; }
     Mod+Right { focus-column-right; }
-    Mod+Up { focus-window-up; }
-    Mod+Down { focus-window-down; }
+    Mod+Up { focus-workspace-up; }
+    Mod+Down { focus-workspace-down; }
     Mod+H { focus-column-left; }
     Mod+L { focus-column-right; }
-    Mod+K { focus-window-up; }
-    Mod+J { focus-window-down; }
+    Mod+K { focus-workspace-up; }
+    Mod+J { focus-workspace-down; }
 
+    // Move focused window: Ctrl+arrows.
+    // Left/Right moves column within workspace, Up/Down moves to another workspace.
+    Mod+Ctrl+Left { move-column-left; }
+    Mod+Ctrl+Right { move-column-right; }
+    Mod+Ctrl+Up { move-window-to-workspace-up; }
+    Mod+Ctrl+Down { move-window-to-workspace-down; }
+    Mod+Ctrl+H { move-column-left; }
+    Mod+Ctrl+L { move-column-right; }
+    Mod+Ctrl+K { move-window-to-workspace-up; }
+    Mod+Ctrl+J { move-window-to-workspace-down; }
+
+    // Shift+arrows: in-column reordering (move window up/down within a column,
+    // or column left/right — same as Ctrl but kept for habit).
     Mod+Shift+Left { move-column-left; }
     Mod+Shift+Right { move-column-right; }
     Mod+Shift+Up { move-window-up; }
@@ -107,10 +126,6 @@ binds {
     // Niri currently only creates downward workspaces automatically.
     Mod+Period { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-down"; }
     Mod+Comma { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-up"; }
-    Mod+Alt+Down { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-down"; }
-    Mod+Alt+Up { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-up"; }
-    Mod+Ctrl+Down { move-window-to-workspace-down; }
-    Mod+Ctrl+Up { move-window-to-workspace-up; }
     Mod+WheelScrollDown cooldown-ms=150 { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-down"; }
     Mod+WheelScrollUp cooldown-ms=150 { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-up"; }
     Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-window-to-workspace-down; }
