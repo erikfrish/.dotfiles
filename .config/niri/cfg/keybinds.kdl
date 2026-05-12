@@ -128,6 +128,10 @@ binds {
     Mod+Comma { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-up"; }
     Mod+WheelScrollDown cooldown-ms=150 { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-down"; }
     Mod+WheelScrollUp cooldown-ms=150 { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-up"; }
+    Mod+Shift+WheelScrollDown { focus-column-right; }
+    Mod+Shift+WheelScrollUp { focus-column-left; }
+    Mod+Shift+Ctrl+WheelScrollDown { move-column-right; }
+    Mod+Shift+Ctrl+WheelScrollUp { move-column-left; }
     Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-window-to-workspace-down; }
     Mod+Ctrl+WheelScrollUp cooldown-ms=150 { move-window-to-workspace-up; }
 
