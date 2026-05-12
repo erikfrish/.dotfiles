@@ -4,3 +4,4 @@ ignore_me
 .gitconfig.local
 .ssh/config.local
 .ssh/yubikeys.tsv
+.config/waybar/style.css
