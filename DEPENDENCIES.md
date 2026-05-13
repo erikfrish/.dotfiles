@@ -68,6 +68,7 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `wl-clipboard` | `wl-copy`, `wl-paste` |
 | `cliphist` | Clipboard history store |
 | `wl-clip-persist` | Keep clipboard after source closes |
+| `imagemagick` | Generate thumbnails for image clipboard entries |
 
 ## Screenshots
 
@@ -171,7 +172,7 @@ sudo pacman -S --needed \
   pipewire wireplumber pipewire-pulse pavucontrol \
   brightnessctl wob swayosd \
   swaync libnotify \
-  wl-clipboard cliphist wl-clip-persist \
+  wl-clipboard cliphist wl-clip-persist imagemagick \
   grim slurp hyprland-contrib \
   awww \
   networkmanager nm-connection-editor network-manager-applet bluez blueman \
