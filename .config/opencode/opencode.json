@@ -124,8 +124,23 @@
           }
         }
       }
+    },
+    "llama.cpp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama-server CUDA local",
+      "options": {
+        "baseURL": "http://127.0.0.1:8080/v1"
+      },
+      "models": {
+        "qwen3.6-35b-a3b": {
+          "name": "Qwen3.6 35B A3B UD-IQ2_M local",
+          "limit": {
+            "context": 80072,
+            "output": 8192
+          }
+        }
+      }
     }
-
   },
   "model": "openai/gpt-5",
   "small_model": "openai/gpt-5-mini"

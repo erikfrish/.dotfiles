@@ -122,12 +122,11 @@ binds {
     Mod+Shift+9 { move-window-to-workspace 9; }
     Mod+Shift+0 { move-window-to-workspace 10; }
 
-    // Custom workspace helper creates an upper workspace when needed. Native
-    // Niri currently only creates downward workspaces automatically.
-    Mod+Period { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-down"; }
-    Mod+Comma { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-up"; }
-    Mod+WheelScrollDown cooldown-ms=150 { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-down"; }
-    Mod+WheelScrollUp cooldown-ms=150 { spawn-sh "~/.config/hypr/scripts/niri_workspace focus-up"; }
+    // Workspace scroll uses native Niri behavior only.
+    Mod+Period { focus-workspace-down; }
+    Mod+Comma { focus-workspace-up; }
+    Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
     Mod+Shift+WheelScrollDown { focus-column-right; }
     Mod+Shift+WheelScrollUp { focus-column-left; }
     Mod+Shift+Ctrl+WheelScrollDown { move-column-right; }

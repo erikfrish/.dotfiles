@@ -67,12 +67,23 @@ watch_caps_lock() {
   led_name=${leds[0]##*/}
   last=$(<"${leds[0]}/brightness")
 
-  while sleep 0.2; do
+  watch_caps_state() {
     current=$(<"${leds[0]}/brightness")
     if [ "$current" != "$last" ]; then
       last=$current
       swayosd-client --caps-lock-led "$led_name" >/dev/null 2>&1 || swayosd-client --caps-lock >/dev/null 2>&1 || true
     fi
+  }
+
+  if command -v inotifywait >/dev/null 2>&1; then
+    while inotifywait -q -e modify "${leds[0]}/brightness" >/dev/null 2>&1; do
+      watch_caps_state
+    done
+    return 0
+  fi
+
+  while sleep 0.5; do
+    watch_caps_state
   done
 }
 

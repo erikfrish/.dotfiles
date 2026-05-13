@@ -29,7 +29,7 @@ window-rule {
 }
 
 window-rule {
-    match title=r#"^(.*[Pp][Ii][Pp].*|[Pp]icture.?in.?[Pp]icture.*)$"#
+    match title=r#"(?i)(^|[^[:alnum:]_])(pip|picture[-[:space:]]*in[-[:space:]]*picture)([^[:alnum:]_]|$)"#
     open-floating true
     default-column-width { fixed 584; }
 }

@@ -5,7 +5,7 @@ lock_file="${XDG_RUNTIME_DIR:-/tmp}/niri_pip_sticky.lock"
 exec 9>"$lock_file"
 flock -n 9 || exit 0
 
-pip_title_re='([Pp][Ii][Pp]|[Pp]icture.?in.?[Pp]icture)'
+pip_title_re='(?i)(^|[^[:alnum:]_])(pip|picture[-[:space:]]*in[-[:space:]]*picture)([^[:alnum:]_]|$)'
 log_file=/tmp/niri_pip_sticky.log
 
 log() {
@@ -44,14 +44,10 @@ sync_pip_to_focused_workspace() {
 
 sync_pip_to_focused_workspace
 
-while sleep 1; do
-  sync_pip_to_focused_workspace
-done &
-
 niri msg -j event-stream 2>/dev/null |
 while read -r line; do
   case "$(printf '%s' "$line" | jq -r 'keys[0]')" in
-    WorkspacesChanged|WindowsChanged)
+    WorkspaceActivated|WorkspacesChanged|WindowsChanged|WindowOpenedOrChanged|WindowClosed)
       sync_pip_to_focused_workspace
       ;;
   esac
