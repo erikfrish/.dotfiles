@@ -32,7 +32,9 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 
 | Package | Purpose |
 |---|---|
-| `wofi` | App launcher, clipboard menu, wallpaper picker |
+| `rofi` | App launcher, clipboard menu, wallpaper picker |
+| `rofi-emoji` | Emoji picker (rofi plugin) |
+| `rofi-calc` | Calculator (rofi plugin) |
 | `wlogout` | Power menu |
 
 ## Audio
@@ -168,7 +170,7 @@ sudo pacman -S --needed \
   hyprland niri xwayland-satellite waybar polkit-kde-agent \
   xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
   ly hyprlock hypridle \
-  wofi wlogout \
+  rofi rofi-emoji rofi-calc wlogout \
   pipewire wireplumber pipewire-pulse pavucontrol \
   brightnessctl wob swayosd \
   swaync libnotify \

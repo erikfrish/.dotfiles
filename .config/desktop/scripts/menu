@@ -1,15 +1,8 @@
 #!/bin/bash
 
-CONFIG="$HOME/.config/wofi/config-launcher"
-STYLE="$HOME/.config/wofi/style.css"
-COLORS="$HOME/.config/wofi/colors"
-XDG_DATA_HOME_DEFAULT="$HOME/.local/share"
-XDG_DATA_DIRS_DEFAULT="/usr/local/share:/usr/share:$XDG_DATA_HOME_DEFAULT"
-
-if [[ ! $(pidof wofi) ]]; then
-	XDG_DATA_HOME="${XDG_DATA_HOME:-$XDG_DATA_HOME_DEFAULT}" \
-	XDG_DATA_DIRS="${XDG_DATA_DIRS:-$XDG_DATA_DIRS_DEFAULT}" \
-		wofi --show drun --prompt 'Search...' --conf "${CONFIG}" --style "${STYLE}" --color "${COLORS}"
-else
-	pkill wofi
+if pidof rofi >/dev/null 2>&1; then
+  pkill rofi
+  exit 0
 fi
+
+exec rofi -show drun -config ~/.config/rofi/config.rasi

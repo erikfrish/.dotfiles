@@ -1,0 +1,13 @@
+configuration {
+  modes: "";
+  font: "JetBrainsMono ExtraBold 13";
+  show-icons: true;
+  icon-theme: "Papirus";
+  case-sensitive: false;
+  matching: "fuzzy";
+  sort: true;
+  sorting-method: "fzf";
+  pid: "/run/user/1000/rofi-clipboard.pid";
+}
+
+@theme "clipboard-theme"

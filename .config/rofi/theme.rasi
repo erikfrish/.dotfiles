@@ -1,0 +1,160 @@
+* {
+  bg:               rgba(24, 24, 32, 93%);
+  bg-input:         #2b2b39;
+  fg:               #dcd7ba;
+  fg-selected:      #181820;
+  accent1:          #859aca;
+  accent2:          #957fb8;
+  urgent:           #e46876;
+  border-clr:       #2b2b39;
+  separator-clr:    #2b2b39;
+
+  background-color: transparent;
+  text-color:       var(fg);
+  spacing:          4;
+}
+
+window {
+  background-color: var(bg);
+  border:           2px;
+  border-color:     var(border-clr);
+  border-radius:    8px;
+  padding:          12px;
+  width:            46%;
+}
+
+mainbox {
+  padding: 0;
+}
+
+inputbar {
+  background-color: var(bg-input);
+  border:           1px;
+  border-color:     var(border-clr);
+  border-radius:    5px;
+  padding:          8px 12px;
+  margin:           0px 0px 8px 0px;
+  children:         [prompt, entry];
+}
+
+prompt {
+  text-color: var(accent1);
+  margin:    0px 8px 0px 0px;
+}
+
+entry {
+  text-color: var(fg);
+}
+
+listview {
+  padding:      4px 0px;
+  scrollbar:    true;
+  spacing:      2px;
+  fixed-height: false;
+  lines:        14;
+  columns:      2;
+}
+
+scrollbar {
+  width:            4px;
+  padding:          0;
+  handle-width:     8px;
+  handle-color:     var(accent1);
+  border:           0px;
+  background-color: transparent;
+}
+
+element {
+  padding:       6px 8px;
+  border-radius: 4px;
+  spacing:       8px;
+}
+
+element normal normal {
+  background-color: transparent;
+  text-color:       var(fg);
+}
+
+element normal urgent {
+  background-color: transparent;
+  text-color:       var(urgent);
+}
+
+element normal active {
+  background-color: transparent;
+  text-color:       var(accent1);
+}
+
+element selected normal {
+  background-image: linear-gradient(to right, #859aca, #957fb8);
+  text-color:       var(fg-selected);
+}
+
+element selected urgent {
+  background-image: linear-gradient(to right, #e46876, #957fb8);
+  text-color:       var(fg-selected);
+}
+
+element selected active {
+  background-image: linear-gradient(to right, #859aca, #957fb8);
+  text-color:       var(fg-selected);
+}
+
+element alternate normal {
+  background-color: transparent;
+  text-color:       var(fg);
+}
+
+element alternate urgent {
+  background-color: transparent;
+  text-color:       var(urgent);
+}
+
+element alternate active {
+  background-color: transparent;
+  text-color:       var(accent1);
+}
+
+element-icon {
+  background-color: transparent;
+  size:             1.2em;
+}
+
+element-text {
+  background-color: transparent;
+  text-color:       inherit;
+  highlight:        inherit;
+}
+
+message {
+  padding:      4px;
+  border-color: var(separator-clr);
+  border:       2px dash 0px 0px;
+}
+
+textbox {
+  text-color: var(fg);
+}
+
+mode-switcher {
+  margin:  8px 0px 0px 0px;
+  spacing: 4px;
+}
+
+button {
+  padding:       4px 12px;
+  border-radius: 4px;
+  text-color:    var(fg);
+}
+
+button selected {
+  background-image: linear-gradient(to right, #859aca, #957fb8);
+  text-color:       var(fg-selected);
+}
+
+error-message {
+  background-color: var(bg);
+  text-color:       var(urgent);
+  padding:          12px;
+  border-radius:    8px;
+}

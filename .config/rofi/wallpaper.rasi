@@ -1,0 +1,13 @@
+configuration {
+  modes: "";
+  font: "JetBrainsMono ExtraBold 14";
+  show-icons: true;
+  icon-theme: "Papirus";
+  case-sensitive: false;
+  matching: "fuzzy";
+  sort: true;
+  sorting-method: "fzf";
+  pid: "/run/user/1000/rofi-wallpaper.pid";
+}
+
+@theme "wallpaper-theme"

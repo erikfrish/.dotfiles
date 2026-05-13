@@ -1,23 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-config="$HOME/.config/wofi/config-clipboard"
-style="$HOME/.config/wofi/style-compact.css"
-colors="$HOME/.config/wofi/colors"
 runtime_dir="${XDG_RUNTIME_DIR:-/tmp}/cliphist-menu"
 thumb_dir="$runtime_dir/thumbs"
 
-if pidof wofi >/dev/null 2>&1; then
-  pkill wofi
+if pidof rofi >/dev/null 2>&1; then
+  pkill rofi
   exit 0
 fi
 
 mkdir -p "$thumb_dir"
-history_file=$(mktemp "$runtime_dir/history.XXXXXX")
-menu_file=$(mktemp "$runtime_dir/menu.XXXXXX")
-trap 'rm -f "$history_file" "$menu_file"' EXIT
-
-cliphist list >"$history_file"
 
 make_image_entry() {
   local line="$1" id raw thumb meta dims
@@ -37,9 +29,9 @@ make_image_entry() {
 
   if [ -f "$thumb" ]; then
     dims=$([ -f "$meta" ] && <"$meta" || printf 'image')
-    printf 'img:%s:text:Image %s\n' "$thumb" "$dims"
+    printf 'Image %s\0icon\x1f%s\n' "$dims" "$thumb"
   else
-    printf 'text:Binary data\n'
+    printf 'Binary data\0icon\x1fxterm\n'
   fi
 }
 
@@ -47,35 +39,24 @@ make_text_entry() {
   local line="$1" preview
   preview=${line#*$'\t'}
   preview=${preview//$'\t'/ }
-  preview=${preview//:/;}
-  printf 'text:%s\n' "$preview"
+  printf '%s\n' "$preview"
 }
 
-while IFS= read -r line; do
+cliphist list | while IFS= read -r line; do
   if [[ "$line" == *"binary data"* ]]; then
     make_image_entry "$line"
   else
     make_text_entry "$line"
   fi
-done <"$history_file" >"$menu_file"
-
-selection=$(
-  wofi --dmenu \
-    --allow-images \
-    --parse-search \
-    --no-custom-entry \
-    --conf "$config" \
-    --style "$style" \
-    --color "$colors" \
-    --cache-file=/dev/null \
-    --define dmenu-print_line_num=true \
-    --define image_size=96 \
-    --prompt 'Clipboard' \
-    <"$menu_file"
-) || exit 0
-
-[[ "$selection" =~ ^[0-9]+$ ]] || exit 0
-
-SEL="$selection" perl -ne 'if ($. == $ENV{SEL} + 1) { print; exit }' "$history_file" |
-  cliphist decode |
-  wl-copy
+done | rofi -dmenu \
+  -i \
+  -no-custom \
+  -p "Clipboard" \
+  -display-columns 1 \
+  -config ~/.config/rofi/clipboard.rasi \
+  -format i \
+  -sync | {
+    index=$(cat)
+    [[ "$index" =~ ^[0-9]+$ ]] || exit 0
+    cliphist list | sed -n "$((index + 1))p" | cliphist decode | wl-copy
+  }

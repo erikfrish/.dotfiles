@@ -1,0 +1,24 @@
+configuration {
+  modes: "drun,emoji,calc";
+  font: "JetBrainsMono ExtraBold 14";
+  show-icons: true;
+  icon-theme: "Papirus";
+  terminal: "alacritty";
+  case-sensitive: false;
+  cycle: true;
+  sidebar-mode: false;
+  matching: "fuzzy";
+  sort: true;
+  sorting-method: "fzf";
+  display-drun: "Apps";
+  display-emoji: "Emoji";
+  display-calc: "Calc";
+  display-clipboard: "Clipboard";
+  display-wallpaper: "Wallpaper";
+  drun-display-format: "{name}";
+  drun-show-actions: false;
+  click-to-exit: true;
+  pid: "/run/user/1000/rofi.pid";
+}
+
+@theme "theme"

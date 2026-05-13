@@ -24,7 +24,7 @@ window-rule {
 }
 
 window-rule {
-    match app-id=r#"^wofi$"#
+    match app-id=r#"^rofi$"#
     open-floating true
 }
 
