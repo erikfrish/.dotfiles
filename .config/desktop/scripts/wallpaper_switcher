@@ -1,97 +1,48 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Interactive wallpaper picker used from Waybar. It keeps Hyprland on hyprpaper
-# and uses awww everywhere else, which makes the same menu work in Niri.
+wallpaper_dir="$HOME/Pictures/Wallpapers"
+wofi_config="$HOME/.config/wofi/config-clipboard"
+wofi_style="$HOME/.config/wofi/style-compact.css"
+wofi_colors="$HOME/.config/wofi/colors"
+change_wallpaper="$HOME/.config/desktop/scripts/change_wallpaper"
 
-DIR="$HOME/Pictures/Wallpapers"
-WOFI_CONFIG="$HOME/.config/wofi/config-clipboard"
-WOFI_STYLE="$HOME/.config/wofi/style-compact.css"
-WOFI_COLORS="$HOME/.config/wofi/colors"
+mapfile -d '' wallpapers < <(
+  find "$wallpaper_dir" -maxdepth 1 -type f \
+    \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) \
+    -print0 | sort -z
+)
 
-# Wallpaper files shown in the Wofi menu. Keep this flat so the menu stays fast
-# and predictable even when ~/Pictures is synced from Nextcloud.
-mapfile -t PICS < <(find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.webp" \))
+if [ "${#wallpapers[@]}" -eq 0 ]; then
+  notify-send "Wallpaper" "No wallpapers found in $wallpaper_dir" 2>/dev/null || true
+  exit 1
+fi
 
-menu(){
-    for i in "${!PICS[@]}"; do
-        # Wofi parses markup, so literal ampersands in filenames must be escaped.
-        filename=$(basename "${PICS[$i]}" | sed 's/&/\&amp;/g')
-        echo "$i. $filename"
-    done
-    echo "RANDOM"
+menu() {
+  local i filename
+  for i in "${!wallpapers[@]}"; do
+    filename=$(basename "${wallpapers[$i]}" | sed 's/&/\&amp;/g')
+    printf '%s. %s\n' "$i" "$filename"
+  done
+  printf 'RANDOM\n'
 }
 
-# Match the compact clipboard/menu style instead of using Wofi defaults.
-wofi_command=(
-    wofi --dmenu
-    --conf "$WOFI_CONFIG"
-    --style "$WOFI_STYLE"
-    --color "$WOFI_COLORS"
-    --prompt 'Wallpaper'
+choice=$(
+  menu | wofi --dmenu \
+    --conf "$wofi_config" \
+    --style "$wofi_style" \
+    --color "$wofi_colors" \
+    --prompt 'Wallpaper' \
     --cache-file=/dev/null
 )
 
-is_hyprland() {
-    [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && hyprctl monitors >/dev/null 2>&1
-}
+[ -n "$choice" ] || exit 0
 
-apply_hyprpaper() {
-    local file="$1"
-    local CONF="$HOME/.config/hypr/hyprpaper.conf"
-
-    # hyprctl hyprpaper requires IPC. Some older configs had it disabled.
-    if [ -f "$CONF" ]; then
-        sed -i 's/ipc = off/ipc = on/g' "$CONF"
-    fi
-
-    if ! pgrep -x "hyprpaper" > /dev/null; then
-        hyprpaper &
-        sleep 0.5
-    fi
-
-    hyprctl hyprpaper preload "$file"
-
-    MONITORS=$(hyprctl monitors | grep "Monitor" | awk '{print $2}')
-    for mon in $MONITORS; do
-        hyprctl hyprpaper wallpaper "$mon,$file"
-    done
-
-    hyprctl hyprpaper unload unused
-}
-
-apply_awww() {
-    local file="$1"
-
-    # Niri uses awww. Stop other background setters so they do not immediately
-    # repaint over the selected image.
-    pkill swaybg
-    pkill hyprpaper
-    awww query || { awww-daemon & sleep 0.5; }
-    awww img "$file" --transition-fps 30 --transition-type any --transition-duration 3
-}
-
-apply() {
-    local file
-    file=$(realpath "$1")
-
-    if is_hyprland; then
-        apply_hyprpaper "$file"
-    else
-        apply_awww "$file"
-    fi
-}
-
-choice=$(menu | "${wofi_command[@]}")
-
-if [[ -z $choice ]]; then exit 0; fi
-
-if [[ "$choice" == "RANDOM" ]]; then
-    target="${PICS[$RANDOM % ${#PICS[@]}]}"
-    apply "$target"
-else
-    # Menu entries start with the array index; the displayed filename may contain
-    # spaces or punctuation, so only parse the leading number.
-    idx=$(echo "$choice" | grep -o '^[0-9]\+')
-    target="${PICS[$idx]}"
-    apply "$target"
+if [ "$choice" = "RANDOM" ]; then
+  exec "$change_wallpaper" random
 fi
+
+idx=$(printf '%s' "$choice" | grep -o '^[0-9]\+')
+[ -n "$idx" ] || exit 0
+
+exec "$change_wallpaper" "${wallpapers[$idx]}"

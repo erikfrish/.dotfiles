@@ -81,8 +81,7 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 
 | Package | Purpose |
 |---|---|
-| `hyprpaper` | Wallpaper for Hyprland |
-| `awww` | Wallpaper for Niri (`awww`, `awww-daemon`) |
+| `awww` | Wallpaper backend for Hyprland and Niri (`awww`, `awww-daemon`) |
 
 ## Bluetooth & Network
 
@@ -174,7 +173,7 @@ sudo pacman -S --needed \
   swaync libnotify \
   wl-clipboard cliphist wl-clip-persist \
   grim slurp hyprland-contrib \
-  hyprpaper awww \
+  awww \
   networkmanager nm-connection-editor network-manager-applet bluez blueman \
   fprintd libfprint fcitx5 \
   gammastep hyprpicker playerctl \

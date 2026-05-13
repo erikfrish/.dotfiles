@@ -621,7 +621,7 @@
   "custom/cycle_wall": {
     "format": "",
     "on-click": "~/.config/desktop/scripts/wallpaper_switcher",
-    "on-click-right": "~/.config/desktop/scripts/change_wallpaper",
+    "on-click-right": "~/.config/desktop/scripts/change_wallpaper random",
     "on-click-middle": "~/.config/waybar/scripts/waybar_style_change",
     "tooltip": true,
     "tooltip-format": "Change wallpaper or style",

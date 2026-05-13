@@ -1,112 +1,83 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-DIR="$HOME/Pictures/Wallpapers"
-ENV_VAR="HYPR_WALLPAPER_INDEX"
+wallpaper_dir="$HOME/Pictures/Wallpapers"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper"
+state_file="$state_dir/current"
 
-# Корректно собираем файлы в массив (даже если в именах пробелы)
-# Сортируем, чтобы порядок был предсказуемым
-mapfile -t PICS < <(find "$DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" -o -name "*.webp" \) | sort)
+mapfile -d '' wallpapers < <(
+  find "$wallpaper_dir" -maxdepth 1 -type f \
+    \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' -o -iname '*.webp' \) \
+    -print0 | sort -z
+)
 
-# Если нет файлов - выходим
-if [ ${#PICS[@]} -eq 0 ]; then
-  echo "No wallpapers found in $DIR" >&2
+if [ "${#wallpapers[@]}" -eq 0 ]; then
+  printf 'No wallpapers found in %s\n' "$wallpaper_dir" >&2
   exit 1
 fi
 
-# Файл для хранения индекса последнего использованного обоя
-STATE_FILE="$HOME/.config/hypr/last_wallpaper_index"
-mkdir -p "$(dirname "$STATE_FILE")"
-
-# Читаем предыдущий индекс (если есть)
-prev_index=$(systemctl --user show-environment \
-  | sed -n "s/^$ENV_VAR=//p")
-
-case "$prev_index" in
-  ''|*[!0-9]*) prev_index=-1;;
-esac
-
-
-count=${#PICS[@]}
-
-if [ "$count" -le 1 ]; then
-  NEXT_INDEX=0
-else
-  if ! printf '%s' "$prev_index" | grep -Eq '^[0-9]+$' || [ "$prev_index" -ge "$count" ]; then
-    prev_index=-1
+ensure_awww() {
+  if ! awww query >/dev/null 2>&1; then
+    awww-daemon >/dev/null 2>&1 &
+    for _ in {1..20}; do
+      awww query >/dev/null 2>&1 && return 0
+      sleep 0.05
+    done
   fi
-  NEXT_INDEX=$(( (prev_index + 1) % count ))
-  # На всякий случай, если получилось тот же самый (маловероятно), сдвигаем ещё на один
-  if [ "$NEXT_INDEX" -eq "$prev_index" ] && [ "$count" -gt 1 ]; then
-    NEXT_INDEX=$(( (NEXT_INDEX + 1) % count ))
-  fi
-fi
+}
 
-systemctl --user set-environment "$ENV_VAR=$NEXT_INDEX"
+choose_random() {
+  local previous="" candidate
+  [ -f "$state_file" ] && previous=$(<"$state_file")
 
-SELECTED_PIC=$(realpath "${PICS[$NEXT_INDEX]}")
-
-# Функция специально для hyprpaper
-change_hyprpaper(){
-  pkill awww-daemon
-  pkill swaybg
-  
-  # Запускаем, если не запущен
-  if ! pgrep -x "hyprpaper" > /dev/null; then
-    hyprpaper &
-    sleep 0.5
+  if [ "${#wallpapers[@]}" -eq 1 ]; then
+    printf '%s\n' "${wallpapers[0]}"
+    return 0
   fi
 
-  # 1. Сначала preload (обязательно полный путь)
-  hyprctl hyprpaper preload "$SELECTED_PIC"
-  
-  # 2. Получаем список мониторов
-  MONITORS=$(hyprctl monitors | grep "Monitor" | awk '{print $2}')
-  
-  # 3. Применяем на все мониторы
-  for MONITOR in $MONITORS; do
-    # Синтаксис: монитор,путь (БЕЗ пробела после запятой)
-    hyprctl hyprpaper wallpaper "$MONITOR,$SELECTED_PIC"
+  for _ in {1..10}; do
+    candidate=${wallpapers[$(shuf -i "0-$((${#wallpapers[@]} - 1))" -n 1)]}
+    if [ "$candidate" != "$previous" ]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
   done
-  
-  # 4. Чистим память (выгружаем всё, что не используется прямо сейчас)
-  hyprctl hyprpaper unload unused
+
+  printf '%s\n' "$candidate"
 }
 
-change_swaybg(){
-  pkill awww-daemon
-  pkill hyprpaper
-  swaybg -m fill -i "$SELECTED_PIC"
+apply_wallpaper() {
+  local file="$1"
+  ensure_awww
+  awww img "$file" --transition-fps 30 --transition-type any --transition-duration 3
+  mkdir -p "$state_dir"
+  printf '%s\n' "$file" >"$state_file"
 }
 
-change_awww(){
-  pkill swaybg
-  pkill hyprpaper
-  awww query || { awww-daemon & sleep 0.5; }
-  awww img "$SELECTED_PIC" --transition-fps 30 --transition-type any --transition-duration 3
-}
+restore_wallpaper() {
+  local remembered=""
+  [ -f "$state_file" ] && remembered=$(<"$state_file")
 
-# Если ничего не указано, проверяем что сейчас запущено
-change_current(){
-  if pidof hyprpaper >/dev/null; then
-    change_hyprpaper
-  elif pidof swaybg >/dev/null; then
-    change_swaybg
+  if [ -n "$remembered" ] && [ -f "$remembered" ]; then
+    apply_wallpaper "$remembered"
   else
-    change_awww
+    apply_wallpaper "$(choose_random)"
   fi
 }
 
-case "$1" in
-  "hypr")
-    change_hyprpaper
+case "${1:-restore}" in
+  restore|'')
+    restore_wallpaper
     ;;
-  "swaybg")
-    change_swaybg
-    ;;
-  "awww"|"swww")
-    change_awww
+  random|awww|swww)
+    apply_wallpaper "$(choose_random)"
     ;;
   *)
-    change_current
+    if [ -f "$1" ]; then
+      apply_wallpaper "$(realpath "$1")"
+    else
+      printf 'Unknown wallpaper mode or file: %s\n' "$1" >&2
+      exit 2
+    fi
     ;;
 esac

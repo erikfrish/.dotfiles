@@ -26,7 +26,7 @@ spawn-sh-at-startup "~/.config/desktop/scripts/lang_switch_osd"
 
 // Niri-specific helpers.
 spawn-sh-at-startup "~/.config/niri/scripts/niri_pip_sticky"
-spawn-sh-at-startup "~/.config/desktop/scripts/change_wallpaper awww"
+spawn-sh-at-startup "~/.config/desktop/scripts/change_wallpaper restore"
 
 // Session apps: browser on workspace 1, IDE on 2, chats on 3.
 spawn-sh-at-startup "~/.config/niri/scripts/niri_autostart_apps"
