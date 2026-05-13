@@ -1,10 +1,23 @@
-output "eDP-1" {
-    mode "3072x1920@120.000"
-    scale 1.75
-    transform "normal"
-    position x=0 y=0
-}
-
+// Keep the base display config hardware-agnostic.
+//
+// Niri's defaults use each connected output's preferred mode and automatic
+// placement, which is the least surprising behavior across laptop, desktop,
+// docking station, and temporary monitor setups.
+//
+// If a specific host needs pinning, add an output block locally after checking
+// names with:
+//   niri msg outputs
+//
+// Example:
+// output "eDP-1" {
+//     mode "3072x1920@120.000"
+//     scale 1.75
+//     transform "normal"
+//     position x=0 y=0
+// }
+//
+// This is a fake HDMI capture/virtual output exposed on compik. Leaving it to
+// auto-enable makes Niri create a phantom 4K monitor and moves the real screen.
 output "HDMI-A-2" {
     off
 }
