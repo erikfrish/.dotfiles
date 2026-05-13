@@ -12,7 +12,7 @@ binds {
     Mod+O hotkey-overlay-title="Open Overview" { toggle-overview; }
     Mod+T hotkey-overlay-title="Open Terminal" { spawn "alacritty"; }
     Mod+E hotkey-overlay-title="Open Files" { spawn "nautilus"; }
-    Mod+R hotkey-overlay-title="Open Menu" { spawn-sh "~/.config/hypr/scripts/menu"; }
+    Mod+R hotkey-overlay-title="Open Menu" { spawn-sh "~/.config/desktop/scripts/menu"; }
 
     // Window state and column management.
     Mod+Q { close-window; }
@@ -25,16 +25,16 @@ binds {
 
     // Small desktop utilities.
     Mod+P { spawn "hyprpicker" "-a"; }
-    Mod+W { spawn-sh "~/.config/hypr/scripts/waybar_style_change"; }
+    Mod+W { spawn-sh "~/.config/waybar/scripts/waybar_style_change"; }
     Mod+B { spawn-sh "killall waybar || waybar &"; }
-    Mod+C { spawn-sh "~/.config/hypr/scripts/clipboard_history"; }
+    Mod+C { spawn-sh "~/.config/desktop/scripts/clipboard_history"; }
 
     // Hardware keys. Audio goes through the shared volume script so both Niri
     // and Hyprland show the same wob OSD and avoid hardcoded sink names.
-    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "~/.config/hypr/scripts/volume --inc"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "~/.config/hypr/scripts/volume --dec"; }
-    XF86AudioMute allow-when-locked=true { spawn-sh "~/.config/hypr/scripts/volume --toggle"; }
-    XF86AudioMicMute allow-when-locked=true { spawn-sh "~/.config/hypr/scripts/volume --toggle-mic"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --inc"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --dec"; }
+    XF86AudioMute allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --toggle"; }
+    XF86AudioMicMute allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --toggle-mic"; }
 
     // Brightness writes directly to the Niri wob FIFO.
     XF86MonBrightnessUp allow-when-locked=true { spawn-sh "brightnessctl -e4 -n2 set 5%+ | sed -En 's/.*\\( ([0-9]+)%\\).*/\\1/p' > /tmp/niri.wob"; }

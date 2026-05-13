@@ -53,7 +53,7 @@ Current audio approach is intentionally simple and portable:
 - No EasyEffects autostart.
 - No hardcoded `laptopchik` sink names.
 - No `audio_output` profile switcher.
-- Volume keys and Waybar call `~/.config/hypr/scripts/volume`.
+- Volume keys and Waybar call `~/.config/desktop/scripts/volume`.
 - Primary backend is `wpctl`; fallback is `pactl`.
 
 The volume script supports:
@@ -78,16 +78,16 @@ Relevant files:
 
 - `.config/hypr/config/autostart.conf`
 - `.config/hypr/config/keybinds.conf`
-- `.config/hypr/scripts/volume`
+- `.config/desktop/scripts/volume`
 - `.config/waybar/config`
 
 Volume keybinds:
 
 ```ini
-bindel = ,XF86AudioRaiseVolume, exec, ~/.config/hypr/scripts/volume --inc
-bindel = ,XF86AudioLowerVolume, exec, ~/.config/hypr/scripts/volume --dec
-bindel = ,XF86AudioMute, exec, ~/.config/hypr/scripts/volume --toggle
-bind = , XF86AudioMicMute, exec, ~/.config/hypr/scripts/volume --toggle-mic
+bindel = ,XF86AudioRaiseVolume, exec, ~/.config/desktop/scripts/volume --inc
+bindel = ,XF86AudioLowerVolume, exec, ~/.config/desktop/scripts/volume --dec
+bindel = ,XF86AudioMute, exec, ~/.config/desktop/scripts/volume --toggle
+bind = , XF86AudioMicMute, exec, ~/.config/desktop/scripts/volume --toggle-mic
 ```
 
 ## Keyboard Layout
@@ -103,7 +103,7 @@ Hyprland and Niri use `us,dotfiles` with the `,ru_ctrl_shortcuts` variant. Regul
 Waybar power button launches:
 
 ```text
-.config/hypr/scripts/power_menu
+.config/desktop/scripts/power_menu
 ```
 
 That wrapper temporarily switches to `us` before opening `wlogout` and restores the previous layout afterward, because `wlogout` single-letter hotkeys are not `Ctrl` shortcuts and are not covered by the XKB shortcut layer.
@@ -113,7 +113,7 @@ That wrapper temporarily switches to `us` before opening `wlogout` and restores 
 Niri app placement is handled by:
 
 ```text
-.config/hypr/scripts/niri_autostart_apps
+.config/niri/scripts/niri_autostart_apps
 ```
 
 Startup placement:

@@ -2,7 +2,7 @@
 Type=Application
 Name=Fingerprint Menu
 Comment=Manage enrolled fingerprints
-Exec=alacritty --title "Fingerprint Menu" -e sudo --preserve-env=DISPLAY,WAYLAND_DISPLAY,XDG_RUNTIME_DIR,DBUS_SESSION_BUS_ADDRESS,SWAYSOCK,HYPRLAND_INSTANCE_SIGNATURE env HOME=/home/erikfrish USER=erikfrish /home/erikfrish/.config/hypr/scripts/fprint_menu
+Exec=alacritty --title "Fingerprint Menu" -e sudo --preserve-env=DISPLAY,WAYLAND_DISPLAY,XDG_RUNTIME_DIR,DBUS_SESSION_BUS_ADDRESS,SWAYSOCK,HYPRLAND_INSTANCE_SIGNATURE env HOME=/home/erikfrish USER=erikfrish /home/erikfrish/.config/desktop/scripts/fprint_menu
 Icon=preferences-desktop-user-password
 Terminal=false
 Categories=Settings;System;Security;

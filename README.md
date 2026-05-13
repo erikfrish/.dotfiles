@@ -32,10 +32,10 @@ stow .
 Управление громкостью универсальное для `laptopchik` и `compik`, не зависит от EasyEffects:
 
 ```sh
-~/.config/hypr/scripts/volume --get
-~/.config/hypr/scripts/volume --inc
-~/.config/hypr/scripts/volume --dec
-~/.config/hypr/scripts/volume --toggle
+~/.config/desktop/scripts/volume --get
+~/.config/desktop/scripts/volume --inc
+~/.config/desktop/scripts/volume --dec
+~/.config/desktop/scripts/volume --toggle
 ```
 
 Основной backend: `wpctl`; fallback: `pactl`.

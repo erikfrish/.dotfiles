@@ -22,11 +22,11 @@ spawn-sh-at-startup "wl-paste --watch cliphist store"
 // OSD stack: wob for volume/brightness values, swayosd for layout/Caps Lock.
 spawn-sh-at-startup "rm -f /tmp/niri.wob; mkfifo /tmp/niri.wob; tail -f /tmp/niri.wob | wob -c ~/.config/wob/wob.ini"
 spawn-at-startup "swayosd-server"
-spawn-sh-at-startup "~/.config/hypr/scripts/lang_switch_osd"
+spawn-sh-at-startup "~/.config/desktop/scripts/lang_switch_osd"
 
 // Niri-specific helpers.
-spawn-sh-at-startup "~/.config/hypr/scripts/niri_pip_sticky"
-spawn-sh-at-startup "~/.config/hypr/scripts/change_wallpaper awww"
+spawn-sh-at-startup "~/.config/niri/scripts/niri_pip_sticky"
+spawn-sh-at-startup "~/.config/desktop/scripts/change_wallpaper awww"
 
 // Session apps: browser on workspace 1, IDE on 2, chats on 3.
-spawn-sh-at-startup "~/.config/hypr/scripts/niri_autostart_apps"
+spawn-sh-at-startup "~/.config/niri/scripts/niri_autostart_apps"

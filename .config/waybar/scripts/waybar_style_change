@@ -32,4 +32,4 @@ ln -sf "$THEME_DIR/$NEXT_THEME.css" "$CONFIG_DIR/style.css"
 
 # Перезапускаем waybar
 killall waybar
-exec "$HOME/.config/hypr/scripts/statusbar"
+exec "$HOME/.config/waybar/scripts/statusbar"

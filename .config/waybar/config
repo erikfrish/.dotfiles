@@ -88,26 +88,26 @@
     "format": "{}",
     "format-en": "en",
     "format-ru": "ru",
-    "on-click": "~/.config/hypr/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "on-click": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
     "on-click-right": "notify-send 'Keyboard' \"$(hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .active_keymap')\"",
-    "on-scroll-up": "~/.config/hypr/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
-    "on-scroll-down": "~/.config/hypr/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "on-scroll-up": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "on-scroll-down": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
   },
 
   "custom/language": {
-    "exec": "~/.config/hypr/scripts/lang_indicator",
+    "exec": "~/.config/desktop/scripts/lang_indicator",
     "interval": 1,
     "format": "{}",
-    "on-click": "~/.config/hypr/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
-    "on-scroll-up": "~/.config/hypr/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
-    "on-scroll-down": "~/.config/hypr/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "on-click": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "on-scroll-up": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "on-scroll-down": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
     "signal": 1,
   },
 
   "custom/screenshot_t": {
     "format": "",
-    "on-click": "~/.config/hypr/scripts/screenshot_full",
-    "on-click-right": "~/.config/hypr/scripts/screenshot_area",
+    "on-click": "~/.config/desktop/scripts/screenshot_full",
+    "on-click-right": "~/.config/desktop/scripts/screenshot_area",
   },
 
   "clock": {
@@ -182,7 +182,7 @@
   "custom/menu": {
     "format": "", // "",
     "tooltip": false,
-    "on-click": "$HOME/.config/hypr/scripts/menu",
+    "on-click": "$HOME/.config/desktop/scripts/menu",
     "on-click-right": "$HOME/.config/hypr/scripts/layout-switcher",
   },
 
@@ -310,7 +310,7 @@
   //     "format-alt-click": "click",
   //     "interval": 3600,
   //     "return-type": "json",
-  //     "exec": "~/.config/hypr/scripts/weather",
+  //     "exec": "~/.config/waybar/scripts/weather",
   //     "exec-if": "ping wttr.in -c1"
   //   },
   "custom/weather": {
@@ -360,7 +360,7 @@
     "format": "󰐥",
     "tooltip": false,
     // Wrapper keeps wlogout hotkeys usable when the current layout is Russian.
-    "on-click": "sh -c '(sleep 0.1s; ~/.config/hypr/scripts/power_menu)' & disown",
+    "on-click": "sh -c '(sleep 0.1s; ~/.config/desktop/scripts/power_menu)' & disown",
     "on-click-right": "~/.config/hypr/scripts/glassmorphism",
   },
 
@@ -518,8 +518,8 @@
       "empty": "",
       "default": "",
     },
-    "on-scroll-up": "~/.config/hypr/scripts/niri_workspace focus-up",
-    "on-scroll-down": "~/.config/hypr/scripts/niri_workspace focus-down",
+    "on-scroll-up": "~/.config/niri/scripts/niri_workspace focus-up",
+    "on-scroll-down": "~/.config/niri/scripts/niri_workspace focus-down",
   },
 
   "hyprland/window": {
@@ -540,14 +540,14 @@
   },
 
   "custom/audio-volume": {
-    "exec": "~/.config/hypr/scripts/volume --get",
+    "exec": "~/.config/desktop/scripts/volume --get",
     "format": " {}%",
     "interval": "once",
     "signal": 8,
-    "on-click": "~/.config/hypr/scripts/volume --toggle",
+    "on-click": "~/.config/desktop/scripts/volume --toggle",
     "on-click-right": "pavucontrol",
-    "on-scroll-up": "~/.config/hypr/scripts/volume --inc",
-    "on-scroll-down": "~/.config/hypr/scripts/volume --dec",
+    "on-scroll-up": "~/.config/desktop/scripts/volume --inc",
+    "on-scroll-down": "~/.config/desktop/scripts/volume --dec",
     "smooth-scrolling-threshold": 1,
   },
 
@@ -565,10 +565,10 @@
       "default": ["", "", ""],
     },
     "scroll-step": 5.0,
-    "on-click": "~/.config/hypr/scripts/volume --toggle",
+    "on-click": "~/.config/desktop/scripts/volume --toggle",
     "on-click-right": "pavucontrol",
-    "on-scroll-up": "~/.config/hypr/scripts/volume --inc",
-    "on-scroll-down": "~/.config/hypr/scripts/volume --dec",
+    "on-scroll-up": "~/.config/desktop/scripts/volume --inc",
+    "on-scroll-down": "~/.config/desktop/scripts/volume --dec",
     "smooth-scrolling-threshold": 1,
   },
 
@@ -599,10 +599,10 @@
     "format": "{format_source}",
     "format-source": " {volume} %",
     "format-source-muted": " muted",
-    "on-click": "~/.config/hypr/scripts/volume --toggle-mic",
+    "on-click": "~/.config/desktop/scripts/volume --toggle-mic",
     "on-click-right": "pavucontrol",
-    "on-scroll-up": "~/.config/hypr/scripts/volume --mic-inc",
-    "on-scroll-down": "~/.config/hypr/scripts/volume --mic-dec",
+    "on-scroll-up": "~/.config/desktop/scripts/volume --mic-inc",
+    "on-scroll-down": "~/.config/desktop/scripts/volume --mic-dec",
     "scroll-step": 5,
   },
 
@@ -620,9 +620,9 @@
 
   "custom/cycle_wall": {
     "format": "",
-    "on-click": "~/.config/hypr/scripts/wallpaper_switcher",
-    "on-click-right": "~/.config/hypr/scripts/change_wallpaper",
-    "on-click-middle": "~/.config/hypr/scripts/waybar_style_change",
+    "on-click": "~/.config/desktop/scripts/wallpaper_switcher",
+    "on-click-right": "~/.config/desktop/scripts/change_wallpaper",
+    "on-click-middle": "~/.config/waybar/scripts/waybar_style_change",
     "tooltip": true,
     "tooltip-format": "Change wallpaper or style",
   },
@@ -630,10 +630,10 @@
   //   "wireplumber": {
   //     "format": "{icon} {volume} %",
   //     "format-muted": " Mute",
-  //     "on-click": "~/.config/hypr/scripts/volume --toggle",
+  //     "on-click": "~/.config/desktop/scripts/volume --toggle",
   //     "on-click-right": "pavucontrol",
-  //     "on-scroll-up": "~/.config/hypr/scripts/volume --inc",
-  //     "on-scroll-down": "~/.config/hypr/scripts/volume --dec",
+  //     "on-scroll-up": "~/.config/desktop/scripts/volume --inc",
+  //     "on-scroll-down": "~/.config/desktop/scripts/volume --dec",
   //     "format-icons": ["", "", ""]
   //   },
 
@@ -743,7 +743,7 @@
     "format": "󱑎 {text}",
     "return-type": "json",
     "interval": 300,
-    "exec": "~/.config/hypr/scripts/wakatime",
+    "exec": "~/.config/waybar/scripts/wakatime",
     "on-click-right": "xdg-open https://wakapi.dev/summary?interval=yesterday",
     "tooltip": true,
   },

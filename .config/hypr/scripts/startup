@@ -1,6 +1,7 @@
 #!/bin/bash
 
 SCRIPTSDIR=$HOME/.config/hypr/scripts
+WAYBAR_SCRIPTSDIR=$HOME/.config/waybar/scripts
 
 # Kill already running process
 _ps=(waybar mako)
@@ -14,4 +15,4 @@ done
 ${SCRIPTSDIR}/notifications &
 
 # Lauch statusbar (waybar)
-${SCRIPTSDIR}/statusbar &
+${WAYBAR_SCRIPTSDIR}/statusbar &
