@@ -5,7 +5,8 @@ configuration {
   icon-theme: "Papirus";
   case-sensitive: false;
   matching: "fuzzy";
-  sort: true;
+  sort: false;
+  cycle: false;
   sorting-method: "fzf";
   pid: "/run/user/1000/rofi-wallpaper.pid";
 }

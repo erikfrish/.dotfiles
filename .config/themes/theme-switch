@@ -74,6 +74,25 @@ apply_rofi() {
     local bg_r bg_g bg_b
     read -r bg_r bg_g bg_b < <(hex_to_rgb "$bg")
     local bg_rgba="rgba(${bg_r}, ${bg_g}, ${bg_b}, 93%)"
+    local window_radius input_radius element_radius
+
+    case "$waybar_shape" in
+        zero-bar|omarchy-tight|hairline-blocks)
+            window_radius=0
+            input_radius=0
+            element_radius=0
+            ;;
+        compact-pills|soft-islands)
+            window_radius=16
+            input_radius=12
+            element_radius=12
+            ;;
+        *)
+            window_radius=8
+            input_radius=5
+            element_radius=4
+            ;;
+    esac
 
     for target in theme wallpaper-theme clipboard-theme; do
         local dest="$config_dir/rofi/${target}.rasi"
@@ -98,7 +117,7 @@ window {
   background-color: var(bg);
   border:           2px;
   border-color:     var(border-clr);
-  border-radius:    8px;
+  border-radius:    ${window_radius}px;
   padding:          12px;
   width:            46%;
 }
@@ -111,7 +130,7 @@ inputbar {
   background-color: var(bg-input);
   border:           1px;
   border-color:     var(border-clr);
-  border-radius:    5px;
+  border-radius:    ${input_radius}px;
   padding:          8px 12px;
   margin:           0px 0px 8px 0px;
   children:         [prompt, entry];
@@ -132,7 +151,7 @@ listview {
   spacing:      2px;
   fixed-height: false;
   lines:        14;
-  columns:      2;
+  columns:      1;
 }
 
 scrollbar {
@@ -146,7 +165,7 @@ scrollbar {
 
 element {
   padding:       6px 8px;
-  border-radius: 4px;
+  border-radius: ${element_radius}px;
   spacing:       8px;
 }
 
@@ -223,7 +242,7 @@ mode-switcher {
 
 button {
   padding:       4px 12px;
-  border-radius: 4px;
+  border-radius: ${element_radius}px;
   text-color:    var(fg);
 }
 
@@ -236,7 +255,7 @@ error-message {
   background-color: var(bg);
   text-color:       var(urgent);
   padding:          12px;
-  border-radius:    8px;
+  border-radius:    ${window_radius}px;
 }
 ROFI
     done
@@ -293,9 +312,29 @@ GTKCSS
 apply_swaync() {
     local template="$config_dir/swaync/template.css"
     local style="$config_dir/swaync/style.css"
+    local control_radius bubble_radius widget_radius
     if [[ ! -f "$template" ]]; then
         return
     fi
+
+    case "$waybar_shape" in
+        zero-bar|omarchy-tight|hairline-blocks)
+            control_radius=0
+            bubble_radius=0
+            widget_radius=0
+            ;;
+        compact-pills|soft-islands)
+            control_radius=18
+            bubble_radius=16
+            widget_radius=14
+            ;;
+        *)
+            control_radius=10
+            bubble_radius=8
+            widget_radius=8
+            ;;
+    esac
+
     {
         cat <<COLORS
 @define-color cc-bg ${bg};
@@ -317,6 +356,37 @@ apply_swaync() {
 @define-color blue-base ${accent};
 COLORS
         tail -n +2 "$template"
+        cat <<RADIUS
+
+.control-center {
+  border-radius: ${control_radius}px;
+}
+
+.notification,
+.notification-content,
+.notification-action,
+.notification-default-action,
+.inline-reply-entry,
+.inline-reply-button,
+.close-button {
+  border-radius: ${bubble_radius}px;
+}
+
+.widget-title,
+.widget-title>button,
+.widget-dnd,
+.widget-dnd>switch,
+.widget-dnd>switch slider,
+.widget-buttons-grid,
+.widget-buttons-grid>flowbox>flowboxchild>button,
+.widget-volume,
+.widget-backlight,
+.widget-mpris,
+.widget-mpris-player,
+.widget-mpris-album-art {
+  border-radius: ${widget_radius}px;
+}
+RADIUS
     } > "$style"
     swaync-client --reload-css 2>/dev/null || killall -HUP swaync 2>/dev/null || true
 }
@@ -329,28 +399,77 @@ apply_all() {
     save_state
 }
 
+theme_thumbnail() {
+    local name="$1"
+    local conf="$themes_dir/${name}.conf"
+    local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/theme-thumbnails"
+    local thumb="$cache_dir/${name}.svg"
+
+    [[ -f "$conf" ]] || return 1
+    mkdir -p "$cache_dir"
+
+    if [[ ! -f "$thumb" || "$conf" -nt "$thumb" ]]; then
+        local waybar_palette waybar_base waybar_shape waybar_accent gtk_theme
+        local bg fg muted accent accent_alt warm ok critical
+        source "$conf"
+        cat > "$thumb" <<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="160" viewBox="0 0 256 160">
+  <rect width="256" height="160" rx="16" fill="$bg"/>
+  <rect x="16" y="14" width="224" height="18" rx="8" fill="$muted" opacity="0.55"/>
+  <circle cx="30" cy="23" r="5" fill="$accent"/>
+  <rect x="48" y="19" width="34" height="8" rx="4" fill="$accent_alt"/>
+  <rect x="92" y="19" width="48" height="8" rx="4" fill="$warm"/>
+  <rect x="176" y="19" width="24" height="8" rx="4" fill="$ok"/>
+  <rect x="208" y="19" width="18" height="8" rx="4" fill="$critical"/>
+  <rect x="24" y="52" width="92" height="58" rx="14" fill="$accent" opacity="0.9"/>
+  <rect x="132" y="52" width="52" height="58" rx="14" fill="$accent_alt" opacity="0.9"/>
+  <rect x="196" y="52" width="36" height="58" rx="14" fill="$warm" opacity="0.9"/>
+  <rect x="24" y="124" width="208" height="8" rx="4" fill="$fg" opacity="0.85"/>
+  <rect x="24" y="140" width="124" height="6" rx="3" fill="$muted"/>
+</svg>
+SVG
+    fi
+
+    printf '%s\n' "$thumb"
+}
+
 menu() {
     if pidof rofi >/dev/null 2>&1; then
         pkill rofi
         exit 0
     fi
 
-    local cur choice
+    local cur choice selected_row=0 i=0
     cur="$(current_theme)"
 
+    while read -r name; do
+        if [[ "$name" == "$cur" ]]; then
+            selected_row="$i"
+            break
+        fi
+        i=$((i + 1))
+    done < <(list_themes)
+
     choice=$(list_themes | while read -r name; do
-        marker=" "
-        [[ "$name" == "$cur" ]] && marker="*"
-        printf '%s %s\n' "$marker" "$name"
+        thumb="$(theme_thumbnail "$name" || printf 'preferences-desktop-theme')"
+        if [[ "$name" == "$cur" ]]; then
+            printf '[ %s ]\0icon\x1f%s\n' "$name" "$thumb"
+        else
+            printf '%s\0icon\x1f%s\n' "$name" "$thumb"
+        fi
     done | rofi -dmenu \
         -i \
         -no-custom \
+        -show-icons \
         -p "Theme" \
+        -selected-row "$selected_row" \
+        -theme-str 'configuration { font: "JetBrainsMono ExtraBold 11"; cycle: false; } window { width: 38%; } listview { columns: 1; lines: 12; } element { padding: 4px 6px; } element-icon { size: 2.2em; }' \
         -format s \
         -sync)
 
     [[ -n "$choice" ]] || exit 0
-    choice="${choice#? }"
+    choice="${choice#[ }"
+    choice="${choice% ]}"
     load_theme "$choice"
     apply_all
 }

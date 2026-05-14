@@ -29,11 +29,16 @@
 scrollbar {
   background: transparent;
   opacity: 0;
+  min-width: 0;
+  min-height: 0;
 }
 
-/* Нацеливаемся на внутренний контейнер GTK */
+scrolledwindow,
 viewport {
   background: transparent;
+  margin: 0;
+  padding: 0;
+  border: none;
 }
 
 .notification-row {
@@ -159,6 +164,8 @@ viewport {
   background: @cc-bg;
   /* border: 2px solid @border-green; */
   border: 2px solid @border-blue;
+  margin: 0;
+  padding: 0;
 }
 
 .widget-title {
@@ -212,11 +219,19 @@ viewport {
   background: @noti-bg-darker;
 }
 
+.widget-buttons-grid>flowbox {
+  min-width: 0;
+}
+
+.widget-buttons-grid>flowbox>flowboxchild {
+  min-width: 74px;
+}
+
 /* widget button */
 .widget-buttons-grid>flowbox>flowboxchild>button {
   margin: 3px;
-  padding: 4px 20px;
-  ;
+  padding: 4px 0;
+  min-width: 62px;
   background: @cc-bg;
   color: @text-color;
   transition: background-color 0.15s ease-in-out;

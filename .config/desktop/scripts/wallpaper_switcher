@@ -4,6 +4,7 @@ set -euo pipefail
 wallpaper_dir="$HOME/Pictures/Wallpapers"
 change_wallpaper="$HOME/.config/desktop/scripts/change_wallpaper"
 thumb_dir="${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-thumbnails"
+state_file="${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper/current"
 
 is_video() {
   case "${1,,}" in
@@ -58,6 +59,18 @@ if [ "${#wallpapers[@]}" -eq 0 ]; then
   exit 1
 fi
 
+selected_row=0
+if [ -f "$state_file" ]; then
+  current_wallpaper=$(<"$state_file")
+  current_wallpaper=$(realpath -m "$current_wallpaper")
+  for i in "${!wallpapers[@]}"; do
+    if [ "$(realpath -m "${wallpapers[$i]}")" = "$current_wallpaper" ]; then
+      selected_row="$i"
+      break
+    fi
+  done
+fi
+
 {
   for wp in "${wallpapers[@]}"; do
     name=$(basename "$wp")
@@ -69,6 +82,7 @@ fi
   -no-custom \
   -p "Wallpaper" \
   -config ~/.config/rofi/wallpaper.rasi \
+  -selected-row "$selected_row" \
   -format s \
   -sync | {
     choice=$(cat)
