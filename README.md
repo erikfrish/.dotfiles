@@ -118,6 +118,24 @@ Themes are flat presets in `.config/themes/*.conf`. Applying a theme generates r
 ~/.config/themes/theme-switch menu
 ```
 
+Theme previews are captured on an empty Niri workspace with each preset's `bg` color applied as a solid wallpaper.
+
+| Theme | Preview |
+| --- | --- |
+| `amber-forge` | ![amber-forge](docs/theme-previews/amber-forge.png) |
+| `cyberpunk` | ![cyberpunk](docs/theme-previews/cyberpunk.png) |
+| `everforest` | ![everforest](docs/theme-previews/everforest.png) |
+| `gruvbox-dark` | ![gruvbox-dark](docs/theme-previews/gruvbox-dark.png) |
+| `kanagawa-thin` | ![kanagawa-thin](docs/theme-previews/kanagawa-thin.png) |
+| `kanagawa-wave` | ![kanagawa-wave](docs/theme-previews/kanagawa-wave.png) |
+| `matte-black` | ![matte-black](docs/theme-previews/matte-black.png) |
+| `miasma` | ![miasma](docs/theme-previews/miasma.png) |
+| `mono` | ![mono](docs/theme-previews/mono.png) |
+| `nord-frost` | ![nord-frost](docs/theme-previews/nord-frost.png) |
+| `tokyo-night` | ![tokyo-night](docs/theme-previews/tokyo-night.png) |
+| `vantablack` | ![vantablack](docs/theme-previews/vantablack.png) |
+| `violet-dusk` | ![violet-dusk](docs/theme-previews/violet-dusk.png) |
+
 Generated files are ignored by Git:
 
 ```text
@@ -130,6 +148,8 @@ Generated files are ignored by Git:
 ~/.config/swaync/style.css
 ~/.config/hypr/hyprlock-theme.conf
 ~/.config/wlogout/style.css
+~/.config/wob/wob.ini
+~/.config/swayosd/style.css
 ```
 
 The Waybar wallpaper button is the main theme entrypoint:
