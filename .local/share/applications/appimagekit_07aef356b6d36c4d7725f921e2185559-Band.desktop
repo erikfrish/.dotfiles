@@ -1,0 +1,23 @@
+[Desktop Entry]
+Name=Band (5.11.3)
+Exec=/home/erikfrish/Applications/band-desktop-5.11.3-linux-x86_64_57a77ab5504f1a7116f65c51bba1de3f.AppImage --enable-features=UseOzonePlatform --ozone-platform=wayland %U
+Terminal=false
+Type=Application
+Icon=appimagekit_07aef356b6d36c4d7725f921e2185559_band-desktop
+StartupWMClass=Band
+X-AppImage-Version=5.11.3
+Comment=WB Band
+MimeType=x-scheme-handler/mattermost;x-scheme-handler/band;
+Categories=Network;InstantMessaging;
+
+TryExec=/home/erikfrish/Applications/band-desktop-5.11.3-linux-x86_64_57a77ab5504f1a7116f65c51bba1de3f.AppImage
+X-AppImage-Old-Icon=band-desktop
+X-AppImage-Old-Name=Band
+X-AppImage-Identifier=07aef356b6d36c4d7725f921e2185559
+Actions=AppImageLauncher-Remove-AppImage;
+X-AppImageLauncher-Version=3.0.0-beta-2 (git commit release/tag), built on 2026-04-29 03:09:56 UTC
+
+[Desktop Action AppImageLauncher-Remove-AppImage]
+Name=Delete this AppImage
+Icon=AppImageLauncher
+Exec=/usr/lib/appimagelauncher/remove "/home/erikfrish/Applications/band-desktop-5.11.3-linux-x86_64_57a77ab5504f1a7116f65c51bba1de3f.AppImage"
