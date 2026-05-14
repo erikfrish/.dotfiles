@@ -109,7 +109,7 @@ apply_wallpaper() {
     else
       stop_image_wallpaper
     fi
-    mpvpaper -o "no-audio --loop-file=inf --panscan=1.0 --video-unscaled=no --keepaspect=yes --start=$video_preview_second" '*' "$file" >/dev/null 2>&1 &
+    mpvpaper -o "no-audio --hwdec=auto-safe --loop-file=inf --panscan=1.0 --video-unscaled=no --keepaspect=yes --start=$video_preview_second" '*' "$file" >/dev/null 2>&1 &
     printf '%s\n' "$!" >"$video_pid_file"
   else
     stop_video_wallpaper
