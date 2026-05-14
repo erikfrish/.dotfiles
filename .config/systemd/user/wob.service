@@ -1,0 +1,13 @@
+[Unit]
+Description=wob volume and brightness OSD
+PartOf=dotfiles-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env bash -lc 'fifo="${XDG_RUNTIME_DIR:-/tmp}/niri.wob"; rm -f "$fifo"; mkfifo "$fifo"; tail -f "$fifo" | wob -c "$HOME/.config/wob/wob.ini"'
+Restart=on-failure
+RestartSec=1
+
+[Install]
+WantedBy=dotfiles-session.target

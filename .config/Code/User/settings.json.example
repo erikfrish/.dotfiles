@@ -1,4 +1,4 @@
-// erikfrish custom settings.json for vscode
+// erikfrish custom settings.json for vscode. Copy to settings.json if desired.
 {
   // Main editor settings
   "window.customMenuBarAltFocus": false,

@@ -1,0 +1,30 @@
+# Copy to ~/.config/dotfiles/machine.conf and adjust per host.
+
+# Paths
+# DOTFILES_WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
+
+# Video wallpaper hardware decoding: auto-safe works across NVIDIA, AMD, Intel.
+# DOTFILES_MPV_HWDEC=auto-safe
+
+# Niri session apps
+# DOTFILES_ENABLE_AUTOSTART_APPS=1
+# DOTFILES_BROWSER_CMD=zen-browser
+# DOTFILES_BROWSER_APP_ID=zen
+# DOTFILES_IDE_CMD=code
+# DOTFILES_IDE_APP_ID=code
+# DOTFILES_CHAT_CMD=forkgram
+# DOTFILES_CHAT_APP_ID_REGEX='forkgram|tdesktop'
+# DOTFILES_ENABLE_BAND=1
+# DOTFILES_BAND_GLOB="$HOME/Applications/band-desktop-*.AppImage"
+
+# Waybar VPN modules. Leave connection empty to hide/inactivate a module.
+# DOTFILES_VPN1_CONNECTION=vpnchik
+# DOTFILES_VPN1_LABEL="Личный VPN"
+# DOTFILES_VPN1_ICON=""
+# DOTFILES_VPN2_CONNECTION=wb
+# DOTFILES_VPN2_LABEL="Рабочий VPN"
+# DOTFILES_VPN2_ICON=""
+
+# DDC/CI setup defaults for scripts/setup-ddcci.
+# DOTFILES_DDCCI_BUS=10
+# DOTFILES_DDCCI_ADDR=0x37

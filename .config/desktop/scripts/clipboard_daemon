@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+wl-clip-persist --clipboard regular &
+wl_persist_pid=$!
+
+wl-paste --type text --watch cliphist store &
+text_pid=$!
+
+wl-paste --type image --watch cliphist store &
+image_pid=$!
+
+wl-paste --watch cliphist store &
+all_pid=$!
+
+trap 'kill "$wl_persist_pid" "$text_pid" "$image_pid" "$all_pid" 2>/dev/null || true' EXIT INT TERM
+wait -n "$wl_persist_pid" "$text_pid" "$image_pid" "$all_pid"

@@ -1,31 +1,29 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-echo "==> Installing packages..."
-sudo pacman -S --needed \
-  niri xwayland-satellite waybar polkit-kde-agent \
-  xdg-desktop-portal-gtk \
-  ly hyprlock swayidle \
-  rofi rofi-emoji rofi-calc wlogout \
-  pipewire wireplumber pipewire-pulse pavucontrol \
-  brightnessctl ddcutil wob swayosd \
-  swaync libnotify \
-  wl-clipboard cliphist wl-clip-persist imagemagick \
-  grim slurp \
-  awww ffmpeg \
-  networkmanager nm-connection-editor network-manager-applet bluez blueman \
-  fprintd libfprint fcitx5 \
-  gammastep hyprpicker playerctl \
-  zsh alacritty \
-  jq gsimplecal btop paru curl \
-  ttf-jetbrains-mono-nerd \
-  xkeyboard-config
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_dir="$(cd -- "$script_dir/.." && pwd)"
 
-paru -S --needed arch-update-tray sshpass ddcci-driver-linux-dkms-git mpvpaper
+read_package_list() {
+  local file="$1"
+  grep -Ev '^[[:space:]]*(#|$)' "$file"
+}
+
+echo "==> Installing packages..."
+mapfile -t pacman_packages < <(read_package_list "$script_dir/packages.pacman")
+sudo pacman -S --needed "${pacman_packages[@]}"
+
+if command -v paru >/dev/null 2>&1; then
+  mapfile -t aur_packages < <(read_package_list "$script_dir/packages.aur")
+  paru -S --needed "${aur_packages[@]}"
+else
+  echo "WARNING: paru is not available; skipped AUR packages."
+  echo "Run again after installing paru or install packages from scripts/packages.aur manually."
+fi
 
 echo ""
 echo "==> Stowing dotfiles..."
-cd ~/.dotfiles
+cd "$repo_dir"
 stow --restow --target="$HOME" .
 
 echo ""
@@ -42,3 +40,5 @@ echo "  Run: ~/.dotfiles/scripts/setup-ssh-agent"
 echo ""
 echo "[4/4] YubiKey pool"
 echo "  Run: ~/.dotfiles/.local/bin/yubikey-pool-setup"
+echo ""
+echo "Validation: ~/.dotfiles/scripts/doctor"

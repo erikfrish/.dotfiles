@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
+[ -r "$lib_file" ] && . "$lib_file"
+type dotfiles_load_machine_config >/dev/null 2>&1 && dotfiles_load_machine_config
+
+: "${DOTFILES_ENABLE_AUTOSTART_APPS:=1}"
+: "${DOTFILES_BROWSER_CMD:=zen-browser}"
+: "${DOTFILES_BROWSER_APP_ID:=zen}"
+: "${DOTFILES_IDE_CMD:=code}"
+: "${DOTFILES_IDE_APP_ID:=code}"
+: "${DOTFILES_CHAT_CMD:=forkgram}"
+: "${DOTFILES_CHAT_APP_ID_REGEX:=forkgram|tdesktop}"
+: "${DOTFILES_ENABLE_BAND:=1}"
+: "${DOTFILES_BAND_GLOB:=$HOME/Applications/band-desktop-*.AppImage}"
+
+[ "$DOTFILES_ENABLE_AUTOSTART_APPS" = 1 ] || exit 0
+
 # Niri does not have a built-in "launch this app directly on workspace N"
 # exec rules. This script starts the daily apps, waits until their windows exist,
 # then moves each window by id. That avoids racing on app startup and keeps the
@@ -35,12 +51,18 @@ wait_window() {
 launch_band() {
     local app_path
 
-    app_path=$(printf '%s\n' "$HOME"/Applications/band-desktop-*.AppImage | head -n1)
+    app_path=$(compgen -G "$DOTFILES_BAND_GLOB" | sort | head -n1)
     [ -f "$app_path" ] || return 1
 
     if [ -z "$(window_id '.app_id == "Band"')" ]; then
         "$app_path" --silent >/dev/null 2>&1 &
     fi
+}
+
+spawn_cmd() {
+    local cmd="$1"
+    [ -n "$cmd" ] || return 1
+    sh -c "$cmd" >/dev/null 2>&1 &
 }
 
 move_to_workspace() {
@@ -89,28 +111,30 @@ ensure_telegram_right_of_band() {
 niri msg action focus-workspace 1 >/dev/null
 
 # Workspace 1: browser.
-if [ -z "$(window_id '.app_id == "zen"')" ]; then
-    zen-browser >/dev/null 2>&1 &
+if [ -z "$(window_id ".app_id == \"$DOTFILES_BROWSER_APP_ID\"")" ]; then
+    spawn_cmd "$DOTFILES_BROWSER_CMD"
 fi
-browser_id=$(wait_window '.app_id == "zen"' || true)
+browser_id=$(wait_window ".app_id == \"$DOTFILES_BROWSER_APP_ID\"" || true)
 [ -n "${browser_id:-}" ] && move_to_workspace "$browser_id" 1
 
 # Workspace 2: IDE.
-if [ -z "$(window_id '.app_id == "code"')" ]; then
-    code >/dev/null 2>&1 &
+if [ -z "$(window_id ".app_id == \"$DOTFILES_IDE_APP_ID\"")" ]; then
+    spawn_cmd "$DOTFILES_IDE_CMD"
 fi
-code_id=$(wait_window '.app_id == "code"' || true)
+code_id=$(wait_window ".app_id == \"$DOTFILES_IDE_APP_ID\"" || true)
 [ -n "${code_id:-}" ] && move_to_workspace "$code_id" 2
 
 # Workspace 3: chats. Band should be left, Telegram/Forkgram should be right.
-launch_band || true
+if [ "$DOTFILES_ENABLE_BAND" = 1 ]; then
+    launch_band || true
+fi
 band_id=$(wait_window '.app_id == "Band"' || true)
 [ -n "${band_id:-}" ] && move_to_workspace "$band_id" 3
 
-if [ -z "$(window_id '(.app_id | test("forkgram|tdesktop"; "i"))')" ]; then
-    forkgram >/dev/null 2>&1 &
+if [ -z "$(window_id "(.app_id | test(\"$DOTFILES_CHAT_APP_ID_REGEX\"; \"i\"))")" ]; then
+    spawn_cmd "$DOTFILES_CHAT_CMD"
 fi
-telegram_id=$(wait_window '(.app_id | test("forkgram|tdesktop"; "i"))' || true)
+telegram_id=$(wait_window "(.app_id | test(\"$DOTFILES_CHAT_APP_ID_REGEX\"; \"i\"))" || true)
 [ -n "${telegram_id:-}" ] && move_to_workspace "$telegram_id" 3
 
 if [ -n "${band_id:-}" ] && [ -n "${telegram_id:-}" ]; then

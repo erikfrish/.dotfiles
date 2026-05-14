@@ -5,12 +5,20 @@ STEP=5
 cache_dir="${XDG_RUNTIME_DIR:-/tmp}/brightness"
 cache_file="$cache_dir/ddc"
 ddc_cache_ttl=10
+lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
+[ -r "$lib_file" ] && . "$lib_file"
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
 wob_fifo() {
-  if [ -p /tmp/niri.wob ]; then
-    printf '%s\n' /tmp/niri.wob
+  local fifo
+  if type dotfiles_wob_fifo >/dev/null 2>&1; then
+    fifo=$(dotfiles_wob_fifo)
+  else
+    fifo="${XDG_RUNTIME_DIR:-/tmp}/niri.wob"
+  fi
+  if [ -p "$fifo" ]; then
+    printf '%s\n' "$fifo"
   fi
 }
 

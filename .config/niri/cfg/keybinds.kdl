@@ -39,7 +39,7 @@ binds {
     // -------------------------------------------------------------------------
     Mod+P { spawn "hyprpicker" "-a"; }
     Mod+W { spawn-sh "~/.config/themes/theme-switch menu"; }
-    Mod+B { spawn-sh "killall waybar || waybar &"; }
+    Mod+B { spawn-sh "systemctl --user restart waybar.service || ~/.config/waybar/scripts/statusbar"; }
     Mod+C { spawn-sh "~/.config/desktop/scripts/clipboard_history"; }
 
     // -------------------------------------------------------------------------

@@ -1,0 +1,13 @@
+[Unit]
+Description=Restore dotfiles wallpaper
+PartOf=dotfiles-session.target
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=%h/.config/desktop/scripts/change_wallpaper restore
+ExecStop=%h/.config/desktop/scripts/change_wallpaper color:000000
+
+[Install]
+WantedBy=dotfiles-session.target

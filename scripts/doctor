@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_dir="$(cd -- "$script_dir/.." && pwd)"
+failed=0
+
+ok() { printf 'OK   %s\n' "$1"; }
+warn() { printf 'WARN %s\n' "$1"; }
+fail() { printf 'FAIL %s\n' "$1"; failed=1; }
+
+check_command() {
+  if command -v "$1" >/dev/null 2>&1; then
+    ok "command: $1"
+  else
+    fail "missing command: $1"
+  fi
+}
+
+script_files() {
+  {
+    git -C "$repo_dir" ls-files \
+      'scripts/*' \
+      '.config/desktop/scripts/*' \
+      '.config/waybar/scripts/*' \
+      '.config/niri/scripts/*' \
+      '.config/themes/theme-switch' \
+      '.config/ly/apply.sh' \
+      '.local/bin/*'
+    git -C "$repo_dir" ls-files --others --exclude-standard \
+      'scripts/*' \
+      '.config/desktop/scripts/*' \
+      '.config/waybar/scripts/*' \
+      '.config/niri/scripts/*' \
+      '.config/themes/theme-switch' \
+      '.config/ly/apply.sh' \
+      '.local/bin/*'
+  } | sort -u
+}
+
+for cmd in bash stow niri waybar rofi jq ffmpeg awww mpvpaper wl-paste cliphist wob swayosd-server; do
+  check_command "$cmd"
+done
+
+if command -v niri >/dev/null 2>&1; then
+  if niri validate -c "$repo_dir/.config/niri/config.kdl" >/dev/null; then
+    ok "niri config validates"
+  else
+    fail "niri config validation failed"
+  fi
+fi
+
+if command -v stow >/dev/null 2>&1; then
+  if (cd "$repo_dir" && stow --simulate --restow --target="$HOME" . >/dev/null); then
+    ok "stow simulation succeeds"
+  else
+    fail "stow simulation failed"
+  fi
+fi
+
+while IFS= read -r file; do
+  [ -f "$repo_dir/$file" ] || continue
+  case "$file" in scripts/packages.*) continue ;; esac
+  if bash -n "$repo_dir/$file"; then
+    ok "bash syntax: $file"
+  else
+    fail "bash syntax: $file"
+  fi
+done < <(script_files)
+
+if command -v shellcheck >/dev/null 2>&1; then
+  if (cd "$repo_dir" && shellcheck scripts/* .config/desktop/scripts/* .config/waybar/scripts/* .config/niri/scripts/* .config/themes/theme-switch .config/ly/apply.sh .local/bin/*); then
+    ok "shellcheck"
+  else
+    fail "shellcheck reported issues"
+  fi
+else
+  warn "shellcheck is not installed"
+fi
+
+for local_file in "$HOME/.gitconfig.local" "$HOME/.ssh/config.local"; do
+  if [ -e "$local_file" ]; then
+    ok "local override exists: $local_file"
+  else
+    warn "local override missing: $local_file"
+  fi
+done
+
+theme_switch="$HOME/.config/themes/theme-switch"
+if [ -x "$theme_switch" ]; then
+  current_theme="$($theme_switch current 2>/dev/null || true)"
+  if [ -n "$current_theme" ] && $theme_switch apply "$current_theme" >/dev/null; then
+    ok "theme regeneration: $current_theme"
+  else
+    warn "theme regeneration skipped or failed"
+  fi
+fi
+
+exit "$failed"

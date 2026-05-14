@@ -17,6 +17,10 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `polkit-kde-agent` | Authentication dialog (`/usr/lib/polkit-kde-authentication-agent-1`) |
 | `xdg-desktop-portal-gtk` | File picker portal (Niri fallback) |
 | `dbus-update-activation-environment` | DBus env sync (part of `dbus`) |
+| `stow` | Dotfile symlink management |
+| `shellcheck` | Optional script lint used by `scripts/doctor` |
+
+`scripts/test` runs portable checks in a temporary home: Bash syntax, Niri validation, Stow simulation, theme generation, and local override behavior.
 
 ## Display Manager & Lock
 
@@ -157,7 +161,7 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | Package | Purpose |
 |---|---|
 | `xkeyboard-config` | Base XKB data (provides `ru(winkeys)`, `EIGHT_LEVEL_BY_CTRL` type) |
-| `xkbcli` | Validate custom layout (`xkbcli compile-keymap --test`) |
+| `libxkbcommon` | Provides `xkbcli` for custom layout validation |
 
 The custom layout lives in `~/.config/xkb/symbols/dotfiles` and is activated by:
 - **Niri**: `layout "us,dotfiles"` + `variant ",ru_ctrl_shortcuts"` + `xkb_options "grp:alt_shift_toggle"` in `cfg/input.kdl`
@@ -165,27 +169,14 @@ The custom layout lives in `~/.config/xkb/symbols/dotfiles` and is activated by:
 ## Install Everything (Arch/CachyOS)
 
 ```bash
-sudo pacman -S --needed \
-  niri xwayland-satellite waybar polkit-kde-agent \
-  xdg-desktop-portal-gtk \
-  ly hyprlock swayidle \
-  rofi rofi-emoji rofi-calc wlogout \
-  pipewire wireplumber pipewire-pulse pavucontrol \
-  brightnessctl ddcutil wob swayosd \
-  swaync libnotify \
-  wl-clipboard cliphist wl-clip-persist imagemagick \
-  grim slurp \
-  awww ffmpeg \
-  networkmanager nm-connection-editor network-manager-applet bluez blueman \
-  fprintd libfprint fcitx5 \
-  gammastep hyprpicker playerctl \
-  zsh alacritty \
-  jq gsimplecal btop paru curl \
-  ttf-jetbrains-mono-nerd \
-  xkeyboard-config xkbcli \
-  code nautilus zen-browser forkgram-desktop
+~/.dotfiles/scripts/setup
+```
 
-paru -S --needed arch-update-tray sshpass ddcci-driver-linux-dkms-git mpvpaper
+The concrete package lists are the source of truth:
+
+```text
+scripts/packages.pacman
+scripts/packages.aur
 ```
 
 ## Post-Install Setup (requires sudo)

@@ -4,6 +4,8 @@ set -euo pipefail
 max_volume=150
 max_volume_wp=1.5
 step=5
+lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
+[ -r "$lib_file" ] && . "$lib_file"
 
 have() {
   command -v "$1" >/dev/null 2>&1
@@ -14,8 +16,14 @@ refresh_waybar() {
 }
 
 wob_fifo() {
-  if [ -p /tmp/niri.wob ]; then
-    printf '%s\n' /tmp/niri.wob
+  local fifo
+  if type dotfiles_wob_fifo >/dev/null 2>&1; then
+    fifo=$(dotfiles_wob_fifo)
+  else
+    fifo="${XDG_RUNTIME_DIR:-/tmp}/niri.wob"
+  fi
+  if [ -p "$fifo" ]; then
+    printf '%s\n' "$fifo"
   fi
 }
 

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
+[ -r "$lib_file" ] && . "$lib_file"
+type dotfiles_load_machine_config >/dev/null 2>&1 && dotfiles_load_machine_config
+
+slot="${1:-vpn1}"
+
+case "$slot" in
+  vpn1)
+    connection="${DOTFILES_VPN1_CONNECTION-vpnchik}"
+    label="${DOTFILES_VPN1_LABEL:-Личный VPN}"
+    icon="${DOTFILES_VPN1_ICON:-}"
+    ;;
+  vpn2)
+    connection="${DOTFILES_VPN2_CONNECTION-wb}"
+    label="${DOTFILES_VPN2_LABEL:-Рабочий VPN}"
+    icon="${DOTFILES_VPN2_ICON:-}"
+    ;;
+  *)
+    printf '{"text":"","class":"inactive","tooltip":"Unknown VPN slot"}\n'
+    exit 0
+    ;;
+esac
+
+if [ -z "$connection" ]; then
+  printf '{"text":"","class":"inactive","tooltip":"%s: not configured"}\n' "$label"
+  exit 0
+fi
+
+if nmcli connection show --active | grep -Fq "$connection"; then
+  printf '{"text":"%s","class":"active","tooltip":"%s: Включен"}\n' "$icon" "$label"
+else
+  printf '{"text":"%s","class":"inactive","tooltip":"%s: Выключен"}\n' "$icon" "$label"
+fi

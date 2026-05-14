@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-wallpaper_dir="$HOME/Pictures/Wallpapers"
+lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
+[ -r "$lib_file" ] && . "$lib_file"
+type dotfiles_load_machine_config >/dev/null 2>&1 && dotfiles_load_machine_config
+
+wallpaper_dir="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper"
 state_file="$state_dir/current"
 video_pid_file="$state_dir/mpvpaper.pid"
 thumb_dir="${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-thumbnails"
 video_preview_second=1
+mpv_hwdec="${DOTFILES_MPV_HWDEC:-auto-safe}"
 
 mapfile -d '' wallpapers < <(
   find "$wallpaper_dir" -maxdepth 1 -type f \
@@ -109,7 +114,7 @@ apply_wallpaper() {
     else
       stop_image_wallpaper
     fi
-    mpvpaper -o "no-audio --hwdec=auto-safe --loop-file=inf --panscan=1.0 --video-unscaled=no --keepaspect=yes --start=$video_preview_second" '*' "$file" >/dev/null 2>&1 &
+    mpvpaper -o "no-audio --hwdec=$mpv_hwdec --loop-file=inf --panscan=1.0 --video-unscaled=no --keepaspect=yes --start=$video_preview_second" '*' "$file" >/dev/null 2>&1 &
     printf '%s\n' "$!" >"$video_pid_file"
   else
     stop_video_wallpaper

@@ -1,0 +1,3 @@
+[Unit]
+Description=Dotfiles Wayland session services
+Wants=waybar.service wob.service swayosd.service swayidle.service clipboard-history.service wallpaper.service

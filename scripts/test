@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_dir="$(cd -- "$script_dir/.." && pwd)"
+failed=0
+tmp_dirs=()
+trap 'rm -rf "${tmp_dirs[@]:-}"' EXIT
+
+pass() { printf 'ok   %s\n' "$1"; }
+fail() { printf 'fail %s\n' "$1"; failed=1; }
+
+run() {
+  local name="$1"
+  shift
+  if "$@"; then
+    pass "$name"
+  else
+    fail "$name"
+  fi
+}
+
+script_files() {
+  {
+    git -C "$repo_dir" ls-files \
+      'scripts/*' \
+      '.config/desktop/scripts/*' \
+      '.config/waybar/scripts/*' \
+      '.config/niri/scripts/*' \
+      '.config/themes/theme-switch' \
+      '.config/ly/apply.sh' \
+      '.local/bin/*'
+    git -C "$repo_dir" ls-files --others --exclude-standard \
+      'scripts/*' \
+      '.config/desktop/scripts/*' \
+      '.config/waybar/scripts/*' \
+      '.config/niri/scripts/*' \
+      '.config/themes/theme-switch' \
+      '.config/ly/apply.sh' \
+      '.local/bin/*'
+  } | sort -u
+}
+
+test_bash_syntax() {
+  local file ok=0
+  while IFS= read -r file; do
+    [ -f "$repo_dir/$file" ] || continue
+    case "$file" in scripts/packages.*) continue ;; esac
+    bash -n "$repo_dir/$file" || ok=1
+  done < <(script_files)
+  return "$ok"
+}
+
+test_niri_config() {
+  command -v niri >/dev/null 2>&1 || return 0
+  niri validate -c "$repo_dir/.config/niri/config.kdl" >/dev/null
+}
+
+test_stow_clean_home() {
+  command -v stow >/dev/null 2>&1 || return 0
+  local tmp
+  tmp=$(mktemp -d)
+  tmp_dirs+=("$tmp")
+  mkdir -p "$tmp/home"
+  (cd "$repo_dir" && stow --simulate --restow --target="$tmp/home" . >/dev/null)
+}
+
+test_theme_switch_generates() {
+  local tmp fakebin theme_script
+  tmp=$(mktemp -d)
+  tmp_dirs+=("$tmp")
+  fakebin="$tmp/bin"
+  mkdir -p "$fakebin" "$tmp/home/.config"
+
+  cp -R "$repo_dir/.config/themes" "$tmp/home/.config/"
+  cp -R "$repo_dir/.config/waybar" "$tmp/home/.config/"
+  cp -R "$repo_dir/.config/swaync" "$tmp/home/.config/"
+  cp -R "$repo_dir/.config/rofi" "$tmp/home/.config/"
+  cp -R "$repo_dir/.config/hypr" "$tmp/home/.config/"
+  cp -R "$repo_dir/.config/wlogout" "$tmp/home/.config/"
+  mkdir -p "$tmp/home/.config/gtk-3.0" "$tmp/home/.config/gtk-4.0" "$tmp/home/.config/wob" "$tmp/home/.config/swayosd" "$tmp/home/.config/alacritty" "$tmp/home/.config/Code/User" "$tmp/home/.config/dotfiles"
+  cp "$repo_dir/.config/dotfiles/lib.sh" "$tmp/home/.config/dotfiles/lib.sh"
+  printf '{\n}\n' > "$tmp/home/.config/Code/User/settings.json"
+
+  for cmd in systemctl swaync-client gsettings killall pkill swayosd-server waybar; do
+    printf '#!/usr/bin/env bash\nexit 0\n' > "$fakebin/$cmd"
+    chmod +x "$fakebin/$cmd"
+  done
+
+  theme_script="$tmp/home/.config/themes/theme-switch"
+  PATH="$fakebin:$PATH" HOME="$tmp/home" XDG_CONFIG_HOME="$tmp/home/.config" XDG_CACHE_HOME="$tmp/cache" XDG_STATE_HOME="$tmp/state" "$theme_script" apply tokyo-night >/dev/null
+
+  [ -s "$tmp/home/.config/alacritty/theme.toml" ] &&
+    [ -s "$tmp/home/.config/ly/theme.ini" ] &&
+    [ -s "$tmp/home/.config/shell/theme.sh" ] &&
+    [ -s "$tmp/home/.config/qt5ct/colors/dotfiles.conf" ] &&
+    [ -s "$tmp/home/.config/qt6ct/colors/dotfiles.conf" ] &&
+    grep -q 'BEGIN dotfiles-theme' "$tmp/home/.config/Code/User/settings.json"
+}
+
+test_vpn_status_without_connection() {
+  local tmp fakebin script
+  tmp=$(mktemp -d)
+  tmp_dirs+=("$tmp")
+  fakebin="$tmp/bin"
+  mkdir -p "$fakebin" "$tmp/config/dotfiles"
+  cp "$repo_dir/.config/dotfiles/lib.sh" "$tmp/config/dotfiles/lib.sh"
+  printf 'DOTFILES_VPN1_CONNECTION=\n' > "$tmp/config/dotfiles/machine.conf"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$fakebin/nmcli"
+  chmod +x "$fakebin/nmcli"
+  script="$repo_dir/.config/desktop/scripts/vpn_status"
+  PATH="$fakebin:$PATH" XDG_CONFIG_HOME="$tmp/config" "$script" vpn1 | grep -q 'not configured'
+}
+
+run "bash syntax" test_bash_syntax
+run "niri config" test_niri_config
+run "stow clean target" test_stow_clean_home
+run "theme-switch generation" test_theme_switch_generates
+run "vpn status local override" test_vpn_status_without_connection
+
+exit "$failed"

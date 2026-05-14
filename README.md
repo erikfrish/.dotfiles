@@ -1,6 +1,6 @@
 # Dotfiles
 
-Personal Linux desktop configuration built around Niri, Waybar, Rofi, swaync, hyprlock, ly, and a small set of shell scripts. The repository is managed with GNU Stow and keeps generated files out of Git, so the checked-in files remain the source of truth.
+Personal Linux desktop configuration built around Niri, Waybar, Rofi, swaync, hyprlock, ly, systemd user services, and a small set of shell scripts. The repository is managed with GNU Stow and keeps generated files out of Git, so the checked-in files remain the source of truth.
 
 The setup is intentionally boring in the places that should be reliable: one compositor, one launcher stack, one theme switcher, one volume path, one wallpaper path.
 
@@ -25,11 +25,13 @@ The setup is intentionally boring in the places that should be reliable: one com
 .config/rofi/          Launcher, clipboard, wallpaper, and theme menus
 .config/swaync/        Notification center config, CSS template, focus helper
 .config/desktop/       Shared scripts for menu, volume, brightness, wallpaper
+.config/dotfiles/      Shared helper library and machine-local profile example
 .config/hypr/          hyprlock only; Hyprland compositor configs are removed
 .config/ly/            TTY display manager config and deploy helper
+.config/systemd/user/  Session services started by dotfiles-session.target
 .config/xkb/           Custom Russian shortcut-friendly XKB layout
 etc/pam.d/hyprlock     PAM config for fingerprint unlock with password fallback
-scripts/               Setup helpers for packages, PAM, SSH agent, DDC/CI
+scripts/               Package lists, setup helpers, doctor, PAM, SSH, DDC/CI
 notes/                 Hardware and operational notes
 ```
 
@@ -40,6 +42,8 @@ Install packages first:
 ```sh
 ~/.dotfiles/scripts/setup
 ```
+
+The package sets live in `scripts/packages.pacman` and `scripts/packages.aur`.
 
 Stow the files:
 
@@ -62,6 +66,25 @@ Deploy ly config explicitly:
 sudo ~/.config/ly/apply.sh
 ```
 
+Optional per-machine overrides:
+
+```sh
+cp ~/.config/dotfiles/machine.conf.example ~/.config/dotfiles/machine.conf
+$EDITOR ~/.config/dotfiles/machine.conf
+```
+
+Validate a machine after install:
+
+```sh
+~/.dotfiles/scripts/doctor
+```
+
+Run repository-level tests without touching the real home directory:
+
+```sh
+~/.dotfiles/scripts/test
+```
+
 ## Machine-Local Files
 
 These files are intentionally ignored and should stay outside Git:
@@ -70,6 +93,9 @@ These files are intentionally ignored and should stay outside Git:
 ~/.gitconfig.local
 ~/.ssh/config.local
 ~/.ssh/yubikeys.tsv
+~/.config/dotfiles/machine.conf
+~/.config/Code/User/settings.json
+~/.zshrc.local
 ```
 
 On a machine that already has local Git or SSH config, move it into the local override files before stowing:
@@ -150,6 +176,14 @@ Generated files are ignored by Git:
 ~/.config/wlogout/style.css
 ~/.config/wob/wob.ini
 ~/.config/swayosd/style.css
+~/.config/alacritty/theme.toml
+~/.config/Code/User/dotfiles-theme.generated.json
+~/.config/qt5ct/colors/dotfiles.conf
+~/.config/qt6ct/colors/dotfiles.conf
+~/.config/qt5ct/qt5ct.conf
+~/.config/qt6ct/qt6ct.conf
+~/.config/ly/theme.ini
+~/.config/shell/theme.sh
 ```
 
 The Waybar wallpaper button is the main theme entrypoint:
@@ -213,10 +247,22 @@ Relevant scripts:
 ```
 
 Video thumbnails are generated with `ffmpeg`. Video wallpapers use `mpvpaper`; image wallpapers use `awww`.
+`DOTFILES_WALLPAPER_DIR` and `DOTFILES_MPV_HWDEC` can be overridden in `~/.config/dotfiles/machine.conf`.
 
 ## Lock And Idle
 
 `hyprlock` is kept only as the screen locker. The compositor is Niri.
+
+Session services are grouped under `dotfiles-session.target`:
+
+```text
+waybar.service
+wob.service
+swayosd.service
+swayidle.service
+clipboard-history.service
+wallpaper.service
+```
 
 Idle flow:
 
@@ -233,3 +279,4 @@ Fingerprint unlock is handled by `/etc/pam.d/hyprlock`. ly intentionally does no
 - `notes/yubikey_pool.md` documents the dynamic YubiKey/SSH signing pool.
 - `notes/thinkpad_setup_process.md` keeps hardware and migration notes.
 - Hyprland compositor configs, Wofi, Swaylock, legacy Waybar styles, and unused Waybar modules were removed to keep the tree focused on the active Niri desktop.
+- Machine-specific knobs live in `~/.config/dotfiles/machine.conf`; keep host quirks there instead of hardcoding them into shared scripts.

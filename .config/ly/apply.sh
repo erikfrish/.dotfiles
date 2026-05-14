@@ -2,6 +2,37 @@
 set -euo pipefail
 
 config_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+theme_file="$config_dir/theme.ini"
+
+merged_config() {
+  local src="$1" theme="$2" dest="$3"
+
+  if [[ ! -f "$theme" ]]; then
+    cp "$src" "$dest"
+    return
+  fi
+
+  awk '
+    FNR == NR {
+      if ($0 ~ /^[[:space:]]*#/ || $0 !~ /=/) next
+      key = $1
+      values[key] = $0
+      next
+    }
+    {
+      key = $1
+      if (key in values) {
+        print values[key]
+        delete values[key]
+      } else {
+        print
+      }
+    }
+    END {
+      for (key in values) print values[key]
+    }
+  ' "$theme" "$src" > "$dest"
+}
 
 deploy() {
   local src="$1" dest="$2"
@@ -18,6 +49,9 @@ deploy() {
   printf 'Installed %s to %s\n' "$src" "$dest"
 }
 
-deploy "$config_dir/config.ini" "/etc/ly/config.ini"
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+merged_config "$config_dir/config.ini" "$theme_file" "$tmp"
+deploy "$tmp" "/etc/ly/config.ini"
 
 printf 'Restart ly or reboot for changes to take effect.\n'

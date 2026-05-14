@@ -92,7 +92,6 @@
     "format": " {:%H:%M   %F, %a}",
     "format-alt": " {:%H:%M}",
     "format-alt-click": "click-right",
-    "timezone": "Europe/Moscow",
     "on-click": "swaync-client -t -sw",
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
     "calendar": {
@@ -286,17 +285,17 @@
 
   "custom/vpn1": {
     "format": "{}",
-    "exec": "sh -c 'if nmcli connection show --active | grep -q \"vpnchik\"; then echo \"{\\\"text\\\": \\\"\\\", \\\"class\\\": \\\"active\\\", \\\"tooltip\\\": \\\"Личный VPN: Включен\\\"}\"; else echo \"{\\\"text\\\": \\\"\\\", \\\"class\\\": \\\"inactive\\\", \\\"tooltip\\\": \\\"Личный VPN: Выключен\\\"}\"; fi'",
+    "exec": "~/.config/desktop/scripts/vpn_status vpn1",
     "return-type": "json",
     "interval": 2,
-    "on-click": "nmcli connection up vpnchik || nmcli connection down vpnchik"
+    "on-click": "~/.config/desktop/scripts/vpn_toggle vpn1"
   },
 
   "custom/vpn2": {
     "format": "{}",
-    "exec": "sh -c 'if nmcli connection show --active | grep -q \"wb\"; then echo \"{\\\"text\\\": \\\"\\\", \\\"class\\\": \\\"active\\\", \\\"tooltip\\\": \\\"Рабочий VPN: Включен\\\"}\"; else echo \"{\\\"text\\\": \\\"\\\", \\\"class\\\": \\\"inactive\\\", \\\"tooltip\\\": \\\"Рабочий VPN: Выключен\\\"}\"; fi'",
+    "exec": "~/.config/desktop/scripts/vpn_status vpn2",
     "return-type": "json",
     "interval": 2,
-    "on-click": "nmcli connection up wb || nmcli connection down wb"
+    "on-click": "~/.config/desktop/scripts/vpn_toggle vpn2"
   }
 }

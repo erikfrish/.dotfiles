@@ -85,6 +85,7 @@ alias ttl='sudo sysctl -w net.inet.ip.ttl=65'
 alias docker_clean_images='docker rmi $(docker images -a --filter=dangling=true -q)'
 alias docker_clean_ps='docker rm $(docker ps --filter=status=exited --filter=status=created -q)'
 alias dcoker_clean_cashe='docker system prune -a'
+alias docker_clean_cache='docker system prune -a'
 alias get_idf='. $HOME/esp/esp-idf/export.sh'
 alias wake_homelab='wakeonlan -i 192.168.1.255 c8:ff:bf:04:e7:64'
 alias ls='eza'
@@ -95,10 +96,10 @@ alias oc='opencode'
 alias tsh='tsh-17'
 
 ENABLE_CORRECTION="false"
-source /usr/share/cachyos-zsh-config/cachyos-config.zsh
+[ -r /usr/share/cachyos-zsh-config/cachyos-config.zsh ] && source /usr/share/cachyos-zsh-config/cachyos-config.zsh
 unsetopt correct correct_all 2>/dev/null
 unset ENABLE_CORRECTION
-source /opt/esp-idf/export.sh > /dev/null 2>&1
+[ -r /opt/esp-idf/export.sh ] && source /opt/esp-idf/export.sh > /dev/null 2>&1
 
 # User configuration
 # source /opt/homebrew/opt/zsh-fast-syntax-highlighting/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
@@ -114,7 +115,7 @@ source /opt/esp-idf/export.sh > /dev/null 2>&1
 export GOPATH="$HOME/go"
 export PATH="$GOPATH/bin/:$PATH"
 export PATH="$PATH:$HOME/.local/bin"
-export PATH="$PATH:/home/erikfrish/.cargo/bin"
+export PATH="$PATH:$HOME/.cargo/bin"
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export LIBVIRT_DEFAULT_URI="qemu:///system"
@@ -126,3 +127,6 @@ if [ -f "$HOME/.config/opencode/.env" ]; then
   . "$HOME/.config/opencode/.env"
   set +a
 fi
+
+[ -r "$HOME/.config/shell/theme.sh" ] && source "$HOME/.config/shell/theme.sh"
+[ -r "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"

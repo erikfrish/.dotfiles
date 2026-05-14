@@ -8,3 +8,5 @@
 .*\.md
 .*\.sh
 .*\.png
+^\.config/dotfiles/machine\.conf$
+^\.zshrc\.local$

@@ -1,8 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-I2C_BUS="${1:-10}"
-I2C_ADDR="${2:-0x37}"
+lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
+[ -r "$lib_file" ] && . "$lib_file"
+type dotfiles_load_machine_config >/dev/null 2>&1 && dotfiles_load_machine_config
+
+I2C_BUS="${1:-${DOTFILES_DDCCI_BUS:-10}}"
+I2C_ADDR="${2:-${DOTFILES_DDCCI_ADDR:-0x37}}"
 
 echo "==> Loading ddcci kernel modules..."
 modprobe ddcci ddcci-backlight || {

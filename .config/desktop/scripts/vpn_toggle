@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
+[ -r "$lib_file" ] && . "$lib_file"
+type dotfiles_load_machine_config >/dev/null 2>&1 && dotfiles_load_machine_config
+
+slot="${1:-vpn1}"
+
+case "$slot" in
+  vpn1) connection="${DOTFILES_VPN1_CONNECTION-vpnchik}" ;;
+  vpn2) connection="${DOTFILES_VPN2_CONNECTION-wb}" ;;
+  *) exit 0 ;;
+esac
+
+[ -n "$connection" ] || exit 0
+
+if nmcli connection show --active | grep -Fq "$connection"; then
+  nmcli connection down "$connection"
+else
+  nmcli connection up "$connection"
+fi
