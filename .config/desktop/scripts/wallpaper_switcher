@@ -60,16 +60,16 @@ if [ "${#wallpapers[@]}" -eq 0 ]; then
 fi
 
 selected_row=0
+current_wallpaper=""
 if [ -f "$state_file" ]; then
   current_wallpaper=$(<"$state_file")
   if [[ "$current_wallpaper" == color:* ]]; then
-    selected_row="${#wallpapers[@]}"
-    (( selected_row += 1 ))
+    selected_row=1
   else
     current_wallpaper=$(realpath -m "$current_wallpaper")
     for i in "${!wallpapers[@]}"; do
       if [ "$(realpath -m "${wallpapers[$i]}")" = "$current_wallpaper" ]; then
-        selected_row="$i"
+        selected_row="$((i + 2))"
         break
       fi
     done
@@ -78,10 +78,18 @@ fi
 
 {
   printf 'Random\0icon\x1fshuffle\n'
-  printf 'Solid Color\0icon\x1ffill-color\n'
+  if [[ "$current_wallpaper" == color:* ]]; then
+    printf '[ Solid Color ]\0icon\x1ffill-color\n'
+  else
+    printf 'Solid Color\0icon\x1ffill-color\n'
+  fi
   for wp in "${wallpapers[@]}"; do
     name=$(basename "$wp")
-    printf '%s\0icon\x1f%s\n' "$name" "$(thumbnail_for "$wp")"
+    if [[ -n "$current_wallpaper" && "$current_wallpaper" != color:* && "$(realpath -m "$wp")" = "$current_wallpaper" ]]; then
+      printf '[ %s ]\0icon\x1f%s\n' "$name" "$(thumbnail_for "$wp")"
+    else
+      printf '%s\0icon\x1f%s\n' "$name" "$(thumbnail_for "$wp")"
+    fi
   done
 } | rofi -dmenu \
   -i \
@@ -93,6 +101,8 @@ fi
   -sync | {
     choice=$(cat)
     [ -n "$choice" ] || exit 0
+    choice="${choice#[ }"
+    choice="${choice% ]}"
     if [ "$choice" = "Random" ]; then
       exec "$change_wallpaper" random
     fi
