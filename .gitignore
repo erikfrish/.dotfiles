@@ -11,3 +11,5 @@ ignore_me
 .config/gtk-3.0/gtk.css
 .config/gtk-4.0/gtk.css
 .config/swaync/style.css
+.config/hypr/hyprlock-theme.conf
+.config/wlogout/style.css
