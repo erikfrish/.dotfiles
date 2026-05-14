@@ -1,0 +1,67 @@
+#!/bin/bash
+set -euo pipefail
+
+I2C_BUS="${1:-10}"
+I2C_ADDR="${2:-0x37}"
+
+echo "==> Loading ddcci kernel modules..."
+modprobe ddcci ddcci-backlight || {
+  echo "ERROR: modprobe failed. Is ddcci-driver-linux-dkms-git installed?"
+  echo "  paru -S ddcci-driver-linux-dkms-git"
+  exit 1
+}
+
+echo "==> Detecting I2C buses with DDC/CI monitors..."
+if [ -d "/sys/class/backlight/ddcci${I2C_BUS}" ]; then
+  echo "ddcci backlight already exists on bus ${I2C_BUS}"
+  ls /sys/class/backlight/
+  exit 0
+fi
+
+echo "==> Binding ddcci to I2C bus ${I2C_BUS}..."
+echo "ddcci ${I2C_ADDR}" > "/sys/bus/i2c/devices/i2c-${I2C_BUS}/new_device" 2>/dev/null || {
+  echo "ERROR: Failed to bind ddcci to i2c-${I2C_BUS}. Try specifying a different bus:"
+  echo "  Usage: $0 [i2c_bus_number] [i2c_address]"
+  echo ""
+  echo "  Available I2C buses with DDC monitors (check 'ddcutil detect'):"
+  ddcutil detect --brief 2>/dev/null || true
+  exit 1
+}
+
+echo "==> Checking /sys/class/backlight/..."
+if ls /sys/class/backlight/ddcci* >/dev/null 2>&1; then
+  echo "Success! Backlight device created:"
+  ls /sys/class/backlight/
+  echo ""
+  echo "Current brightness: $(cat /sys/class/backlight/ddcci${I2C_BUS}/brightness)/$(cat /sys/class/backlight/ddcci${I2C_BUS}/max_brightness)"
+else
+  echo "WARNING: ddcci module loaded but no backlight device found."
+  echo "Check 'dmesg | grep ddcci' for errors."
+fi
+
+echo ""
+echo "==> Installing persistent configuration..."
+tee /etc/modules-load.d/ddcci.conf >/dev/null << 'EOF'
+ddcci
+ddcci-backlight
+EOF
+
+tee /etc/systemd/system/ddcci-bind.service >/dev/null << EOF
+[Unit]
+Description=Bind ddcci to monitor I2C bus
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo ddcci ${I2C_ADDR} > /sys/bus/i2c/devices/i2c-${I2C_BUS}/new_device'
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable ddcci-bind.service
+
+echo ""
+echo "Done! Brightness will auto-start on boot."
+echo "Test: brightnessctl s 5%-"

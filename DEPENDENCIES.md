@@ -52,7 +52,9 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 
 | Package | Purpose |
 |---|---|
-| `brightnessctl` | Screen brightness control |
+| `brightnessctl` | Screen brightness control (backlight + ddcci) |
+| `ddcutil` | DDC/CI monitor control (fallback when no ddcci driver) |
+| `ddcci-driver-linux-dkms` | Kernel driver for DDC/CI as `/sys/class/backlight/ddcci*` |
 | `wob` | Volume/brightness overlay bar |
 | `swayosd` | Layout/CapsLock/volume OSD |
 
@@ -172,7 +174,7 @@ sudo pacman -S --needed \
   ly hyprlock hypridle \
   rofi rofi-emoji rofi-calc wlogout \
   pipewire wireplumber pipewire-pulse pavucontrol \
-  brightnessctl wob swayosd \
+  brightnessctl ddcutil wob swayosd \
   swaync libnotify \
   wl-clipboard cliphist wl-clip-persist imagemagick \
   grim slurp hyprland-contrib \
@@ -186,5 +188,26 @@ sudo pacman -S --needed \
   xkeyboard-config xkbcli \
   code nautilus zen-browser forkgram-desktop
 
-paru -S --needed arch-update-tray sshpass
+paru -S --needed arch-update-tray sshpass ddcci-driver-linux-dkms-git
 ```
+
+## Post-Install Setup (requires sudo)
+
+```bash
+# DDC/CI backlight driver for external monitors
+# Run: sudo ~/.dotfiles/scripts/setup-ddcci
+#
+# Or manually:
+#   sudo modprobe ddcci ddcci-backlight
+#   sudo sh -c 'echo ddcci 0x37 > /sys/bus/i2c/devices/i2c-10/new_device'
+#   ls /sys/class/backlight/   # should show ddcciN
+
+# SSH agent (user service)
+# Run: ~/.dotfiles/scripts/setup-ssh-agent
+#
+# Or manually:
+#   systemctl --user disable ssh-agent.socket
+#   systemctl --user enable --now ssh-agent.service
+
+# YubiKey pool
+# Run: ~/.dotfiles/.local/bin/yubikey-pool-setup

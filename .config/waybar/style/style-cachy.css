@@ -91,7 +91,7 @@ window#waybar.hidden {
 #memory,
 #disk,
 #temperature,
-#backlight,
+#custom-backlight,
 #network,
 #custom-audio-volume,
 #pulseaudio,
@@ -235,7 +235,7 @@ window#waybar.hidden {
     color: #7d9bba;
 }
 
-#backlight {
+#custom-backlight {
     color: #8fbcbb;
 }
 

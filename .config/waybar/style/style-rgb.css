@@ -44,7 +44,7 @@ tooltip label {
 #memory,
 #disk,
 #temperature,
-#backlight,
+#custom-backlight,
 #network,
 #custom-audio-volume,
 #pulseaudio,
@@ -76,7 +76,7 @@ tooltip label {
 	border: 1px solid #b4befe;
 }
 
-#backlight {
+#custom-backlight {
 	background-color: #cba6f7;
 }
 

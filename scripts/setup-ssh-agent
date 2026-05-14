@@ -1,0 +1,17 @@
+#!/bin/bash
+set -euo pipefail
+
+echo "==> Disabling system ssh-agent.socket (conflicts with custom service)..."
+systemctl --user disable ssh-agent.socket 2>/dev/null || true
+systemctl --user stop ssh-agent.socket 2>/dev/null || true
+
+echo "==> Enabling custom ssh-agent.service..."
+systemctl --user daemon-reload
+systemctl --user enable --now ssh-agent.service
+
+echo "==> Checking status..."
+systemctl --user status ssh-agent.service --no-pager 2>/dev/null || true
+
+echo ""
+echo "Socket: ${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ssh-agent.socket"
+echo "Test: ssh-add -l"

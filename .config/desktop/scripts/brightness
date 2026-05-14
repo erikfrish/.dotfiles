@@ -1,0 +1,207 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STEP=5
+cache_dir="${XDG_RUNTIME_DIR:-/tmp}/brightness"
+cache_file="$cache_dir/ddc"
+ddc_cache_ttl=10
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+wob_fifo() {
+  if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && [ -p "/tmp/$HYPRLAND_INSTANCE_SIGNATURE.wob" ]; then
+    printf '%s\n' "/tmp/$HYPRLAND_INSTANCE_SIGNATURE.wob"
+  elif [ -p /tmp/niri.wob ]; then
+    printf '%s\n' /tmp/niri.wob
+  fi
+}
+
+show_wob() {
+  local value fifo
+  value=${1:-0}
+  fifo=$(wob_fifo)
+  [ -n "$fifo" ] || return 0
+  timeout 0.5s bash -c 'printf "%s\n" "$1" >"$2"' _ "$value" "$fifo" >/dev/null 2>&1 || true
+}
+
+refresh_waybar() {
+  pkill -RTMIN+10 waybar 2>/dev/null || true
+}
+
+detect_method() {
+  local method_cache="$cache_dir/method"
+  if [ -f "$method_cache" ] && [ "$(find "$method_cache" -newermt '60 seconds ago' 2>/dev/null)" ]; then
+    cat "$method_cache"
+    return
+  fi
+  mkdir -p "$cache_dir"
+  local result="none"
+  for bl in /sys/class/backlight/*/; do
+    [ -d "$bl" ] && { result="backlight"; break; }
+  done
+  if [ "$result" = "none" ] && have ddcutil; then
+    ddcutil detect --brief 2>/dev/null | grep -q 'Display [0-9]' && result="ddc"
+  fi
+  echo "$result" > "$method_cache"
+  echo "$result"
+}
+
+backlight_name() {
+  ls /sys/class/backlight/ 2>/dev/null | head -1
+}
+
+ddc_read_raw() {
+  mkdir -p "$cache_dir"
+  if [ -f "$cache_file" ] && [ "$(find "$cache_file" -newermt "${ddc_cache_ttl} seconds ago" 2>/dev/null)" ]; then
+    cat "$cache_file"
+    return
+  fi
+  local line cur max
+  line=$(ddcutil getvcp 10 --display 1 --brief 2>/dev/null)
+  cur=$(echo "$line" | awk '{print $4}')
+  max=$(echo "$line" | awk '{print $5}')
+  [ -n "$cur" ] && [ -n "$max" ] || return 1
+  printf '%s %s\n' "$cur" "$max" > "$cache_file"
+  printf '%s %s\n' "$cur" "$max"
+}
+
+ddc_set() {
+  ddcutil setvcp 10 "$1" --display 1 2>/dev/null || true
+  local cached
+  cached=$(cat "$cache_file" 2>/dev/null || echo "1 1")
+  local max
+  max=$(echo "$cached" | awk '{print $2}')
+  printf '%s %s\n' "$1" "$max" > "$cache_file"
+}
+
+METHOD=$(detect_method)
+
+get() {
+  case "$METHOD" in
+    backlight)
+      local name max cur
+      name=$(backlight_name)
+      cur=$(cat "/sys/class/backlight/$name/brightness" 2>/dev/null || echo 0)
+      max=$(cat "/sys/class/backlight/$name/max_brightness" 2>/dev/null || echo 1)
+      awk -v c="$cur" -v m="$max" 'BEGIN { printf "%.0f", (c/m)*100 }'
+      ;;
+    ddc)
+      local raw cur max
+      raw=$(ddc_read_raw) || { echo 0; return; }
+      cur=$(echo "$raw" | awk '{print $1}')
+      max=$(echo "$raw" | awk '{print $2}')
+      [ -n "$cur" ] && [ -n "$max" ] && [ "$max" -gt 0 ] || { echo 0; return; }
+      awk -v c="$cur" -v m="$max" 'BEGIN { printf "%.0f", (c/m)*100 }'
+      ;;
+    *) echo 0 ;;
+  esac
+}
+
+get_icon() {
+  local pct
+  pct=$(get)
+  if [ "$pct" -eq 0 ]; then echo "display-brightness-off-symbolic"
+  elif [ "$pct" -le 33 ]; then echo "display-brightness-low-symbolic"
+  elif [ "$pct" -le 66 ]; then echo "display-brightness-medium-symbolic"
+  else echo "display-brightness-high-symbolic"
+  fi
+}
+
+get_icon_sym() {
+  local pct
+  pct=$(get)
+  if [ "$pct" -le 33 ]; then echo "󰃞"
+  elif [ "$pct" -le 66 ]; then echo "󰃟"
+  else echo "󰃠"
+  fi
+}
+
+json() {
+  local pct icon
+  pct=$(get)
+  icon=$(get_icon_sym)
+  printf '{"text":"%s %s%%","tooltip":"Brightness %s%%","class":"%s","alt":"%s"}\n' "$icon" "$pct" "$pct" "$(get_icon)" "$pct"
+}
+
+inc() {
+  case "$METHOD" in
+    backlight)
+      brightnessctl s "${STEP}%+" -q 2>/dev/null || true
+      ;;
+    ddc)
+      local raw cur max new
+      raw=$(ddc_read_raw) || return
+      cur=$(echo "$raw" | awk '{print $1}')
+      max=$(echo "$raw" | awk '{print $2}')
+      [ -n "$cur" ] && [ -n "$max" ] && [ "$max" -gt 0 ] || return
+      new=$(awk -v c="$cur" -v m="$max" -v s="$STEP" 'BEGIN { n=int(c + m*s/100 + 0.5); if(n>m) n=m; print n }')
+      [ "$new" -ge 1 ] && ddc_set "$new"
+      ;;
+  esac
+  show_wob "$(get)"
+  refresh_waybar
+}
+
+dec() {
+  case "$METHOD" in
+    backlight)
+      brightnessctl s "${STEP}%-" -q 2>/dev/null || true
+      ;;
+    ddc)
+      local raw cur max new
+      raw=$(ddc_read_raw) || return
+      cur=$(echo "$raw" | awk '{print $1}')
+      max=$(echo "$raw" | awk '{print $2}')
+      [ -n "$cur" ] && [ -n "$max" ] && [ "$max" -gt 0 ] || return
+      new=$(awk -v c="$cur" -v m="$max" -v s="$STEP" 'BEGIN { n=int(c - m*s/100 + 0.5); if(n<1) n=1; print n }')
+      [ "$new" -ge 1 ] && ddc_set "$new"
+      ;;
+  esac
+  show_wob "$(get)"
+  refresh_waybar
+}
+
+set_val() {
+  local pct=${1:-50}
+  case "$METHOD" in
+    backlight)
+      brightnessctl s "${pct}%" -q 2>/dev/null || true
+      ;;
+    ddc)
+      local raw max new
+      raw=$(ddc_read_raw) || return
+      max=$(echo "$raw" | awk '{print $2}')
+      [ -n "$max" ] && [ "$max" -gt 0 ] || return
+      new=$(awk -v m="$max" -v p="$pct" 'BEGIN { n=int(m*p/100 + 0.5); if(n<1) n=1; if(n>m) n=m; print n }')
+      ddc_set "$new"
+      ;;
+  esac
+  show_wob "$(get)"
+  refresh_waybar
+}
+
+cycle() {
+  local pct targets
+  pct=$(get)
+  targets="0 33 66 100"
+  local next=""
+  for t in $targets; do
+    if [ "$pct" -lt "$t" ]; then
+      next=$t
+      break
+    fi
+  done
+  [ -z "$next" ] && next=0
+  set_val "$next"
+}
+
+case "${1:-}" in
+  --get)      get;;
+  --get-icon) get_icon;;
+  --json)     json;;
+  --inc)      inc;;
+  --dec)      dec;;
+  --set)      set_val "${2:-50}";;
+  --cycle)    cycle;;
+  *)          json;;
+esac

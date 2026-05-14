@@ -36,9 +36,9 @@ binds {
     XF86AudioMute allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --toggle"; }
     XF86AudioMicMute allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --toggle-mic"; }
 
-    // Brightness writes directly to the Niri wob FIFO.
-    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "brightnessctl -e4 -n2 set 5%+ | sed -En 's/.*\\( ([0-9]+)%\\).*/\\1/p' > /tmp/niri.wob"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "brightnessctl -e4 -n2 set 5%- | sed -En 's/.*\\( ([0-9]+)%\\).*/\\1/p' > /tmp/niri.wob"; }
+    // Brightness (auto-detects backlight or DDC/CI)
+    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/brightness --inc"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/brightness --dec"; }
 
     XF86AudioPlay allow-when-locked=true { spawn-sh "playerctl play-pause"; }
     XF86AudioPause allow-when-locked=true { spawn-sh "playerctl play-pause"; }
