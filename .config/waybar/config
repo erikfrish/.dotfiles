@@ -25,6 +25,7 @@
     // "custom/rofi",
     "niri/workspaces",
     "hyprland/workspaces",
+    "custom/cycle_wall",
     "custom/menu",
     "cpu",
     "temperature",
@@ -43,8 +44,6 @@
     // "custom/weather"
     // "custom/keybindings",
     "clock",
-    "custom/gammastep",
-    "custom/cycle_wall",
     "custom/notification",
   ],
   "modules-right": [
@@ -113,7 +112,9 @@
   "clock": {
     "format": " {:%H:%M   %F, %a}",
     "format-alt": " {:%H:%M}",
+    "format-alt-click": "click-right",
     "timezone": "Europe/Moscow",
+    "on-click": "swaync-client -t -sw",
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
     "calendar": {
       "mode": "year",

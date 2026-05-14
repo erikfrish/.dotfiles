@@ -215,7 +215,7 @@ viewport {
 .widget-buttons-grid {
   font-size: x-large;
   padding: 5px;
-  margin: 0px 10px 10px 10px;
+  margin: 10px 10px 10px 10px;
   background: @noti-bg-darker;
 }
 
@@ -259,8 +259,10 @@ viewport {
 .widget-mpris {
   color: @text-color;
   background: @noti-bg-darker;
-  margin: 0px 10px 10px 10px;
+  margin: 0px 10px 8px 10px;
+  padding: 2px;
   box-shadow: none;
+  font-size: 0.9rem;
 }
 
 .widget-mpris>box>button,
@@ -268,7 +270,12 @@ viewport {
 .widget-mpris-album-art {
   border-radius: 0;
   box-shadow: none;
-  margin: 10px;
+  margin: 6px;
+}
+
+.widget-mpris-album-art {
+  min-width: 72px;
+  min-height: 72px;
 }
 
 picture.mpris-background {
