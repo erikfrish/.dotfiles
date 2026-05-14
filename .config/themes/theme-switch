@@ -66,6 +66,8 @@ generated_missing() {
         "$config_dir/swaync/style.css"
         "$config_dir/hypr/hyprlock-theme.conf"
         "$config_dir/wlogout/style.css"
+        "$config_dir/wob/wob.ini"
+        "$config_dir/swayosd/style.css"
         "${XDG_CACHE_HOME:-$HOME/.cache}/waybar/theme.css"
     )
 
@@ -606,6 +608,87 @@ button:hover {
 WLOGOUT
 }
 
+apply_wob() {
+    local wob_conf="$config_dir/wob/wob.ini"
+    local bg_hex="${bg#\#}"
+    local accent_hex="${accent#\#}"
+    local muted_hex="${muted#\#}"
+
+    cat > "$wob_conf" <<WOB
+timeout = 1000
+width = 600
+height = 40
+border_offset = 2
+border_size = 2
+bar_padding = 2
+anchor = top center
+margin = 55
+background_color = ${bg_hex}ee
+bar_color = ${accent_hex}
+border_color = ${accent_hex}
+[style.muted]
+bar_color = ${muted_hex}
+border_color = ${muted_hex}
+[style.overflow]
+bar_color = ${critical#\#}
+border_color = ${critical#\#}
+background_color = ${bg_hex}ee
+WOB
+
+    local wob_pid
+    wob_pid=$(pgrep -f "wob -c" 2>/dev/null || true)
+    if [[ -n "$wob_pid" ]]; then
+        kill "$wob_pid" 2>/dev/null || true
+        sleep 0.1
+        rm -f /tmp/niri.wob
+        mkfifo /tmp/niri.wob
+        tail -f /tmp/niri.wob | wob -c "$wob_conf" >/dev/null 2>&1 &
+    fi
+}
+
+apply_swayosd() {
+    local style="$config_dir/swayosd/style.css"
+    local bg_r bg_g bg_b
+    read -r bg_r bg_g bg_b < <(hex_to_rgb "$bg")
+
+    cat > "$style" <<SWAYOSD
+window {
+    background-color: rgba(${bg_r}, ${bg_g}, ${bg_b}, 0.93);
+    border: 2px solid ${accent};
+    border-radius: 0px;
+    min-height: 2px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+box {
+    padding: 0 2px;
+    min-height: 2px;
+    min-width: 400px;
+}
+
+progressbar {
+    min-height: 10px;
+    background-color: transparent;
+    border-radius: 0px;
+}
+
+progress {
+    background-color: ${accent};
+    border-radius: 0px;
+}
+
+label {
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 18px;
+    color: ${accent};
+    font-weight: bold;
+}
+SWAYOSD
+
+    killall swayosd-server 2>/dev/null || true
+    nohup swayosd-server -s "$style" >/dev/null 2>&1 &
+}
+
 apply_all() {
     apply_waybar
     apply_rofi
@@ -613,6 +696,8 @@ apply_all() {
     apply_swaync
     apply_hyprlock
     apply_wlogout
+    apply_wob
+    apply_swayosd
     save_state
 }
 

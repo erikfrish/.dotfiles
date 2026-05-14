@@ -13,3 +13,5 @@ ignore_me
 .config/swaync/style.css
 .config/hypr/hyprlock-theme.conf
 .config/wlogout/style.css
+.config/wob/wob.ini
+.config/swayosd/style.css
