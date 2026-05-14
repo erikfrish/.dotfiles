@@ -25,18 +25,18 @@
 }
 
 #custom-vpn1.active {
-    color: @fg;
-    background: @muted;
+    color: @bg;
+    background: @fg;
 }
 
 #custom-vpn2.active {
-    color: @fg;
-    background: @muted;
+    color: @bg;
+    background: @fg;
 }
 
 #custom-vpn1.inactive,
 #custom-vpn2.inactive {
-    color: @bg;
+    color: @muted;
     background: transparent;
 }
 

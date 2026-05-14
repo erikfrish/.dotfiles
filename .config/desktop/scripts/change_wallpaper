@@ -4,10 +4,13 @@ set -euo pipefail
 wallpaper_dir="$HOME/Pictures/Wallpapers"
 state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper"
 state_file="$state_dir/current"
+video_pid_file="$state_dir/mpvpaper.pid"
+thumb_dir="${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-thumbnails"
+video_preview_second=1
 
 mapfile -d '' wallpapers < <(
   find "$wallpaper_dir" -maxdepth 1 -type f \
-    \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' -o -iname '*.webp' \) \
+    \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' -o -iname '*.webp' -o -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' \) \
     -print0 | sort -z
 )
 
@@ -24,6 +27,46 @@ ensure_awww() {
       sleep 0.05
     done
   fi
+}
+
+stop_video_wallpaper() {
+  if [ -f "$video_pid_file" ]; then
+    local pid
+    pid=$(<"$video_pid_file")
+    if [ -n "$pid" ]; then
+      kill "$pid" 2>/dev/null || true
+    fi
+    rm -f "$video_pid_file"
+  fi
+}
+
+stop_image_wallpaper() {
+  awww kill >/dev/null 2>&1 || true
+}
+
+is_video() {
+  case "${1,,}" in
+    *.mp4|*.webm|*.mkv) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+thumbnail_for_video() {
+  local file="$1"
+
+  command -v ffmpeg >/dev/null 2>&1 || return 1
+  mkdir -p "$thumb_dir"
+
+  local hash thumb
+  hash=$(printf '%s' "$file" | sha256sum | cut -d' ' -f1)
+  thumb="$thumb_dir/$hash-full.jpg"
+
+  if [ ! -f "$thumb" ] || [ "$file" -nt "$thumb" ]; then
+    ffmpeg -hide_banner -loglevel error -ss "$video_preview_second" -i "$file" -frames:v 1 -vf 'scale=1920:-1' -y "$thumb" >/dev/null 2>&1 || return 1
+  fi
+
+  [ -f "$thumb" ] || return 1
+  printf '%s\n' "$thumb"
 }
 
 choose_random() {
@@ -48,9 +91,32 @@ choose_random() {
 
 apply_wallpaper() {
   local file="$1"
-  ensure_awww
-  awww img "$file" --transition-fps 30 --transition-type any --transition-duration 3
   mkdir -p "$state_dir"
+
+  if is_video "$file"; then
+    if ! command -v mpvpaper >/dev/null 2>&1; then
+      notify-send "Wallpaper" "Install mpvpaper to use video wallpapers" 2>/dev/null || true
+      printf 'mpvpaper is required for video wallpapers\n' >&2
+      exit 1
+    fi
+    local thumb=""
+    thumb=$(thumbnail_for_video "$file" || true)
+    stop_video_wallpaper
+    if [ -n "$thumb" ]; then
+      ensure_awww
+      awww img "$thumb" --transition-fps 30 --transition-type any --transition-duration 1.2
+      sleep 1.2
+    else
+      stop_image_wallpaper
+    fi
+    mpvpaper -o "no-audio --loop-file=inf --panscan=1.0 --video-unscaled=no --keepaspect=yes --start=$video_preview_second" '*' "$file" >/dev/null 2>&1 &
+    printf '%s\n' "$!" >"$video_pid_file"
+  else
+    stop_video_wallpaper
+    ensure_awww
+    awww img "$file" --transition-fps 30 --transition-type any --transition-duration 3
+  fi
+
   printf '%s\n' "$file" >"$state_file"
 }
 

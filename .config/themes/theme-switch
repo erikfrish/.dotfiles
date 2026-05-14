@@ -240,6 +240,34 @@ error-message {
 }
 ROFI
     done
+
+    cat >> "$config_dir/rofi/wallpaper-theme.rasi" <<'WALLPAPER_ROFI'
+
+window {
+  width:   62%;
+  padding: 16px;
+}
+
+listview {
+  columns: 2;
+  lines:   3;
+  spacing: 6px;
+}
+
+element {
+  orientation: vertical;
+  padding:     8px;
+  spacing:     6px;
+}
+
+element-icon {
+  size: 8em;
+}
+
+element-text {
+  horizontal-align: 0.5;
+}
+WALLPAPER_ROFI
 }
 
 apply_gtk() {

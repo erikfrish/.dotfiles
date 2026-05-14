@@ -3,6 +3,44 @@ set -euo pipefail
 
 wallpaper_dir="$HOME/Pictures/Wallpapers"
 change_wallpaper="$HOME/.config/desktop/scripts/change_wallpaper"
+thumb_dir="${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-thumbnails"
+
+is_video() {
+  case "${1,,}" in
+    *.mp4|*.webm|*.mkv) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+thumbnail_for() {
+  local file="$1"
+
+  if ! is_video "$file"; then
+    printf '%s\n' "$file"
+    return 0
+  fi
+
+  if ! command -v ffmpeg >/dev/null 2>&1; then
+    printf 'video-x-generic\n'
+    return 0
+  fi
+
+  mkdir -p "$thumb_dir"
+
+  local hash thumb
+  hash=$(printf '%s' "$file" | sha256sum | cut -d' ' -f1)
+  thumb="$thumb_dir/$hash.jpg"
+
+  if [ ! -f "$thumb" ] || [ "$file" -nt "$thumb" ]; then
+    ffmpeg -hide_banner -loglevel error -ss 00:00:01 -i "$file" -frames:v 1 -vf 'scale=512:-1' -y "$thumb" >/dev/null 2>&1 || true
+  fi
+
+  if [ -f "$thumb" ]; then
+    printf '%s\n' "$thumb"
+  else
+    printf 'video-x-generic\n'
+  fi
+}
 
 if pidof rofi >/dev/null 2>&1; then
   pkill rofi
@@ -11,7 +49,7 @@ fi
 
 mapfile -d '' wallpapers < <(
   find "$wallpaper_dir" -maxdepth 1 -type f \
-    \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) \
+    \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.gif' -o -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' \) \
     -print0 | sort -z
 )
 
@@ -23,7 +61,7 @@ fi
 {
   for wp in "${wallpapers[@]}"; do
     name=$(basename "$wp")
-    printf '%s\0icon\x1f%s\n' "$name" "$wp"
+    printf '%s\0icon\x1f%s\n' "$name" "$(thumbnail_for "$wp")"
   done
   printf 'Random\0icon\x1fshuffle\n'
 } | rofi -dmenu \

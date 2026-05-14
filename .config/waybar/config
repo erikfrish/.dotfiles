@@ -45,7 +45,6 @@
     "clock",
     "custom/gammastep",
     "custom/cycle_wall",
-    "custom/theme",
     "custom/notification",
   ],
   "modules-right": [
@@ -610,20 +609,10 @@
   "custom/cycle_wall": {
     "format": "",
     "on-click": "~/.config/desktop/scripts/wallpaper_switcher",
-    "on-click-right": "~/.config/desktop/scripts/change_wallpaper random",
+    "on-click-right": "~/.config/themes/theme-switch menu",
+    "on-click-middle": "~/.config/desktop/scripts/change_wallpaper random",
     "tooltip": true,
-    "tooltip-format": "Change wallpaper",
-  },
-
-  "custom/theme": {
-    "exec": "~/.config/waybar/scripts/waybar_theme waybar-json",
-    "return-type": "json",
-    "format": "{}",
-    "interval": "once",
-    "on-click": "~/.config/themes/theme-switch menu",
-    "on-click-right": "~/.config/waybar/scripts/waybar_theme cycle",
-    "on-click-middle": "~/.config/themes/theme-switch apply $(~/.config/themes/theme-switch list | shuf -n1)",
-    "tooltip": true,
+    "tooltip-format": "Wallpaper / themes",
   },
 
   //   "wireplumber": {

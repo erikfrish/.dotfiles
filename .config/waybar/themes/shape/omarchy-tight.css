@@ -54,6 +54,15 @@ window#waybar > box {
     margin-right: 6px;
 }
 
+#custom-vpn1,
+#custom-vpn2 {
+    min-width: 22px;
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-left: 1px;
+    margin-right: 1px;
+}
+
 #tray {
     margin-right: 14px;
 }

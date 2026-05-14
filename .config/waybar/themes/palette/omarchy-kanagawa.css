@@ -1,5 +1,5 @@
 @define-color bg #1f1f28;
-@define-color module_bg rgba(45, 79, 103, 0.62);
+@define-color module_bg rgba(31, 31, 40, 0.92);
 @define-color tooltip_bg rgba(31, 31, 40, 0.96);
 @define-color fg #dcd7ba;
 @define-color muted #54546d;

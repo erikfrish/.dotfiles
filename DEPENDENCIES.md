@@ -87,6 +87,8 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | Package | Purpose |
 |---|---|
 | `awww` | Wallpaper backend for Hyprland and Niri (`awww`, `awww-daemon`) |
+| `mpvpaper` | Optional video wallpaper backend for `.mp4`, `.webm`, `.mkv` |
+| `ffmpeg` | Generate video thumbnails for the wallpaper picker |
 
 ## Bluetooth & Network
 
@@ -178,7 +180,7 @@ sudo pacman -S --needed \
   swaync libnotify \
   wl-clipboard cliphist wl-clip-persist imagemagick \
   grim slurp hyprland-contrib \
-  awww \
+  awww ffmpeg \
   networkmanager nm-connection-editor network-manager-applet bluez blueman \
   fprintd libfprint fcitx5 \
   gammastep hyprpicker playerctl \
@@ -188,7 +190,7 @@ sudo pacman -S --needed \
   xkeyboard-config xkbcli \
   code nautilus zen-browser forkgram-desktop
 
-paru -S --needed arch-update-tray sshpass ddcci-driver-linux-dkms-git
+paru -S --needed arch-update-tray sshpass ddcci-driver-linux-dkms-git mpvpaper
 ```
 
 ## Post-Install Setup (requires sudo)
