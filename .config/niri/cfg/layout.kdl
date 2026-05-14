@@ -1,7 +1,15 @@
+// -----------------------------------------------------------------------------
+// Layout
+// -----------------------------------------------------------------------------
+
 layout {
+    // Compact gaps keep the scrollable column layout dense without removing the
+    // visual separation between windows.
     gaps 8
     center-focused-column "on-overflow"
 
+    // These widths cover the common laptop cases: side-by-side reference, main
+    // editor/browser, and single-column focus.
     preset-column-widths {
         proportion 0.33333
         proportion 0.5
@@ -11,6 +19,7 @@ layout {
 
     default-column-width { proportion 0.5; }
 
+    // The focus ring is the main active-window cue because borders are disabled.
     focus-ring {
         width 3
         active-color "#cba6f7"
@@ -21,6 +30,8 @@ layout {
         off
     }
 
+    // A subtle shadow gives floating windows and unfocused columns depth without
+    // making the theme depend on compositor-specific decorations.
     shadow {
         on
         softness 30
@@ -34,6 +45,7 @@ hotkey-overlay {
     skip-at-startup
 }
 
+// Ask GTK/Qt apps to avoid client-side decorations when they support it.
 prefer-no-csd
 
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"

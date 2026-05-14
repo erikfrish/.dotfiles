@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Niri does not have Hyprland-style "launch this app directly on workspace N"
+# Niri does not have a built-in "launch this app directly on workspace N"
 # exec rules. This script starts the daily apps, waits until their windows exist,
 # then moves each window by id. That avoids racing on app startup and keeps the
 # chat workspace ordered with Band on the left and Telegram on the right.

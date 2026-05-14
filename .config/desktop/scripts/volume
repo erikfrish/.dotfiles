@@ -14,9 +14,7 @@ refresh_waybar() {
 }
 
 wob_fifo() {
-  if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && [ -p "/tmp/$HYPRLAND_INSTANCE_SIGNATURE.wob" ]; then
-    printf '%s\n' "/tmp/$HYPRLAND_INSTANCE_SIGNATURE.wob"
-  elif [ -p /tmp/niri.wob ]; then
+  if [ -p /tmp/niri.wob ]; then
     printf '%s\n' /tmp/niri.wob
   fi
 }

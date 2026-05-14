@@ -1,4 +1,4 @@
-// User XKB snippets shared by Niri and Hyprland.
+// User XKB snippets for the Niri session.
 //
 // Why this exists:
 // Russian layout normally emits Cyrillic keysyms, so app shortcuts like

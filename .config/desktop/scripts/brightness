@@ -9,9 +9,7 @@ ddc_cache_ttl=10
 have() { command -v "$1" >/dev/null 2>&1; }
 
 wob_fifo() {
-  if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && [ -p "/tmp/$HYPRLAND_INSTANCE_SIGNATURE.wob" ]; then
-    printf '%s\n' "/tmp/$HYPRLAND_INSTANCE_SIGNATURE.wob"
-  elif [ -p /tmp/niri.wob ]; then
+  if [ -p /tmp/niri.wob ]; then
     printf '%s\n' /tmp/niri.wob
   fi
 }

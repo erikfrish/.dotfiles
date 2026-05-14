@@ -24,7 +24,6 @@
   "modules-left": [
     // "custom/rofi",
     "niri/workspaces",
-    "hyprland/workspaces",
     "custom/cycle_wall",
     "custom/menu",
     "cpu",
@@ -36,10 +35,8 @@
     "memory",
     // "custom/weather",
     "custom/wakatime",
-    "hyprland/submap",
   ],
   "modules-center": [
-    // "hyprland/window",
     // "clock#date",
     // "custom/weather"
     // "custom/keybindings",
@@ -51,7 +48,6 @@
     "custom/vpn1",
     "custom/vpn2",
     // "network",
-    // "hyprland/window",
     "custom/gammastep",
     "custom/backlight",
     "custom/audio-volume",
@@ -60,7 +56,6 @@
     // "custom/screenshot_t",
     "battery",
     "idle_inhibitor",
-    // "hyprland/language",
     "custom/language",
     "custom/power",
   ],
@@ -76,21 +71,6 @@
   "custom/sp2": {
     "format": " |",
     "tooltip": false,
-  },
-
-  "hyprland/submap": {
-    "format": "<span style=\"italic\">  {}</span>", // Icon: expand-arrows-alt
-    "tooltip": false,
-  },
-
-  "hyprland/language": {
-    "format": "{}",
-    "format-en": "en",
-    "format-ru": "ru",
-    "on-click": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
-    "on-click-right": "notify-send 'Keyboard' \"$(hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .active_keymap')\"",
-    "on-scroll-up": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
-    "on-scroll-down": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
   },
 
   "custom/language": {
@@ -184,7 +164,6 @@
     "format": "", // "",
     "tooltip": false,
     "on-click": "$HOME/.config/desktop/scripts/menu",
-    "on-click-right": "$HOME/.config/hypr/scripts/layout-switcher",
   },
 
   // "battery": {
@@ -223,7 +202,6 @@
     "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
     "format-time": "{H}h {M}min",
     "tooltip": true,
-    "on-click-right": "~/.config/hypr/scripts/glassmorphism",
   },
 
   "network": {
@@ -350,7 +328,6 @@
     "tooltip": false,
     // Wrapper keeps wlogout hotkeys usable when the current layout is Russian.
     "on-click": "sh -c '(sleep 0.1s; ~/.config/desktop/scripts/power_menu)' & disown",
-    "on-click-right": "~/.config/hypr/scripts/glassmorphism",
   },
 
   //   "clock": {
@@ -440,53 +417,6 @@
         "exec": "$HOME/.config/waybar/get_kbdlayout.sh"
   },*/
 
-  // "hyprland/workspaces": {
-  //   "all-outputs": true,
-  //   "format": "{name}",
-  //   "format-icons": {
-  //     "1": "一",
-  //     "2": "二",
-  //     "3": "三",
-  //     "4": "四",
-  //     "5": "五",
-  //     "6": "六",
-  //     "7": "七",
-  //     "8": "八",
-  //     "9": "九",
-  //     "10": "十",
-  //   },
-  //   "on-scroll-up": "hyprctl dispatch workspace e+1 1>/dev/null",
-  //   "on-scroll-down": "hyprctl dispatch workspace e-1 1>/dev/null",
-  //   "sort-by-number": true,
-  //   "active-only": false,
-  // },
-
-  "hyprland/workspaces": {
-    "format": "{name}",
-    //"format": "{name}: {icon}",
-    //"format": "{icon}",
-    "show-special": false,
-    "on-click": "activate",
-    "all-outputs": true,
-    "sort-by-number": true,
-    "format-icons": {
-      "1": "main  ",
-      "2": "2  ",
-      "3": "3  ",
-      "4": "4  ",
-      "5": "5  ",
-      "6": "6  ",
-      "7": "7  ",
-      "8": "8  ",
-      "9": "9  ",
-      "10": " 10 ",
-      "focused": "",
-      "default": "",
-    },
-    "on-scroll-up": "hyprctl dispatch workspace e+1",
-    "on-scroll-down": "hyprctl dispatch workspace e-1",
-  },
-
   "niri/workspaces": {
     "format": "{icon}",
     "on-click": "activate",
@@ -509,13 +439,6 @@
     },
     "on-scroll-up": "~/.config/niri/scripts/niri_workspace focus-up",
     "on-scroll-down": "~/.config/niri/scripts/niri_workspace focus-down",
-  },
-
-  "hyprland/window": {
-    // "max-length": 360,
-    "max-length": 100,
-    "format": "{}",
-    "separate-outputs": true,
   },
 
   "disk": {
@@ -654,48 +577,13 @@
     "spacing": 6,
   },
 
-  "custom/lock": {
-    "format": "",
-    "on-click": "~/.config/hypr/scripts/lockscreen",
-    "tooltip": false,
-  },
-
-  "custom/keybindings": {
-    "format": "",
-    "tooltip": false,
-    "on-click": "~/.config/hypr/scripts/keyhint",
-  },
-
   "custom/updater": {
     "format": " {}",
     "exec": "checkupdates | wc -l",
     "exec-if": "[[ $(checkupdates | wc -l) ]]",
     "interval": 15,
     "on-click": "alacritty --title update -e sh -c 'paru -Syu || yay -Syu' && notify-send 'The system has been updated'",
-    "on-click-right": "~/.config/hypr/scripts/changeWallpaper",
   },
-
-  // "wlr/workspaces": {
-  //   "format": "{name}",
-  //   //"format": "{name}: {icon}",
-  //   "on-click": "activate",
-  //   "all-outputs": true,
-  //   "sort-by-number": true,
-  //   "format-icons": {
-  //     "1": "1  ",
-  //     "2": "2  ",
-  //     "3": "3  ",
-  //     "4": "4  ",
-  //     "5": "5  ",
-  //     "6": "6  ",
-  //     "7": "7  ",
-  //     "8": "8  ",
-  //     "9": "9  ",
-  //     "10": " 10 ",
-  //   },
-  //   "on-scroll-up": "hyprctl dispatch workspace e+1",
-  //   "on-scroll-down": "hyprctl dispatch workspace e-1",
-  // },
 
   "wlr/taskbar": {
     "format": "{icon} {name} ",

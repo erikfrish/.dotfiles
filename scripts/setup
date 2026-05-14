@@ -3,21 +3,21 @@ set -euo pipefail
 
 echo "==> Installing packages..."
 sudo pacman -S --needed \
-  hyprland niri xwayland-satellite waybar polkit-kde-agent \
-  xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
-  ly hyprlock hypridle \
+  niri xwayland-satellite waybar polkit-kde-agent \
+  xdg-desktop-portal-gtk \
+  ly hyprlock swayidle \
   rofi rofi-emoji rofi-calc wlogout \
   pipewire wireplumber pipewire-pulse pavucontrol \
   brightnessctl ddcutil wob swayosd \
   swaync libnotify \
   wl-clipboard cliphist wl-clip-persist imagemagick \
-  grim slurp hyprland-contrib \
+  grim slurp \
   awww ffmpeg \
   networkmanager nm-connection-editor network-manager-applet bluez blueman \
   fprintd libfprint fcitx5 \
   gammastep hyprpicker playerctl \
   zsh alacritty \
-  jq socat gsimplecal btop paru curl \
+  jq gsimplecal btop paru curl \
   ttf-jetbrains-mono-nerd \
   xkeyboard-config
 

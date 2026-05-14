@@ -48,18 +48,6 @@ watch_niri_layout() {
   done
 }
 
-watch_hypr_layout() {
-  socket="$XDG_RUNTIME_DIR/hypr/${HYPRLAND_INSTANCE_SIGNATURE:-}/.socket2.sock"
-  [ -S "$socket" ] || return 1
-
-  socat -U - "UNIX-CONNECT:$socket" |
-  while read -r line; do
-    case "$line" in
-      activelayout*) show_layout "${line#*,}" ;;
-    esac
-  done
-}
-
 watch_caps_lock() {
   leds=(/sys/class/leds/*::capslock)
   [ -e "${leds[0]}" ] || return 0
@@ -91,8 +79,6 @@ watch_caps_lock &
 
 if niri msg keyboard-layouts >/dev/null 2>&1; then
   watch_niri_layout &
-elif hyprctl -j devices >/dev/null 2>&1; then
-  watch_hypr_layout &
 fi
 
 wait

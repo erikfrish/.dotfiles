@@ -1,4 +1,9 @@
-// Niri entrypoint. Keep detailed settings in cfg/*.kdl.
+// -----------------------------------------------------------------------------
+// Niri Entrypoint
+// -----------------------------------------------------------------------------
+// Keep this file as an index only. The cfg/*.kdl files are ordered roughly like
+// session startup: input/output first, then layout, environment, services, rules,
+// and finally keybindings.
 
 include "./cfg/input.kdl"
 include "./cfg/display.kdl"

@@ -1,3 +1,7 @@
+// -----------------------------------------------------------------------------
+// Autostart
+// -----------------------------------------------------------------------------
+
 // Core session services and tray applets.
 spawn-at-startup "xwayland-satellite"
 spawn-at-startup "waybar"
@@ -7,9 +11,12 @@ spawn-at-startup "blueman-applet"
 
 // Authentication prompts for privileged actions such as fingerprint enrollment.
 spawn-sh-at-startup "pgrep -f /usr/lib/polkit-kde-authentication-agent-1 >/dev/null || /usr/lib/polkit-kde-authentication-agent-1"
-spawn-at-startup "hypridle"
 
-// User services shared with Hyprland.
+// Niri-native idle handling. hyprlock remains the locker because its PAM config
+// already supports fingerprint unlock; monitor power uses Niri actions directly.
+spawn-sh-at-startup "swayidle -w before-sleep 'pidof hyprlock || hyprlock' timeout 330 'niri msg action power-off-monitors' resume 'niri msg action power-on-monitors' timeout 1800 'pidof hyprlock || hyprlock'"
+
+// User services shared by the desktop session.
 spawn-sh-at-startup "systemctl --user start gammastep.service swaync.service arch-update-tray.service"
 spawn-sh-at-startup "dbus-update-activation-environment --systemd SSH_AUTH_SOCK XDG_RUNTIME_DIR WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP"
 

@@ -1,7 +1,10 @@
+// -----------------------------------------------------------------------------
+// Outputs
+// -----------------------------------------------------------------------------
 // Niri ignores output blocks whose connector is absent, so it is safe to
 // declare all hosts in one shared config.
 //
-// Verify names and exact refresh rates with: niri msg outputs
+// Verify connector names and exact refresh rates with: niri msg outputs
 
 output "eDP-1" {
     mode "3072x1920@120.000"

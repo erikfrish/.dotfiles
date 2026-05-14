@@ -2,11 +2,10 @@
 
 Packages required for these dotfiles to work. Arch Linux / CachyOS package names.
 
-## Compositors (pick one or both)
+## Compositor
 
 | Package | Purpose |
 |---|---|
-| `hyprland` | Wayland compositor |
 | `niri` | Scrollable-tiling Wayland compositor |
 
 ## Core Wayland
@@ -16,7 +15,6 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `xwayland-satellite` | XWayland for Niri |
 | `waybar` | Status bar |
 | `polkit-kde-agent` | Authentication dialog (`/usr/lib/polkit-kde-authentication-agent-1`) |
-| `xdg-desktop-portal-hyprland` | Screen share / screenshot portal (Hyprland) |
 | `xdg-desktop-portal-gtk` | File picker portal (Niri fallback) |
 | `dbus-update-activation-environment` | DBus env sync (part of `dbus`) |
 
@@ -26,7 +24,7 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 |---|---|
 | `ly` | TTY display manager |
 | `hyprlock` | Screen locker |
-| `hypridle` | Idle daemon (auto-lock, suspend) |
+| `swayidle` | Idle daemon for lock and monitor power management |
 
 ## App Launchers & Menus
 
@@ -80,13 +78,12 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 |---|---|
 | `grim` | Screenshot capture |
 | `slurp` | Area selection |
-| `grimblast` | Screenshot wrapper (part of `hyprland-contrib`) |
 
 ## Wallpaper
 
 | Package | Purpose |
 |---|---|
-| `awww` | Wallpaper backend for Hyprland and Niri (`awww`, `awww-daemon`) |
+| `awww` | Wallpaper backend (`awww`, `awww-daemon`) |
 | `mpvpaper` | Optional video wallpaper backend for `.mp4`, `.webm`, `.mkv` |
 | `ffmpeg` | Generate video thumbnails for the wallpaper picker |
 
@@ -132,8 +129,7 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 
 | Package | Purpose |
 |---|---|
-| `jq` | JSON parsing (Niri/Hyprland IPC in scripts) |
-| `socat` | Hyprland socket2 listener (layout OSD) |
+| `jq` | JSON parsing for desktop scripts |
 | `gsimplecal` | Calendar popup |
 | `btop` | System monitor |
 | `paru` | AUR helper (update check module) |
@@ -165,27 +161,26 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 
 The custom layout lives in `~/.config/xkb/symbols/dotfiles` and is activated by:
 - **Niri**: `layout "us,dotfiles"` + `variant ",ru_ctrl_shortcuts"` + `xkb_options "grp:alt_shift_toggle"` in `cfg/input.kdl`
-- **Hyprland**: `kb_layout = us,dotfiles` + `kb_variant = ,ru_ctrl_shortcuts` + `kb_options = grp:win_space_toggle` in `config/input.conf`
 
 ## Install Everything (Arch/CachyOS)
 
 ```bash
 sudo pacman -S --needed \
-  hyprland niri xwayland-satellite waybar polkit-kde-agent \
-  xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
-  ly hyprlock hypridle \
+  niri xwayland-satellite waybar polkit-kde-agent \
+  xdg-desktop-portal-gtk \
+  ly hyprlock swayidle \
   rofi rofi-emoji rofi-calc wlogout \
   pipewire wireplumber pipewire-pulse pavucontrol \
   brightnessctl ddcutil wob swayosd \
   swaync libnotify \
   wl-clipboard cliphist wl-clip-persist imagemagick \
-  grim slurp hyprland-contrib \
+  grim slurp \
   awww ffmpeg \
   networkmanager nm-connection-editor network-manager-applet bluez blueman \
   fprintd libfprint fcitx5 \
   gammastep hyprpicker playerctl \
   zsh alacritty \
-  jq socat gsimplecal btop paru curl \
+  jq gsimplecal btop paru curl \
   ttf-jetbrains-mono-nerd \
   xkeyboard-config xkbcli \
   code nautilus zen-browser forkgram-desktop

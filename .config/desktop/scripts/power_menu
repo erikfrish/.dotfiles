@@ -11,15 +11,6 @@ previous_layout=""
 current_layout_index() {
     if niri msg keyboard-layouts >/dev/null 2>&1; then
         niri msg keyboard-layouts | awk '/^ \*/ { print $2; exit }'
-        return
-    fi
-
-    if hyprctl -j devices >/dev/null 2>&1; then
-        layout=$(hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .active_keymap' | head -n1)
-        case "$(printf '%s' "$layout" | tr '[:upper:]' '[:lower:]')" in
-            *russian*) printf '1\n' ;;
-            *) printf '0\n' ;;
-        esac
     fi
 }
 
@@ -28,11 +19,6 @@ switch_layout() {
 
     if niri msg keyboard-layouts >/dev/null 2>&1; then
         niri msg action switch-layout "$index" >/dev/null 2>&1 || true
-        return
-    fi
-
-    if hyprctl -j devices >/dev/null 2>&1; then
-        hyprctl switchxkblayout all "$index" >/dev/null 2>&1 || true
     fi
 }
 

@@ -1,10 +1,23 @@
+// -----------------------------------------------------------------------------
+// Environment
+// -----------------------------------------------------------------------------
+
 environment {
+    // Export the desktop identity early so portals and apps pick the Niri session.
     XDG_SESSION_TYPE "wayland"
     XDG_CURRENT_DESKTOP "niri"
+
+    // User ssh-agent service socket. Keep this stable for shells and GUI apps.
     SSH_AUTH_SOCK "/run/user/1000/ssh-agent.socket"
+
+    // Prefer Wayland where possible, with X11 fallback for older apps.
     SDL_VIDEODRIVER "wayland,x11"
+
+    // Theme defaults; the unified theme switcher writes GTK CSS on top.
     GTK_THEME "adw-gtk3-dark"
     QT_STYLE_OVERRIDE "Adwaita-Dark"
+
+    // Desktop GPU defaults for the shared laptop/desktop config.
     LIBVA_DRIVER_NAME "nvidia"
     GBM_BACKEND "nvidia-drm"
     __GLX_VENDOR_LIBRARY_NAME "nvidia"

@@ -1,4 +1,11 @@
+// -----------------------------------------------------------------------------
+// Keybindings
+// -----------------------------------------------------------------------------
+
 binds {
+    // -------------------------------------------------------------------------
+    // Session Helpers
+    // -------------------------------------------------------------------------
     // Show Niri's built-in cheat sheet for the bindings below.
     Mod+Shift+Slash { show-hotkey-overlay; }
 
@@ -7,14 +14,18 @@ binds {
     // layout change notification.
     Mod+Space { switch-layout "next"; }
 
-    // App launchers. Keep these aligned with Hyprland defaults where possible.
+    // -------------------------------------------------------------------------
+    // Launchers
+    // -------------------------------------------------------------------------
     Mod+I hotkey-overlay-title="Open VSCode" { spawn "code"; }
     Mod+Z hotkey-overlay-title="Open Overview" { toggle-overview; }
     Mod+T hotkey-overlay-title="Open Terminal" { spawn "alacritty"; }
     Mod+E hotkey-overlay-title="Open Files" { spawn "nautilus"; }
     Mod+R hotkey-overlay-title="Open Menu" { spawn-sh "~/.config/desktop/scripts/menu"; }
 
-    // Window state and column management.
+    // -------------------------------------------------------------------------
+    // Window Management
+    // -------------------------------------------------------------------------
     Mod+Q { close-window; }
     Mod+V { toggle-window-floating; }
     Mod+Shift+V { switch-focus-between-floating-and-tiling; }
@@ -23,14 +34,19 @@ binds {
     Mod+BracketRight { consume-or-expel-window-right; }
     Mod+BracketLeft { consume-or-expel-window-left; }
 
-    // Small desktop utilities.
+    // -------------------------------------------------------------------------
+    // Desktop Utilities
+    // -------------------------------------------------------------------------
     Mod+P { spawn "hyprpicker" "-a"; }
     Mod+W { spawn-sh "~/.config/waybar/scripts/waybar_style_change"; }
     Mod+B { spawn-sh "killall waybar || waybar &"; }
     Mod+C { spawn-sh "~/.config/desktop/scripts/clipboard_history"; }
 
-    // Hardware keys. Audio goes through the shared volume script so both Niri
-    // and Hyprland show the same wob OSD and avoid hardcoded sink names.
+    // -------------------------------------------------------------------------
+    // Hardware Keys
+    // -------------------------------------------------------------------------
+    // Audio goes through the shared volume script so keybinds and Waybar actions
+    // show the same wob OSD and avoid hardcoded sink names.
     XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --inc"; }
     XF86AudioLowerVolume allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --dec"; }
     XF86AudioMute allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --toggle"; }
@@ -45,8 +61,11 @@ binds {
     XF86AudioNext allow-when-locked=true { spawn-sh "playerctl next"; }
     XF86AudioPrev allow-when-locked=true { spawn-sh "playerctl previous"; }
 
+    // -------------------------------------------------------------------------
+    // Focus And Movement
+    // -------------------------------------------------------------------------
     // Niri is column-first: left/right move between columns, up/down between
-    // workspaces. This matches Hyprland's workspace-nav muscle memory.
+    // workspaces.
     // No modifier arrows: focus. Ctrl+arrows: move window.
     Mod+Left { focus-column-left; }
     Mod+Right { focus-column-right; }
@@ -79,14 +98,18 @@ binds {
     Mod+Shift+K { move-window-up; }
     Mod+Shift+J { move-window-down; }
 
-    // Resize the current column/window.
+    // -------------------------------------------------------------------------
+    // Sizing
+    // -------------------------------------------------------------------------
     Mod+Ctrl+R { reset-window-height; }
     Mod+Minus { set-column-width "-10%"; }
     Mod+Equal { set-column-width "+10%"; }
     Mod+Shift+Minus { set-window-height "-10%"; }
     Mod+Shift+Equal { set-window-height "+10%"; }
 
-    // Direct workspace access.
+    // -------------------------------------------------------------------------
+    // Workspaces
+    // -------------------------------------------------------------------------
     Mod+1 { focus-workspace 1; }
     Mod+2 { focus-workspace 2; }
     Mod+3 { focus-workspace 3; }
@@ -98,8 +121,8 @@ binds {
     Mod+9 { focus-workspace 9; }
     Mod+0 { focus-workspace 10; }
 
-    // Move windows to workspaces. Ctrl follows focus; Shift mirrors Hyprland's
-    // silent move style for muscle memory.
+    // Move windows to workspaces. Ctrl and Shift are both kept so existing
+    // muscle memory has a forgiving path while staying native to Niri.
     Mod+Ctrl+1 { move-window-to-workspace 1; }
     Mod+Ctrl+2 { move-window-to-workspace 2; }
     Mod+Ctrl+3 { move-window-to-workspace 3; }
@@ -134,7 +157,9 @@ binds {
     Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-window-to-workspace-down; }
     Mod+Ctrl+WheelScrollUp cooldown-ms=150 { move-window-to-workspace-up; }
 
-    // Screenshots.
+    // -------------------------------------------------------------------------
+    // Screenshots And Session
+    // -------------------------------------------------------------------------
     Print { screenshot; }
     Shift+Print { screenshot-screen; }
     Ctrl+Print { screenshot; }

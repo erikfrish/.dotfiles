@@ -72,22 +72,22 @@ If the default sink is still `easyeffects_sink`, the script switches to the firs
 
 Waybar uses the `custom/audio-volume` module, backed by the same script.
 
-## Hyprland
+## Niri
 
 Relevant files:
 
-- `.config/hypr/config/autostart.conf`
-- `.config/hypr/config/keybinds.conf`
+- `.config/niri/cfg/autostart.kdl`
+- `.config/niri/cfg/keybinds.kdl`
 - `.config/desktop/scripts/volume`
 - `.config/waybar/config`
 
 Volume keybinds:
 
-```ini
-bindel = ,XF86AudioRaiseVolume, exec, ~/.config/desktop/scripts/volume --inc
-bindel = ,XF86AudioLowerVolume, exec, ~/.config/desktop/scripts/volume --dec
-bindel = ,XF86AudioMute, exec, ~/.config/desktop/scripts/volume --toggle
-bind = , XF86AudioMicMute, exec, ~/.config/desktop/scripts/volume --toggle-mic
+```kdl
+XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --inc"; }
+XF86AudioLowerVolume allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --dec"; }
+XF86AudioMute allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --toggle"; }
+XF86AudioMicMute allow-when-locked=true { spawn-sh "~/.config/desktop/scripts/volume --toggle-mic"; }
 ```
 
 ## Keyboard Layout
@@ -98,7 +98,7 @@ Russian layout uses a tracked user XKB symbols file:
 .config/xkb/symbols/dotfiles
 ```
 
-Hyprland and Niri use `us,dotfiles` with the `,ru_ctrl_shortcuts` variant. Regular typing stays Russian, but `Ctrl`/`Ctrl+Shift` on Russian letters resolves to the matching Latin keysyms, so common application shortcuts keep working without switching to `us`.
+Niri uses `us,dotfiles` with the `,ru_ctrl_shortcuts` variant. Regular typing stays Russian, but `Ctrl`/`Ctrl+Shift` on Russian letters resolves to the matching Latin keysyms, so common application shortcuts keep working without switching to `us`.
 
 Waybar power button launches:
 

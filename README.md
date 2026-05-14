@@ -1,7 +1,7 @@
 # my configs
 
 - `notes/yubikey_pool.md` - динамический пул аппаратных SSH/YubiKey ключей для git signing и SSH-доступа.
-- `notes/thinkpad_setup_process.md` - актуальные заметки по Hyprland, Waybar и универсальной audio-схеме.
+- `notes/thinkpad_setup_process.md` - актуальные заметки по Niri, Waybar и универсальной audio-схеме.
 
 ## Install
 
