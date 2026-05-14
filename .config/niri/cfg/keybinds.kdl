@@ -38,7 +38,7 @@ binds {
     // Desktop Utilities
     // -------------------------------------------------------------------------
     Mod+P { spawn "hyprpicker" "-a"; }
-    Mod+W { spawn-sh "~/.config/waybar/scripts/waybar_style_change"; }
+    Mod+W { spawn-sh "~/.config/themes/theme-switch menu"; }
     Mod+B { spawn-sh "killall waybar || waybar &"; }
     Mod+C { spawn-sh "~/.config/desktop/scripts/clipboard_history"; }
 
