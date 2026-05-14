@@ -1,22 +1,14 @@
+@define-color foreground #cdd6f4;
+
 * {
     font-family: "Fira Sans Semibold", "Font Awesome 6 Free", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
     font-size: 14px;
-    /* Slightly smaller font size */
     font-weight: 900;
     margin: 0;
     padding: 0;
-    transition-property: background-color;
-    transition-duration: 0.5s;
-    min-height: 0;
-}
-
-/* Reset all styles */
-* {
     border: none;
     border-radius: 3px;
     min-height: 0;
-    margin-top: 1px;
-    /* margin: 0.2em 0.3em 0.2em 0.3em; */
 }
 
 /* The whole bar */
@@ -34,36 +26,33 @@ window#waybar.hidden {
 }
 
 #workspaces button {
-    padding: 0px 0px;
-    /* Adjusted padding to reduce height */
-    margin: 3px 5px;
-    /* Reduced margin slightly */
-    border-radius: 6px;
+    padding: 0 2px;
+    margin: 0 2px;
+    border-radius: 0;
     color: @foreground;
-    background-color: #111827;
-    transition: all 0.3s ease-in-out;
+    background-color: transparent;
     font-size: 13px;
-    /* Slightly smaller font size */
+    min-width: 0;
 }
 
 #workspaces button.active {
     color: @foreground;
-    background: #025939;
+    background: transparent;
 }
 
 #workspaces button:hover {
-    background: #333333;
+    background: transparent;
+    color: #9CCFD8;
 }
 
 #workspaces button.urgent {
-    background-color: #eb4d4b;
+    color: #eb4d4b;
 }
 
 #workspaces {
     background-color: #111827;
     border-radius: 14px;
     padding: 3px 6px;
-    /* Adjusted padding to reduce height */
 }
 
 #window {
@@ -308,7 +297,8 @@ label:focus {
 }
 
 #temperature {
-    background-color: #f0932b;
+    color: #f0932b;
+    background-color: transparent;
 }
 
 #temperature.critical {
@@ -363,27 +353,12 @@ label:focus {
 
 #custom-vpn1,
 #custom-vpn2 {
-    /* Фиксируем ширину, чтобы иконка была в центре "квадрата" */
-    min-width: 40px;
+    min-width: 33px;
     padding: 0;
     padding-top: 2px;
-    /* margin: 0 4px; */
-
-    /* border-radius: 8px; */
-    transition: all 0.3s ease;
-
-    /* Используем font-size для контроля размера "коробки" */
-    font-size: 18px;
-}
-
-/* Если иконка кажется слишком высокой или низкой, 
-   используй небольшой margin-bottom внутри модуля: */
-#custom-vpn1,
-#custom-vpn2 {
-    font-family: "Font Awesome 6 Free", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
-    /* min-width: 33px; */
     padding-right: 1px;
-    margin-bottom: 0px;
+    transition: all 0.3s ease;
+    font-size: 18px;
 }
 
 #custom-vpn1.active {

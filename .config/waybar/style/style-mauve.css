@@ -25,32 +25,28 @@ tooltip {
 /*-----module groups----*/
 .modules-right {
     background-color: #1e1e2e;
-    border: 0px solid #b4befe;
     border-radius: 10px;
 }
 
 .modules-center {
     background-color: #1e1e2e;
-    border: 0px solid #b4befe;
     border-radius: 10px;
 }
 
 .modules-left {
     background-color: #1e1e2e;
-    border: 0px solid #b4befe;
     border-radius: 10px;
-
 }
 
 #workspaces button {
-    padding: 1px;
+    padding: 0 2px;
     color: #6E6A86;
-    margin-right: 3px;
+    margin-right: 2px;
+    min-width: 0;
 }
 
 #workspaces button.active {
     color: #cba6f7;
-    border-radius: 15px 15px 15px 15px;
 }
 
 #workspaces button.focused {
@@ -58,13 +54,11 @@ tooltip {
 }
 
 #workspaces button.urgent {
-    color: #11111b;
-    border-radius: 10px;
+    color: #e46876;
 }
 
 #workspaces button:hover {
     color: #9CCFD8;
-    border-radius: 15px;
 }
 
 #custom-vpn1,#custom-vpn2,
@@ -143,24 +137,12 @@ tooltip {
 
 #custom-vpn1,
 #custom-vpn2 {
-    /* Фиксируем ширину, чтобы иконка была в центре "квадрата" */
-    min-width: 34px;
+    min-width: 29px;
     padding: 0;
     margin: 0 4px;
-
     border-radius: 8px;
     transition: all 0.3s ease;
-
-    /* Используем font-size для контроля размера "коробки" */
     font-size: 15px;
-}
-
-/* Если иконка кажется слишком высокой или низкой, 
-   используй небольшой margin-bottom внутри модуля: */
-#custom-vpn1,
-#custom-vpn2 {
-    min-width: 29px;
-    margin-bottom: 0px;
 }
 
 #custom-vpn1.active {

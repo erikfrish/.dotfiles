@@ -9,7 +9,8 @@
 }
 
 window#waybar {
-    background: rgba(0, 0, 0, 0);
+    background: #282828;
+    color: #d8d8d8;
 }
 
 window>box {
@@ -60,22 +61,24 @@ tooltip label {
 
 /*-----modules indv----*/
 #workspaces button {
-    padding: 0px 2px;
+    padding: 0 2px;
     background-color: transparent;
+    min-width: 0;
 }
 
 #workspaces button:hover {
-    box-shadow: inherit;
-    background-color: rgba(0, 153, 153, 0);
+    background-color: transparent;
+    color: #9CCFD8;
 }
 
 #workspaces button.focused {
-    background-color: rgba(0, 85, 102, 0);
+    background-color: transparent;
+    color: #d8dee9;
 }
 
 #workspaces button.active {
-    background-color: rgba(191, 191, 191, 0.1);
-    /*box-shadow:inherit;*/
+    background-color: transparent;
+    color: #bfbfbf;
 }
 
 #custom-vpn1,#custom-vpn2,
@@ -101,9 +104,8 @@ tooltip label {
 #window,
 #workspaces,
 #taskbar,
-#bluetooth,
-#taskbar,
 #taskbar button,
+#bluetooth,
 #custom-media,
 #custom-cycle_wall,
 #custom-updater,
@@ -111,7 +113,6 @@ tooltip label {
 #custom-power,
 #custom-spotify,
 #custom-weather,
-#custom-power,
 #custom-lock,
 #custom-weather.severe,
 #custom-weather.sunnyDay,
@@ -123,7 +124,6 @@ tooltip label {
 #custom-weather.showyIcyDay,
 #custom-weather.snowyIcyNight,
 #custom-weather.default,
-#idle_inhibitor,
 #custom-language,
 #language {
     padding: 0 10px;
@@ -156,11 +156,6 @@ tooltip label {
     color: #cc3436;
 }
 
-#waybar {
-    background-color: #282828;
-    color: #d8d8d8;
-}
-
 @keyframes blink {
     to {
         color: #000000;
@@ -188,24 +183,12 @@ tooltip label {
 
 #custom-vpn1,
 #custom-vpn2 {
-    /* Фиксируем ширину, чтобы иконка была в центре "квадрата" */
-    min-width: 40px;
+    min-width: 33px;
     padding: 0;
     margin: 0 4px;
-
     border-radius: 8px;
     transition: all 0.3s ease;
-
-    /* Используем font-size для контроля размера "коробки" */
     font-size: 18px;
-}
-
-/* Если иконка кажется слишком высокой или низкой, 
-   используй небольшой margin-bottom внутри модуля: */
-#custom-vpn1,
-#custom-vpn2 {
-    min-width: 33px;
-    margin-bottom: 0px;
 }
 
 #custom-vpn1.active {

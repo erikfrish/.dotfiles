@@ -58,7 +58,6 @@ tooltip label {
 #taskbar,
 #taskbar button,
 #bluetooth,
-#workspaces,
 #custom-menu,
 #custom-power,
 #custom-cycle_wall,
@@ -66,7 +65,6 @@ tooltip label {
 #custom-updater,
 #custom-lock,
 #custom-weather,
-#idle_inhibitor,
 #custom-language,
 #language {
 	border-radius: 8px;
@@ -100,7 +98,7 @@ tooltip label {
 
 #battery.critical:not(.charging) {
 	background-color: #f38ba8;
-	color: #f38ba8;
+	color: #3A3B3C;
 	animation-name: blink;
 	animation-duration: 0.5s;
 	animation-timing-function: linear;
@@ -137,14 +135,16 @@ tooltip label {
 }
 
 #workspaces button {
-	border-radius: 8px;
-	background-color: #d9e0ee;
-	color: #3A3B3C;
+	border-radius: 0;
+	background-color: transparent;
+	color: #6E6A86;
+	min-width: 0;
+	padding: 0 2px;
 }
 
 #workspaces button.active {
-	background-color: #eba0ac;
-	color: #3A3B3C;
+	background-color: transparent;
+	color: #cba6f7;
 }
 
 #taskbar button {
@@ -236,39 +236,27 @@ tooltip label {
 
 #custom-vpn1,
 #custom-vpn2 {
-	/* Фиксируем ширину, чтобы иконка была в центре "квадрата" */
-	min-width: 40px;
-	padding: 0;
-	margin: 0 4px;
-
-	border-radius: 8px;
-	transition: all 0.3s ease;
-
-	/* Используем font-size для контроля размера "коробки" */
-	font-size: 18px;
-}
-
-/* Если иконка кажется слишком высокой или низкой, 
-   используй небольшой margin-bottom внутри модуля: */
-#custom-vpn1,
-#custom-vpn2 {
     min-width: 33px;
-	margin-bottom: 0px;
+    padding: 0;
+    margin: 0 4px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 18px;
 }
 
 #custom-vpn1.active {
-	color: #81a1c1;
-	background: rgba(129, 161, 193, 0.15);
+    color: #81a1c1;
+    background: rgba(129, 161, 193, 0.15);
 }
 
 #custom-vpn2.active {
-	color: #a3be8c;
-	background: rgba(163, 190, 140, 0.15);
+    color: #a3be8c;
+    background: rgba(163, 190, 140, 0.15);
 }
 
 #custom-vpn1.inactive,
 #custom-vpn2.inactive {
-	color: #666666;
+    color: #666666;
 }
 
 #custom-notification {
