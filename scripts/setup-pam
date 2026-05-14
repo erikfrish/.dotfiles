@@ -18,6 +18,4 @@ deploy() {
   printf 'Installed %s to %s\n' "$src" "$dest"
 }
 
-deploy "$config_dir/config.ini" "/etc/ly/config.ini"
-
-printf 'Restart ly or reboot for changes to take effect.\n'
+deploy "$config_dir/../etc/pam.d/hyprlock" "/etc/pam.d/hyprlock"

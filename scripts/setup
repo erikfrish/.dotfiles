@@ -19,7 +19,7 @@ sudo pacman -S --needed \
   zsh alacritty \
   jq socat gsimplecal btop paru curl \
   ttf-jetbrains-mono-nerd \
-  xkeyboard-config xkbcli
+  xkeyboard-config
 
 paru -S --needed arch-update-tray sshpass ddcci-driver-linux-dkms-git
 
@@ -31,11 +31,14 @@ stow --restow --target="$HOME" .
 echo ""
 echo "==> Running post-install setups..."
 echo ""
-echo "[1/3] DDC/CI backlight driver (external monitors)"
+echo "[1/4] System config files (PAM)"
+echo "  Run: sudo ~/.dotfiles/scripts/setup-pam"
+echo ""
+echo "[2/4] DDC/CI backlight driver (external monitors)"
 echo "  Run: sudo ~/.dotfiles/scripts/setup-ddcci"
 echo ""
-echo "[2/3] SSH agent service"
+echo "[3/4] SSH agent service"
 echo "  Run: ~/.dotfiles/scripts/setup-ssh-agent"
 echo ""
-echo "[3/3] YubiKey pool"
+echo "[4/4] YubiKey pool"
 echo "  Run: ~/.dotfiles/.local/bin/yubikey-pool-setup"
