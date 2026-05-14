@@ -120,11 +120,22 @@ apply_wallpaper() {
   printf '%s\n' "$file" >"$state_file"
 }
 
+apply_color() {
+  local hex="${1#\#}"
+  mkdir -p "$state_dir"
+  stop_video_wallpaper
+  ensure_awww
+  awww clear "$hex"
+  printf 'color:%s\n' "$hex" >"$state_file"
+}
+
 restore_wallpaper() {
   local remembered=""
   [ -f "$state_file" ] && remembered=$(<"$state_file")
 
-  if [ -n "$remembered" ] && [ -f "$remembered" ]; then
+  if [[ "$remembered" == color:* ]]; then
+    apply_color "${remembered#color:}"
+  elif [ -n "$remembered" ] && [ -f "$remembered" ]; then
     apply_wallpaper "$remembered"
   else
     apply_wallpaper "$(choose_random)"
@@ -137,6 +148,9 @@ case "${1:-restore}" in
     ;;
   random|awww|swww)
     apply_wallpaper "$(choose_random)"
+    ;;
+  color:*)
+    apply_color "${1#color:}"
     ;;
   *)
     if [ -f "$1" ]; then

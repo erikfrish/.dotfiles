@@ -62,21 +62,27 @@ fi
 selected_row=0
 if [ -f "$state_file" ]; then
   current_wallpaper=$(<"$state_file")
-  current_wallpaper=$(realpath -m "$current_wallpaper")
-  for i in "${!wallpapers[@]}"; do
-    if [ "$(realpath -m "${wallpapers[$i]}")" = "$current_wallpaper" ]; then
-      selected_row="$i"
-      break
-    fi
-  done
+  if [[ "$current_wallpaper" == color:* ]]; then
+    selected_row="${#wallpapers[@]}"
+    (( selected_row += 1 ))
+  else
+    current_wallpaper=$(realpath -m "$current_wallpaper")
+    for i in "${!wallpapers[@]}"; do
+      if [ "$(realpath -m "${wallpapers[$i]}")" = "$current_wallpaper" ]; then
+        selected_row="$i"
+        break
+      fi
+    done
+  fi
 fi
 
 {
+  printf 'Random\0icon\x1fshuffle\n'
+  printf 'Solid Color\0icon\x1ffill-color\n'
   for wp in "${wallpapers[@]}"; do
     name=$(basename "$wp")
     printf '%s\0icon\x1f%s\n' "$name" "$(thumbnail_for "$wp")"
   done
-  printf 'Random\0icon\x1fshuffle\n'
 } | rofi -dmenu \
   -i \
   -no-custom \
@@ -89,6 +95,11 @@ fi
     [ -n "$choice" ] || exit 0
     if [ "$choice" = "Random" ]; then
       exec "$change_wallpaper" random
+    fi
+    if [ "$choice" = "Solid Color" ]; then
+      color=$(hyprpicker -a -f hex 2>/dev/null || true)
+      [ -n "$color" ] || exit 0
+      exec "$change_wallpaper" "color:${color#\#}"
     fi
     for wp in "${wallpapers[@]}"; do
       if [ "$(basename "$wp")" = "$choice" ]; then

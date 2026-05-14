@@ -2,7 +2,7 @@ configuration {
   modes: "";
   font: "JetBrainsMono ExtraBold 14";
   show-icons: true;
-  icon-theme: "Papirus";
+  icon-theme: "breeze-dark";
   case-sensitive: false;
   matching: "fuzzy";
   sort: false;

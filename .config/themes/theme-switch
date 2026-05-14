@@ -332,6 +332,7 @@ listview {
   columns: 2;
   lines:   3;
   spacing: 6px;
+  flow:    horizontal;
 }
 
 element {
