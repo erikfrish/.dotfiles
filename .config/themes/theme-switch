@@ -614,6 +614,8 @@ apply_wob() {
     local accent_hex="${accent#\#}"
     local muted_hex="${muted#\#}"
 
+    mkdir -p "$(dirname "$wob_conf")"
+
     cat > "$wob_conf" <<WOB
 timeout = 1000
 width = 600
@@ -635,21 +637,20 @@ border_color = ${critical#\#}
 background_color = ${bg_hex}ee
 WOB
 
-    local wob_pid
-    wob_pid=$(pgrep -f "wob -c" 2>/dev/null || true)
-    if [[ -n "$wob_pid" ]]; then
-        kill "$wob_pid" 2>/dev/null || true
-        sleep 0.1
-        rm -f /tmp/niri.wob
-        mkfifo /tmp/niri.wob
-        tail -f /tmp/niri.wob | wob -c "$wob_conf" >/dev/null 2>&1 &
-    fi
+    pkill -f "wob -c" 2>/dev/null || true
+    pkill -f "tail -f /tmp/niri.wob" 2>/dev/null || true
+    sleep 0.1
+    rm -f /tmp/niri.wob
+    mkfifo /tmp/niri.wob
+    nohup sh -c 'tail -f "$1" | wob -c "$2"' sh /tmp/niri.wob "$wob_conf" >/dev/null 2>&1 &
 }
 
 apply_swayosd() {
     local style="$config_dir/swayosd/style.css"
     local bg_r bg_g bg_b
     read -r bg_r bg_g bg_b < <(hex_to_rgb "$bg")
+
+    mkdir -p "$(dirname "$style")"
 
     cat > "$style" <<SWAYOSD
 window {
