@@ -1,0 +1,111 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono ExtraBold", "Symbols Nerd Font", sans-serif;
+    font-size: 16px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+window#waybar {
+    background: transparent;
+    color: @fg;
+}
+
+window#waybar.hidden {
+    opacity: 0.35;
+}
+
+window#waybar.empty,
+window#waybar.tiled,
+window#waybar.floating {
+    background: transparent;
+}
+
+tooltip {
+    background: @tooltip_bg;
+    border: 1px solid @border;
+    border-radius: 10px;
+}
+
+tooltip label {
+    color: @fg;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+    background: rgba(0, 43, 51, 0.22);
+    border: 1px solid @border;
+    border-radius: 8px;
+}
+
+.modules-left {
+    margin: 2px 0 0 5px;
+}
+
+.modules-center {
+    margin: 2px 0 0;
+}
+
+.modules-right {
+    margin: 2px 10px 0 0;
+}
+
+#workspaces button {
+    background: transparent;
+    color: @muted;
+    min-width: 0;
+}
+
+#workspaces button.active,
+#workspaces button.focused {
+    color: @accent;
+}
+
+#workspaces button:hover {
+    color: @accent_alt;
+}
+
+#workspaces button.urgent,
+#battery.critical:not(.charging),
+#temperature.critical,
+#network.disconnected,
+#bluetooth.disconnected {
+    color: @critical;
+}
+
+#battery.charging,
+#battery.full,
+#battery.plugged {
+    color: @ok;
+}
+
+#idle_inhibitor.activated {
+    color: @bg;
+    background: @accent;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    color: @critical;
+}
+
+@keyframes blink {
+    to {
+        color: @bg;
+    }
+}
+
+#battery.critical:not(.charging) {
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}

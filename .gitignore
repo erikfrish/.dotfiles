@@ -5,3 +5,9 @@ ignore_me
 .ssh/config.local
 .ssh/yubikeys.tsv
 .config/waybar/style.css
+.config/rofi/theme.rasi
+.config/rofi/wallpaper-theme.rasi
+.config/rofi/clipboard-theme.rasi
+.config/gtk-3.0/gtk.css
+.config/gtk-4.0/gtk.css
+.config/swaync/style.css

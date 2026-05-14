@@ -1,35 +1,3 @@
-#!/bin/bash
-
-CONFIG_DIR="$HOME/.config/waybar"
-THEME_DIR="$CONFIG_DIR/style"
-
-# На что реально указывает style.css
-CURRENT_THEME=$(basename "$(realpath "$CONFIG_DIR/style.css")" .css)
-
-# Список всех тем, кроме style.css
-THEMES=($(ls "$THEME_DIR"/*.css | grep -v 'style\.css' | xargs -n1 basename | sed 's/\.css$//' | sort))
-
-# Находим индекс текущей темы
-CURRENT_INDEX=-1
-for i in "${!THEMES[@]}"; do
-    if [[ "${THEMES[$i]}" == "$CURRENT_THEME" ]]; then
-        CURRENT_INDEX=$i
-        break
-    fi
-done
-
-# Выбираем следующую тему по кругу
-if [[ $CURRENT_INDEX -ge 0 ]]; then
-    NEXT_INDEX=$(( (CURRENT_INDEX + 1) % ${#THEMES[@]} ))
-else
-    NEXT_INDEX=0
-fi
-
-NEXT_THEME="${THEMES[$NEXT_INDEX]}"
-
-# Создаём симлинк
-ln -sf "$THEME_DIR/$NEXT_THEME.css" "$CONFIG_DIR/style.css"
-
-# Перезапускаем waybar
-killall waybar
-exec "$HOME/.config/waybar/scripts/statusbar"
+#!/usr/bin/env bash
+set -euo pipefail
+exec "$HOME/.config/themes/theme-switch" menu

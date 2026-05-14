@@ -1,0 +1,124 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono ExtraBold", "Symbols Nerd Font", "Font Awesome 6 Free", sans-serif;
+    font-size: 14px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+window#waybar {
+    background: transparent;
+    color: @fg;
+    transition-property: background-color, color;
+    transition-duration: 0.2s;
+}
+
+window#waybar.hidden {
+    opacity: 0.25;
+}
+
+tooltip {
+    background: @tooltip_bg;
+    border: 1px solid @border;
+    border-radius: 10px;
+}
+
+tooltip label {
+    color: @fg;
+}
+
+#custom-menu,
+#custom-notification,
+#custom-wakatime,
+#custom-vpn1,
+#custom-vpn2,
+#custom-cycle_wall,
+#custom-theme,
+#custom-gammastep,
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#custom-backlight,
+#network,
+#custom-audio-volume,
+#pulseaudio,
+#wireplumber,
+#custom-media,
+#mode,
+#tray,
+#idle_inhibitor,
+#mpd,
+#bluetooth,
+#custom-power,
+#custom-weather,
+#custom-language,
+#language,
+#window,
+#workspaces {
+    background: @module_bg;
+    color: @fg;
+    border: 1px solid @border;
+}
+
+#workspaces button {
+    color: @muted;
+    background: transparent;
+    min-width: 0;
+}
+
+#workspaces button.active,
+#workspaces button.focused {
+    color: @accent;
+}
+
+#workspaces button:hover {
+    color: @accent_alt;
+    background: transparent;
+}
+
+#workspaces button.urgent,
+#battery.critical:not(.charging),
+#network.disconnected,
+#bluetooth.disconnected {
+    color: @critical;
+}
+
+#battery.charging,
+#battery.full,
+#battery.plugged {
+    color: @ok;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    color: @critical;
+}
+
+#idle_inhibitor.activated {
+    color: @bg;
+    background: @accent;
+}
+
+@keyframes blink {
+    to {
+        background: @critical_bg;
+        color: @critical;
+    }
+}
+
+#battery.critical:not(.charging) {
+    animation-name: blink;
+    animation-duration: 0.6s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}

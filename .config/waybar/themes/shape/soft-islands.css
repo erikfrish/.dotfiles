@@ -1,0 +1,65 @@
+window#waybar > box {
+    margin: 3px 8px 0;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 16px;
+    padding: 2px;
+}
+
+#custom-menu,
+#custom-notification,
+#custom-wakatime,
+#custom-vpn1,
+#custom-vpn2,
+#custom-cycle_wall,
+#custom-theme,
+#custom-gammastep,
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#custom-backlight,
+#network,
+#custom-audio-volume,
+#pulseaudio,
+#wireplumber,
+#custom-media,
+#mode,
+#tray,
+#idle_inhibitor,
+#mpd,
+#bluetooth,
+#custom-power,
+#custom-weather,
+#custom-language,
+#language,
+#window,
+#workspaces {
+    border-radius: 14px;
+    padding: 4px 8px;
+    margin: 0 2px;
+}
+
+#workspaces button {
+    padding: 0 4px;
+    margin: 0 1px;
+}
+
+#custom-vpn1,
+#custom-vpn2,
+#custom-theme,
+#custom-power {
+    min-width: 26px;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+#custom-notification {
+    min-width: 40px;
+}

@@ -1,0 +1,60 @@
+#workspaces,
+#clock,
+#tray {
+    border-color: @accent;
+}
+
+#custom-menu,
+#custom-theme,
+#custom-cycle_wall {
+    background: @accent;
+    color: @bg;
+}
+
+#cpu,
+#memory,
+#temperature {
+    border-color: @warm;
+    color: @warm;
+}
+
+#custom-audio-volume,
+#pulseaudio,
+#wireplumber,
+#custom-backlight,
+#custom-gammastep {
+    border-color: @accent_alt;
+    color: @accent_alt;
+}
+
+#battery,
+#custom-language,
+#language {
+    border-color: @ok;
+    color: @ok;
+}
+
+#custom-vpn1.active {
+    background: @accent;
+    color: @bg;
+    border-color: @accent;
+}
+
+#custom-vpn2.active {
+    background: @ok;
+    color: @bg;
+    border-color: @ok;
+}
+
+#custom-vpn1.inactive,
+#custom-vpn2.inactive {
+    background: transparent;
+    color: @muted;
+    border-color: @muted;
+}
+
+#custom-power {
+    background: @critical;
+    border-color: @critical;
+    color: @bg;
+}

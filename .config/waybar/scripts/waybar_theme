@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+theme_switch="$HOME/.config/themes/theme-switch"
+
+usage() {
+    printf 'Usage: %s [apply|menu|current|waybar-json|cycle LAYER|set LAYER NAME]\n' "$(basename "$0")"
+    printf 'Unified themes managed by theme-switch. Layers kept for compat.\n'
+}
+
+waybar_json() {
+    local cur
+    cur="$("$theme_switch" current 2>/dev/null || echo none)"
+    printf '{"text":"󰔎","tooltip":"Theme: %s\\n\\nLeft: choose theme\\nRight: next theme"}\n' "$cur"
+}
+
+case "${1:-apply}" in
+    apply|menu|current|list)
+        exec "$theme_switch" "$@"
+        ;;
+    waybar-json)
+        waybar_json
+        ;;
+    cycle)
+        "$theme_switch" apply "$( ("$theme_switch" list | awk -v cur="$("$theme_switch" current)" '
+            { names[NR]=$1 }
+            END {
+                for (i=1; i<=NR; i++) {
+                    if (names[i]==cur) { print names[i%NR+1]; exit }
+                }
+                print names[1]
+            }
+        '))" >/dev/null 2>&1
+        ;;
+    set)
+        "$theme_switch" apply "$3" >/dev/null 2>&1
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

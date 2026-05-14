@@ -1,0 +1,88 @@
+* {
+    border: none;
+    font-family: "JetBrainsMono ExtraBold", "Symbols Nerd Font", sans-serif;
+    font-size: 14px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+window#waybar {
+    background: transparent;
+    color: @fg;
+}
+
+window#waybar.hidden {
+    opacity: 0.5;
+}
+
+tooltip {
+    background: @tooltip_bg;
+    border: 1px solid @border;
+    border-radius: 10px;
+}
+
+tooltip label {
+    color: @fg;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+    background: @module_bg;
+    border-radius: 10px;
+}
+
+#workspaces button {
+    background: transparent;
+    color: @muted;
+    margin-right: 2px;
+    min-width: 0;
+}
+
+#workspaces button.active,
+#workspaces button.focused {
+    color: @accent;
+}
+
+#workspaces button:hover {
+    color: @accent_alt;
+}
+
+#workspaces button.urgent,
+#battery.critical:not(.charging),
+#temperature.critical,
+#network.disconnected,
+#bluetooth.disconnected {
+    color: @critical;
+}
+
+#battery.charging,
+#battery.full,
+#battery.plugged,
+#idle_inhibitor.activated {
+    color: @ok;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    color: @critical;
+}
+
+@keyframes blink {
+    to {
+        color: @bg;
+    }
+}
+
+#battery.critical:not(.charging) {
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}

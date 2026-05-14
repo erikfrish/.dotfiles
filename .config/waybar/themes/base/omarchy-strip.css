@@ -1,0 +1,79 @@
+* {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: @fg;
+    font-family: "JetBrainsMono Nerd Font", "JetBrainsMono ExtraBold", "Symbols Nerd Font", sans-serif;
+    font-size: 12px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+window#waybar {
+    background: @bg;
+    color: @fg;
+}
+
+window#waybar.hidden,
+.hidden {
+    opacity: 0;
+}
+
+.modules-left {
+    margin-left: 8px;
+}
+
+.modules-right {
+    margin-right: 8px;
+}
+
+#workspaces button {
+    all: initial;
+    color: @fg;
+    min-width: 9px;
+}
+
+#workspaces button.empty {
+    opacity: 0.5;
+}
+
+#workspaces button.active,
+#workspaces button.focused {
+    color: @accent;
+}
+
+#workspaces button.urgent,
+#battery.critical:not(.charging),
+#temperature.critical,
+#network.disconnected,
+#bluetooth.disconnected {
+    color: @critical;
+}
+
+#battery.charging,
+#battery.full,
+#battery.plugged,
+#idle_inhibitor.activated {
+    color: @ok;
+}
+
+tooltip {
+    background: @tooltip_bg;
+    border: 1px solid @border;
+    border-radius: 2px;
+    padding: 2px;
+}
+
+tooltip label {
+    color: @fg;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    color: @critical;
+}

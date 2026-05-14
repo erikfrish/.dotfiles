@@ -1,0 +1,53 @@
+window#waybar > box {
+    margin: 0;
+}
+
+#custom-menu,
+#custom-notification,
+#custom-wakatime,
+#custom-vpn1,
+#custom-vpn2,
+#custom-cycle_wall,
+#custom-theme,
+#custom-gammastep,
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#custom-backlight,
+#network,
+#custom-audio-volume,
+#pulseaudio,
+#wireplumber,
+#custom-media,
+#mode,
+#tray,
+#idle_inhibitor,
+#mpd,
+#bluetooth,
+#custom-power,
+#custom-weather,
+#custom-language,
+#language,
+#window,
+#workspaces {
+    border-radius: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    padding: 0 5px;
+    margin: 0;
+}
+
+#workspaces button {
+    padding: 0 4px;
+    margin: 0;
+}
+
+#custom-vpn1,
+#custom-vpn2,
+#custom-theme,
+#custom-power {
+    min-width: 18px;
+}

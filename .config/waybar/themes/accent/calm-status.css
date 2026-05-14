@@ -1,0 +1,52 @@
+#custom-menu {
+    color: @accent_alt;
+}
+
+#cpu,
+#temperature {
+    color: @warm;
+}
+
+#memory,
+#custom-cycle_wall,
+#custom-theme,
+#custom-gammastep {
+    color: @warm;
+}
+
+#custom-audio-volume,
+#pulseaudio,
+#wireplumber,
+#custom-backlight {
+    color: @accent;
+}
+
+#clock,
+#custom-language,
+#language {
+    color: @fg;
+}
+
+#battery {
+    color: @accent_alt;
+}
+
+#custom-vpn1.active {
+    color: @fg;
+    background: @accent;
+}
+
+#custom-vpn2.active {
+    color: @fg;
+    background: @ok;
+}
+
+#custom-vpn1.inactive,
+#custom-vpn2.inactive {
+    color: @muted;
+    background: transparent;
+}
+
+#custom-power {
+    color: @critical;
+}

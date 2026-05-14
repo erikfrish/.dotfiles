@@ -1,0 +1,55 @@
+#custom-menu,
+#custom-theme,
+#custom-cycle_wall,
+#clock {
+    color: @fg;
+}
+
+#cpu,
+#battery,
+#pulseaudio,
+#custom-audio-volume,
+#network,
+#bluetooth {
+    color: @accent;
+}
+
+#memory,
+#temperature,
+#custom-gammastep,
+#custom-backlight {
+    color: @muted;
+}
+
+#custom-notification,
+#custom-language,
+#language {
+    color: @accent_alt;
+}
+
+#custom-vpn1.active {
+    color: @fg;
+    background: @accent;
+}
+
+#custom-vpn2.active {
+    color: @fg;
+    background: @ok;
+}
+
+#custom-vpn1.inactive,
+#custom-vpn2.inactive {
+    color: @muted;
+    background: transparent;
+}
+
+#idle_inhibitor.activated {
+    color: @fg;
+    background: @accent;
+}
+
+#custom-power,
+#battery.critical:not(.charging),
+#temperature.critical {
+    color: @critical;
+}
