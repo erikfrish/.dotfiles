@@ -162,8 +162,8 @@ binds {
     // -------------------------------------------------------------------------
     Print { screenshot; }
     Shift+Print { screenshot-screen; }
-    Ctrl+Print { screenshot; }
-    Ctrl+Shift+Print { screenshot-screen; }
+    Ctrl+Print { spawn-sh "~/.config/desktop/scripts/screenshot_save"; }
+    Ctrl+Shift+Print { spawn-sh "~/.config/desktop/scripts/screenshot_full"; }
 
     // Session controls and shortcut inhibition toggle.
     Mod+Ctrl+M { quit; }

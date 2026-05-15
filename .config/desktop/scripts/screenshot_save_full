@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DIR=~/Pictures/Screenshots
+mkdir -p "$DIR"
+FILE="$DIR/Screenshot from $(date '+%Y-%m-%d %H-%M-%S').png"
+grim "$FILE"
+notify-send "Screenshot saved" "$FILE"
