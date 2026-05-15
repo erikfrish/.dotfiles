@@ -17,6 +17,11 @@ environment {
     GTK_THEME "adw-gtk3-dark"
     QT_STYLE_OVERRIDE "Adwaita-Dark"
 
+    // XWayland keyboard layout — must match xkb config in input.kdl.
+    XKB_DEFAULT_LAYOUT "us,dotfiles"
+    XKB_DEFAULT_VARIANT ",ru_ctrl_shortcuts"
+    XKB_DEFAULT_OPTIONS "grp:alt_shift_toggle"
+
     // Desktop GPU defaults for the shared laptop/desktop config.
     LIBVA_DRIVER_NAME "nvidia"
     GBM_BACKEND "nvidia-drm"
