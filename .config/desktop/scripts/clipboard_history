@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-runtime_dir="${XDG_RUNTIME_DIR:-/tmp}/cliphist-menu"
-thumb_dir="$runtime_dir/thumbs"
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/cliphist-menu"
+thumb_dir="$cache_dir/thumbs"
 
 if pidof rofi >/dev/null 2>&1; then
   pkill rofi
@@ -11,25 +11,41 @@ fi
 
 mkdir -p "$thumb_dir"
 
+cleanup_stale_cache() {
+  find "$thumb_dir" -name '*.png' -mtime +30 -delete
+  find "$thumb_dir" -name '*.txt' -mtime +30 -delete
+}
+cleanup_stale_cache
+
 make_image_entry() {
-  local line="$1" id raw thumb meta dims
+  local line="$1" id raw thumb meta dims ts_file timestamp
 
   id=${line%%$'\t'*}
-  raw="$runtime_dir/$id.clip"
+  raw="$cache_dir/$id.clip"
   thumb="$thumb_dir/$id.png"
   meta="$thumb_dir/$id.txt"
+  ts_file="$thumb_dir/$id.ts"
 
   if [ ! -f "$thumb" ] || [ ! -f "$meta" ]; then
-    if printf '%s\n' "$line" | cliphist decode >"$raw" && identify -quiet "$raw" >/dev/null 2>&1; then
+    if printf '%s' "$id" | cliphist decode >"$raw" && identify -quiet "$raw" >/dev/null 2>&1; then
       identify -format '%wx%h %m' "$raw" >"$meta" 2>/dev/null || rm -f "$meta"
-      magick "$raw[0]" -auto-orient -thumbnail '96x96>' "$thumb" >/dev/null 2>&1 || rm -f "$thumb"
+      magick "$raw[0]" -auto-orient -thumbnail '256x256>' "$thumb" >/dev/null 2>&1 || rm -f "$thumb"
     fi
     rm -f "$raw"
   fi
 
   if [ -f "$thumb" ]; then
-    dims=$([ -f "$meta" ] && <"$meta" || printf 'image')
-    printf 'Image %s\0icon\x1f%s\n' "$dims" "$thumb"
+    if [ -f "$meta" ]; then
+      dims=$(cat "$meta")
+    else
+      dims="image"
+    fi
+    if [ -f "$ts_file" ]; then
+      timestamp=$(cat "$ts_file")
+    else
+      timestamp=""
+    fi
+    printf '[image] %s %s\0icon\x1f%s\n' "$dims" "$timestamp" "$thumb"
   else
     printf 'Binary data\0icon\x1fxterm\n'
   fi
@@ -53,9 +69,9 @@ done | rofi -dmenu \
   -no-custom \
   -p "Clipboard" \
   -display-columns 1 \
+  -disable-history \
   -config ~/.config/rofi/clipboard.rasi \
-  -format i \
-  -sync | {
+  -format i | {
     index=$(cat)
     [[ "$index" =~ ^[0-9]+$ ]] || exit 0
     cliphist list | sed -n "$((index + 1))p" | cliphist decode | wl-copy

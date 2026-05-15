@@ -1,12 +1,13 @@
 configuration {
   modes: "";
-  font: "JetBrainsMono ExtraBold 13";
+  font: "JetBrainsMono ExtraBold 14";
   show-icons: true;
   icon-theme: "Papirus";
   case-sensitive: false;
   matching: "fuzzy";
   sort: true;
   sorting-method: "fzf";
+  click-to-exit: true;
   pid: "/run/user/1000/rofi-clipboard.pid";
 }
 

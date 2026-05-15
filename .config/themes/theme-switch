@@ -292,6 +292,18 @@ element-icon {
   size:             1.2em;
 }
 
+element selected normal element-icon {
+  size: 3.6em;
+}
+
+element selected urgent element-icon {
+  size: 3.6em;
+}
+
+element selected active element-icon {
+  size: 3.6em;
+}
+
 element-text {
   background-color: transparent;
   text-color:       inherit;
@@ -333,6 +345,21 @@ error-message {
 ROFI
     done
 
+    cat >> "$config_dir/rofi/clipboard-theme.rasi" <<'CLIPBOARD_ROFI'
+
+element selected normal element-icon {
+  size: 5.6em;
+}
+
+element selected urgent element-icon {
+  size: 5.6em;
+}
+
+element selected active element-icon {
+  size: 5.6em;
+}
+CLIPBOARD_ROFI
+
     cat >> "$config_dir/rofi/wallpaper-theme.rasi" <<'WALLPAPER_ROFI'
 
 window {
@@ -355,6 +382,18 @@ element {
 
 element-icon {
   size: 8em;
+}
+
+element selected normal element-icon {
+  size: 10em;
+}
+
+element selected urgent element-icon {
+  size: 10em;
+}
+
+element selected active element-icon {
+  size: 10em;
 }
 
 element-text {
