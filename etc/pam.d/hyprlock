@@ -1,2 +1,4 @@
-auth        sufficient  pam_fprintd.so
+# hyprlock handles the fingerprint reader itself through auth.fingerprint.
+# Keep PAM password-only; stacking pam_fprintd here can make password auth wait
+# for the parallel fingerprint flow before unlocking.
 auth        include     login

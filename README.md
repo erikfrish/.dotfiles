@@ -271,7 +271,7 @@ Idle flow:
 - 30 minutes: lock through `hyprlock`.
 - Before sleep: lock through `hyprlock`.
 
-Fingerprint unlock is handled by `/etc/pam.d/hyprlock`. ly intentionally does not use fingerprint PAM because TTY display managers can hang or behave poorly with fingerprint prompts.
+Fingerprint unlock is enabled in `~/.config/hypr/hyprlock.conf` through `auth.fingerprint`. `/etc/pam.d/hyprlock` intentionally stays password-only so hyprlock does not run a second `pam_fprintd` flow in parallel with its built-in fingerprint auth. ly intentionally does not use fingerprint PAM because TTY display managers can hang or behave poorly with fingerprint prompts.
 
 ## Notes
 
