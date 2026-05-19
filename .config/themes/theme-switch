@@ -117,6 +117,7 @@ hex_to_alpha() {
 apply_waybar() {
     local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/waybar"
     local waybar_state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/waybar"
+    local generated_config="$cache_dir/config"
     mkdir -p "$cache_dir" "$waybar_state_dir"
 
     cat > "$waybar_state_dir/theme.conf" <<EOF
@@ -133,6 +134,21 @@ EOF
 @import "$config_dir/waybar/themes/shape/$waybar_shape.css";
 @import "$config_dir/waybar/themes/accent/$waybar_accent.css";
 EOF
+
+    awk \
+        -v months="        \"months\": \"<span color='$accent'><b>{}</b></span>\"," \
+        -v days="        \"days\": \"<span color='$accent_alt'><b>{}</b></span>\"," \
+        -v weeks="        \"weeks\": \"<span color='$ok'><b>W{}</b></span>\"," \
+        -v weekdays="        \"weekdays\": \"<span color='$warm'><b>{}</b></span>\"," \
+        -v today="        \"today\": \"<span color='$critical'><b><u>{}</u></b></span>\"" \
+        '
+        /"months"[[:space:]]*:/ { print months; next }
+        /"days"[[:space:]]*:/ { print days; next }
+        /"weeks"[[:space:]]*:/ { print weeks; next }
+        /"weekdays"[[:space:]]*:/ { print weekdays; next }
+        /"today"[[:space:]]*:/ { print today; next }
+        { print }
+        ' "$config_dir/waybar/config" > "$generated_config"
 
     ln -sf "$cache_dir/theme.css" "$config_dir/waybar/style.css"
     if systemctl --user --quiet is-active waybar.service 2>/dev/null; then

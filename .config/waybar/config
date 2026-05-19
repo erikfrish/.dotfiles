@@ -92,6 +92,7 @@
     "format": " {:%H:%M   %F, %a}",
     "format-alt": " {:%H:%M}",
     "format-alt-click": "click-right",
+    "locale": "en_US.UTF-8",
     "on-click": "swaync-client -t -sw",
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
     "calendar": {
