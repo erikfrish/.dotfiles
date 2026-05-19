@@ -11,7 +11,7 @@ state_file="$state_dir/current"
 video_pid_file="$state_dir/mpvpaper.pid"
 thumb_dir="${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-thumbnails"
 video_preview_second=1
-mpv_hwdec="${DOTFILES_MPV_HWDEC:-auto-safe}"
+mpv_hwdec="${DOTFILES_MPV_HWDEC:-no}"
 
 mapfile -d '' wallpapers < <(
   find "$wallpaper_dir" -maxdepth 1 -type f \

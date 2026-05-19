@@ -3,8 +3,9 @@
 # Paths
 # DOTFILES_WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
 
-# Video wallpaper hardware decoding: auto-safe works across NVIDIA, AMD, Intel.
-# DOTFILES_MPV_HWDEC=auto-safe
+# Video wallpaper hardware decoding. Keep disabled by default because mpvpaper
+# can wedge mixed-GPU Wayland sessions when it picks the wrong hardware path.
+# DOTFILES_MPV_HWDEC=no
 
 # Niri session apps
 # DOTFILES_ENABLE_AUTOSTART_APPS=1
