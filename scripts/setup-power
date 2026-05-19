@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_dir="$(cd -- "$script_dir/.." && pwd)"
+
+deploy() {
+  local src="$1" dest="$2" mode="$3"
+  if [[ ! -f "$src" ]]; then
+    printf 'Missing source: %s\n' "$src" >&2
+    exit 1
+  fi
+  install -Dm"$mode" "$src" "$dest"
+  printf 'Installed %s\n' "$dest"
+}
+
+deploy "$repo_dir/scripts/root/dotfiles-power-profile" "/usr/local/libexec/dotfiles-power-profile" 755
+deploy "$repo_dir/etc/systemd/system/dotfiles-power-profile.service" "/etc/systemd/system/dotfiles-power-profile.service" 644
+deploy "$repo_dir/etc/udev/rules.d/90-dotfiles-power-profile.rules" "/etc/udev/rules.d/90-dotfiles-power-profile.rules" 644
+
+install -Dm644 /dev/stdin /etc/NetworkManager/conf.d/10-wifi-powersave.conf <<'EOF'
+[connection]
+wifi.powersave=3
+EOF
+printf 'Installed /etc/NetworkManager/conf.d/10-wifi-powersave.conf\n'
+
+systemctl daemon-reload
+udevadm control --reload
+systemctl restart NetworkManager.service
+systemctl start dotfiles-power-profile.service
+
+printf '\nDone. Current state:\n'
+powerprofilesctl get 2>/dev/null || true
+cat /sys/module/pcie_aspm/parameters/policy 2>/dev/null || true
+if command -v iw >/dev/null 2>&1; then
+  for iface in /sys/class/net/*; do
+    [ -d "$iface/wireless" ] || continue
+    iw dev "${iface##*/}" get power_save 2>/dev/null || true
+  done
+fi
+
+
+# Installed /usr/local/libexec/dotfiles-power-profile
+# Installed /etc/systemd/system/dotfiles-power-profile.service
+# Installed /etc/udev/rules.d/90-dotfiles-power-profile.rules
+# Installed /etc/NetworkManager/conf.d/10-wifi-powersave.conf

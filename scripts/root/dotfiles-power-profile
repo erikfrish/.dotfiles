@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+is_ac_online() {
+  local supply online
+  shopt -s nullglob
+  for supply in /sys/class/power_supply/*; do
+    [ -r "$supply/type" ] || continue
+    case "$(<"$supply/type")" in
+      Mains|USB|USB_C|USB_PD)
+        [ -r "$supply/online" ] || continue
+        online=$(<"$supply/online")
+        [ "$online" = 1 ] && return 0
+        ;;
+    esac
+  done
+  return 1
+}
+
+set_power_profile() {
+  command -v powerprofilesctl >/dev/null 2>&1 || return 0
+  powerprofilesctl set "$1" >/dev/null 2>&1 || true
+}
+
+set_pcie_aspm() {
+  local policy_file=/sys/module/pcie_aspm/parameters/policy
+  [ -w "$policy_file" ] || return 0
+  printf '%s\n' "$1" > "$policy_file" || true
+}
+
+set_wifi_powersave() {
+  command -v iw >/dev/null 2>&1 || return 0
+
+  local iface
+  shopt -s nullglob
+  for iface in /sys/class/net/*; do
+    [ -d "$iface/wireless" ] || continue
+    iw dev "${iface##*/}" set power_save on >/dev/null 2>&1 || true
+  done
+}
+
+if is_ac_online; then
+  set_power_profile balanced
+  set_pcie_aspm default
+else
+  set_power_profile power-saver
+  set_pcie_aspm powersave
+fi
+
+# Keep Wi-Fi power saving enabled in both modes. NetworkManager also gets a
+# persistent default from setup-power; this covers the active interface now.
+set_wifi_powersave

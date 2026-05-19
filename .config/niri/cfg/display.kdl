@@ -9,6 +9,7 @@
 output "eDP-1" {
     mode "3072x1920@120.000"
     scale 1.75
+    variable-refresh-rate
 }
 
 output "DP-4" {

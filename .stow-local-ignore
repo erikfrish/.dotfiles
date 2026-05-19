@@ -2,6 +2,7 @@
 ^\.github
 ^\.vscode
 ^scripts
+^etc
 .*bak(/.*)?
 \.swp$
 \.bak$

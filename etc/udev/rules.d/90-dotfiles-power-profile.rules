@@ -1,0 +1,4 @@
+SUBSYSTEM=="power_supply", ATTR{type}=="Mains", RUN+="/usr/bin/systemctl start dotfiles-power-profile.service"
+SUBSYSTEM=="power_supply", ATTR{type}=="USB", RUN+="/usr/bin/systemctl start dotfiles-power-profile.service"
+SUBSYSTEM=="power_supply", ATTR{type}=="USB_C", RUN+="/usr/bin/systemctl start dotfiles-power-profile.service"
+SUBSYSTEM=="power_supply", ATTR{type}=="USB_PD", RUN+="/usr/bin/systemctl start dotfiles-power-profile.service"

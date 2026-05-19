@@ -31,6 +31,8 @@ The setup is intentionally boring in the places that should be reliable: one com
 .config/systemd/user/  Session services started by dotfiles-session.target
 .config/xkb/           Custom Russian shortcut-friendly XKB layout
 etc/pam.d/hyprlock     PAM config for fingerprint unlock with password fallback
+etc/systemd/system/     Root systemd units for hardware/session integration
+etc/udev/rules.d/       Udev rules for power-source automation
 scripts/               Package lists, setup helpers, doctor, PAM, SSH, DDC/CI
 notes/                 Hardware and operational notes
 ```
@@ -56,6 +58,7 @@ Apply privileged pieces when needed:
 
 ```sh
 sudo ~/.dotfiles/scripts/setup-pam
+sudo ~/.dotfiles/scripts/setup-power
 sudo ~/.dotfiles/scripts/setup-ddcci
 ~/.dotfiles/scripts/setup-ssh-agent
 ```
@@ -272,6 +275,29 @@ Idle flow:
 - Before sleep: lock through `hyprlock`.
 
 Fingerprint unlock is enabled in `~/.config/hypr/hyprlock.conf` through `auth.fingerprint`. `/etc/pam.d/hyprlock` intentionally stays password-only so hyprlock does not run a second `pam_fprintd` flow in parallel with its built-in fingerprint auth. ly intentionally does not use fingerprint PAM because TTY display managers can hang or behave poorly with fingerprint prompts.
+
+## Power
+
+Power source changes are handled by `/etc/udev/rules.d/90-dotfiles-power-profile.rules`, which starts `dotfiles-power-profile.service`.
+
+The service runs `/usr/local/libexec/dotfiles-power-profile`:
+
+- On battery: `powerprofilesctl set power-saver`, PCIe ASPM `powersave`, Wi-Fi power saving on.
+- On AC: `powerprofilesctl set balanced`, PCIe ASPM `default`, Wi-Fi power saving stays on.
+
+Install the privileged pieces with:
+
+```sh
+sudo ~/.dotfiles/scripts/setup-power
+```
+
+Check the active state:
+
+```sh
+powerprofilesctl get
+cat /sys/module/pcie_aspm/parameters/policy
+iw dev wlan0 get power_save
+```
 
 ## Notes
 
