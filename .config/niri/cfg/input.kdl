@@ -21,7 +21,7 @@ input {
             // cannot see Niri's switch-layout keybind. Alt+Shift does not
             // leak printable characters into apps unlike win_space_toggle.
             // Wayland-native apps use the Mod+Space keybind instead.
-            options "grp:alt_shift_toggle"
+            // options "grp:alt_shift_toggle"
         }
 
         // Always start sessions with NumLock enabled.

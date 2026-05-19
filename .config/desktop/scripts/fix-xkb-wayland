@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
-# Fix XWayland keymap — niri doesn't pass input.kdl xkb to X server.
-# This applies the correct layout, variant and toggle option.
+set -euo pipefail
 
-# Only run once
-[ -n "${_XKB_FIXED:-}" ] && exit 0
-export _XKB_FIXED=1
+# Fix XWayland keymap: niri applies input.kdl through libxkbcommon, but
+# XWayland/Java apps need the same user XKB layout loaded into the X server.
+display="${DISPLAY:-:0}"
+xkb_dir="${XDG_CONFIG_HOME:-$HOME/.config}/xkb"
 
-# Wait for XWayland to start
-sleep 1
+for _ in {1..20}; do
+    if keymap=$(DISPLAY="$display" setxkbmap -I"$xkb_dir" -layout us,dotfiles -variant ',ru_ctrl_shortcuts' -option grp:alt_shift_toggle -print 2>/dev/null); then
+        if printf '%s\n' "$keymap" | DISPLAY="$display" xkbcomp -I"$xkb_dir" - "$display" >/dev/null 2>&1; then
+            exit 0
+        fi
+    fi
 
-# Set the keymap on the X server
-# Uses setxkbmap with verbose mode suppressed
-DISPLAY=:0 setxkbmap -layout us,dotfiles -variant ',ru_ctrl_shortcuts' -option grp:alt_shift_toggle 2>/dev/null
+    sleep 0.25
+done
+
+exit 1

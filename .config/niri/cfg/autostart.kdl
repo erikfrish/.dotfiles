@@ -4,6 +4,7 @@
 
 // Core session services and tray applets.
 spawn-at-startup "xwayland-satellite"
+spawn-sh-at-startup "~/.config/desktop/scripts/fix-xkb-wayland"
 spawn-at-startup "fcitx5" "-d"
 spawn-at-startup "nm-applet" "--indicator"
 spawn-at-startup "blueman-applet"
