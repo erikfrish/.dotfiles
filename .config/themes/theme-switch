@@ -935,7 +935,6 @@ SHELL_THEME
 }
 
 apply_all() {
-    apply_waybar
     apply_rofi
     apply_gtk
     apply_swaync
@@ -949,6 +948,10 @@ apply_all() {
     apply_ly
     apply_shell
     save_state
+    # Waybar may be the parent process when theme-switch is launched from the
+    # bar. Restart it last so it cannot kill the theme apply before state and
+    # the other generated configs are updated.
+    apply_waybar
 }
 
 theme_thumbnail() {
