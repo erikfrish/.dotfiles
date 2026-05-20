@@ -112,13 +112,13 @@
           }
         },
         "berrylm-l": {
-          "name": "berrylm-l",
+          "name": "wb-reviewer-berrylm-l",
           "provider": {
             "api": "https://aimodels.wb.ru/reviewer-a/v1"
           }
         },
         "berrylm-l-v2": {
-          "name": "berrylm-l-v2",
+          "name": "wb-autocomplete-berrylm-l-v2",
           "provider": {
             "api": "https://aimodels.wb.ru/reviewer-b/v1"
           }
@@ -136,9 +136,30 @@
           "name": "Qwen3.6 35B A3B UD-IQ2_M local",
           "limit": {
             "context": 80072,
+            "output": 4096
+          }
+        },
+        "Qwen3-Coder-Next-UD-Q4_K_M-80072": {
+          "name": "Qwen3-Coder-Next-UD-Q4_K_M-80072",
+          "limit": {
+            "context": 80072,
+            "output": 4096
+          }
+        },
+        "Qwen3-Coder-Next-UD-Q4_K_M-262144": {
+          "name": "Qwen3-Coder-Next-UD-Q4_K_M-262144",
+          "limit": {
+            "context": 162144,
             "output": 8192
           }
-        }
+        },
+        "Qwen3-Coder-Next-UD-Q4_K_M-162144": {
+          "name": "Qwen3-Coder-Next-UD-Q4_K_M-162144",
+          "limit": {
+            "context": 162144,
+            "output": 8192
+          }
+        },
       }
     }
   },
