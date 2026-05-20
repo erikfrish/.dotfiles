@@ -55,7 +55,7 @@ window#waybar > box {
 
 #custom-vpn1,
 #custom-vpn2 {
-    min-width: 14px;
+    min-width: 13px;
     padding-left: 2px;
     padding-right: 6px;
     margin-left: 1px;

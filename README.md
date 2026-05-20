@@ -152,7 +152,10 @@ Theme previews are captured on an empty Niri workspace with each preset's `bg` c
 | Theme | Preview |
 | --- | --- |
 | `amber-forge` | ![amber-forge](docs/theme-previews/amber-forge.png) |
+| `blood-moon` | ![blood-moon](docs/theme-previews/blood-moon.png) |
+| `catppuccin-mocha` | ![catppuccin-mocha](docs/theme-previews/catppuccin-mocha.png) |
 | `cyberpunk` | ![cyberpunk](docs/theme-previews/cyberpunk.png) |
+| `dracula` | ![dracula](docs/theme-previews/dracula.png) |
 | `everforest` | ![everforest](docs/theme-previews/everforest.png) |
 | `gruvbox-dark` | ![gruvbox-dark](docs/theme-previews/gruvbox-dark.png) |
 | `kanagawa-thin` | ![kanagawa-thin](docs/theme-previews/kanagawa-thin.png) |
@@ -161,6 +164,8 @@ Theme previews are captured on an empty Niri workspace with each preset's `bg` c
 | `miasma` | ![miasma](docs/theme-previews/miasma.png) |
 | `mono` | ![mono](docs/theme-previews/mono.png) |
 | `nord-frost` | ![nord-frost](docs/theme-previews/nord-frost.png) |
+| `one-dark` | ![one-dark](docs/theme-previews/one-dark.png) |
+| `rose-pine` | ![rose-pine](docs/theme-previews/rose-pine.png) |
 | `tokyo-night` | ![tokyo-night](docs/theme-previews/tokyo-night.png) |
 | `vantablack` | ![vantablack](docs/theme-previews/vantablack.png) |
 | `violet-dusk` | ![violet-dusk](docs/theme-previews/violet-dusk.png) |

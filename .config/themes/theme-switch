@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# -----------------------------------------------------------------------------
+# Bootstrap
+# -----------------------------------------------------------------------------
+
 themes_dir="$HOME/.config/themes"
 state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/themes"
 state_file="$state_dir/current"
@@ -9,9 +13,17 @@ lib_file="$config_dir/dotfiles/lib.sh"
 [ -r "$lib_file" ] && . "$lib_file"
 type dotfiles_load_machine_config >/dev/null 2>&1 && dotfiles_load_machine_config
 
+# -----------------------------------------------------------------------------
+# CLI
+# -----------------------------------------------------------------------------
+
 usage() {
     printf 'Usage: %s [apply THEME|menu|current|list]\n' "$(basename "$0")"
 }
+
+# -----------------------------------------------------------------------------
+# Theme State
+# -----------------------------------------------------------------------------
 
 load_theme() {
     local name="$1"
@@ -59,6 +71,37 @@ list_themes() {
     shopt -u nullglob
 }
 
+# -----------------------------------------------------------------------------
+# Shared Helpers
+# -----------------------------------------------------------------------------
+
+systemd_user_active() {
+    systemctl --user --quiet is-active "$1" 2>/dev/null
+}
+
+restart_user_service() {
+    systemctl --user restart "$1" 2>/dev/null || true
+}
+
+hex_to_rgb() {
+    local hex="${1#\#}"
+    printf '%d %d %d\n' "0x${hex:0:2}" "0x${hex:2:2}" "0x${hex:4:2}"
+}
+
+hex_to_hypr() {
+    local hex="${1#\#}"
+    printf '0xff%s\n' "$hex"
+}
+
+hex_to_alpha() {
+    local hex="${1#\#}"
+    printf 'ff%s\n' "$hex"
+}
+
+# -----------------------------------------------------------------------------
+# Generated File Health
+# -----------------------------------------------------------------------------
+
 generated_missing() {
     local files=(
         "$config_dir/rofi/theme.rasi"
@@ -99,20 +142,9 @@ ensure_generated() {
     apply_all
 }
 
-hex_to_rgb() {
-    local hex="${1#\#}"
-    printf '%d %d %d\n' "0x${hex:0:2}" "0x${hex:2:2}" "0x${hex:4:2}"
-}
-
-hex_to_hypr() {
-    local hex="${1#\#}"
-    printf '0xff%s\n' "$hex"
-}
-
-hex_to_alpha() {
-    local hex="${1#\#}"
-    printf 'ff%s\n' "$hex"
-}
+# -----------------------------------------------------------------------------
+# Apply: Desktop Shell
+# -----------------------------------------------------------------------------
 
 apply_waybar() {
     local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/waybar"
@@ -151,8 +183,8 @@ EOF
         ' "$config_dir/waybar/config" > "$generated_config"
 
     ln -sf "$cache_dir/theme.css" "$config_dir/waybar/style.css"
-    if systemctl --user --quiet is-active waybar.service 2>/dev/null; then
-        systemctl --user restart waybar.service 2>/dev/null || true
+    if systemd_user_active waybar.service; then
+        restart_user_service waybar.service
     else
         killall waybar 2>/dev/null || true
         nohup "$config_dir/waybar/scripts/statusbar" >/dev/null 2>&1 &
@@ -520,6 +552,10 @@ RADIUS
     swaync-client --reload-css 2>/dev/null || killall -HUP swaync 2>/dev/null || true
 }
 
+# -----------------------------------------------------------------------------
+# Apply: Lock And Logout
+# -----------------------------------------------------------------------------
+
 apply_hyprlock() {
     local dest="$config_dir/hypr/hyprlock-theme.conf"
 
@@ -673,6 +709,10 @@ button:hover {
 WLOGOUT
 }
 
+# -----------------------------------------------------------------------------
+# Apply: OSD
+# -----------------------------------------------------------------------------
+
 apply_wob() {
     local wob_conf="$config_dir/wob/wob.ini"
     local bg_hex="${bg#\#}"
@@ -702,8 +742,8 @@ border_color = ${critical#\#}
 background_color = ${bg_hex}ee
 WOB
 
-    if systemctl --user --quiet is-active wob.service 2>/dev/null; then
-        systemctl --user restart wob.service 2>/dev/null || true
+    if systemd_user_active wob.service; then
+        restart_user_service wob.service
     else
         local fifo
         if type dotfiles_wob_fifo >/dev/null 2>&1; then
@@ -761,13 +801,17 @@ label {
 }
 SWAYOSD
 
-    if systemctl --user --quiet is-active swayosd.service 2>/dev/null; then
-        systemctl --user restart swayosd.service 2>/dev/null || true
+    if systemd_user_active swayosd.service; then
+        restart_user_service swayosd.service
     else
         killall swayosd-server 2>/dev/null || true
         nohup swayosd-server -s "$style" >/dev/null 2>&1 &
     fi
 }
+
+# -----------------------------------------------------------------------------
+# Apply: Terminal, Toolkit, Editor, Login, Shell
+# -----------------------------------------------------------------------------
 
 apply_alacritty() {
     local dest="$config_dir/alacritty/theme.toml"
@@ -950,6 +994,10 @@ export DOTFILES_THEME_CRITICAL="$critical"
 SHELL_THEME
 }
 
+# -----------------------------------------------------------------------------
+# Apply: Orchestration
+# -----------------------------------------------------------------------------
+
 apply_all() {
     apply_rofi
     apply_gtk
@@ -969,6 +1017,10 @@ apply_all() {
     # the other generated configs are updated.
     apply_waybar
 }
+
+# -----------------------------------------------------------------------------
+# Theme Picker
+# -----------------------------------------------------------------------------
 
 theme_thumbnail() {
     local name="$1"
@@ -1004,6 +1056,33 @@ SVG
     printf '%s\n' "$thumb"
 }
 
+selected_theme_row() {
+    local cur="$1" name i=0
+
+    while read -r name; do
+        if [[ "$name" == "$cur" ]]; then
+            printf '%s\n' "$i"
+            return
+        fi
+        i=$((i + 1))
+    done < <(list_themes)
+
+    printf '0\n'
+}
+
+theme_menu_rows() {
+    local cur="$1" name thumb
+
+    while read -r name; do
+        thumb="$(theme_thumbnail "$name" || printf 'preferences-desktop-theme')"
+        if [[ "$name" == "$cur" ]]; then
+            printf '[ %s ]\0icon\x1f%s\n' "$name" "$thumb"
+        else
+            printf '%s\0icon\x1f%s\n' "$name" "$thumb"
+        fi
+    done < <(list_themes)
+}
+
 menu() {
     ensure_generated
 
@@ -1012,25 +1091,11 @@ menu() {
         exit 0
     fi
 
-    local cur choice selected_row=0 i=0
+    local cur choice selected_row
     cur="$(current_theme)"
+    selected_row="$(selected_theme_row "$cur")"
 
-    while read -r name; do
-        if [[ "$name" == "$cur" ]]; then
-            selected_row="$i"
-            break
-        fi
-        i=$((i + 1))
-    done < <(list_themes)
-
-    choice=$(list_themes | while read -r name; do
-        thumb="$(theme_thumbnail "$name" || printf 'preferences-desktop-theme')"
-        if [[ "$name" == "$cur" ]]; then
-            printf '[ %s ]\0icon\x1f%s\n' "$name" "$thumb"
-        else
-            printf '%s\0icon\x1f%s\n' "$name" "$thumb"
-        fi
-    done | rofi -dmenu \
+    choice=$(theme_menu_rows "$cur" | rofi -dmenu \
         -i \
         -no-custom \
         -show-icons \
@@ -1046,6 +1111,10 @@ menu() {
     load_theme "$choice"
     apply_all
 }
+
+# -----------------------------------------------------------------------------
+# Main
+# -----------------------------------------------------------------------------
 
 case "${1:-menu}" in
     apply)

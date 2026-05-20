@@ -1,0 +1,12 @@
+@define-color bg #282a36;
+@define-color module_bg rgba(68, 71, 90, 0.86);
+@define-color tooltip_bg rgba(40, 42, 54, 0.96);
+@define-color fg #f8f8f2;
+@define-color muted #6272a4;
+@define-color border rgba(189, 147, 249, 0.26);
+@define-color accent #bd93f9;
+@define-color accent_alt #8be9fd;
+@define-color warm #f1fa8c;
+@define-color ok #50fa7b;
+@define-color critical #ff5555;
+@define-color critical_bg rgba(255, 85, 85, 0.18);

@@ -8,8 +8,8 @@
   "passthrough": false,
   "fixed-center": true,
   "ipc": true,
-  "margin-left": 6,
-  "margin-right": 6,
+  "margin-left": 0,
+  "margin-right": 0,
   "margin-bottom": 0,
   "spacing": 4,
 
@@ -271,7 +271,7 @@
   },
 
   "custom/power": {
-    "format": "󰐥",
+    "format": "<span rise='3072'>󰐥</span>",
     "tooltip": false,
     "on-click": "sh -c '(sleep 0.1s; ~/.config/desktop/scripts/power_menu)' & disown"
   },
