@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-wallpaper_dir="$HOME/Pictures/Wallpapers"
+lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
+[ -r "$lib_file" ] && . "$lib_file"
+type dotfiles_load_machine_config >/dev/null 2>&1 && dotfiles_load_machine_config
+
+wallpaper_dir="${DOTFILES_WALLPAPER_DIR:-$HOME/Pictures/Wallpapers}"
 change_wallpaper="$HOME/.config/desktop/scripts/change_wallpaper"
 thumb_dir="${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-thumbnails"
 state_file="${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper/current"
@@ -46,6 +50,11 @@ thumbnail_for() {
 if pidof rofi >/dev/null 2>&1; then
   pkill rofi
   exit 0
+fi
+
+if [ ! -d "$wallpaper_dir" ]; then
+  notify-send "Wallpaper" "Directory does not exist: $wallpaper_dir" 2>/dev/null || true
+  exit 1
 fi
 
 mapfile -d '' wallpapers < <(

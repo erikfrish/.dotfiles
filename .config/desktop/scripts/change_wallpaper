@@ -13,6 +13,11 @@ thumb_dir="${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-thumbnails"
 video_preview_second=1
 mpv_hwdec="${DOTFILES_MPV_HWDEC:-no}"
 
+if [ ! -d "$wallpaper_dir" ]; then
+  printf 'Wallpaper directory does not exist: %s\n' "$wallpaper_dir" >&2
+  exit 1
+fi
+
 mapfile -d '' wallpapers < <(
   find "$wallpaper_dir" -maxdepth 1 -type f \
     \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' -o -iname '*.webp' -o -iname '*.mp4' -o -iname '*.webm' -o -iname '*.mkv' \) \
