@@ -9,6 +9,31 @@ read_package_list() {
   grep -Ev '^[[:space:]]*(#|$)' "$file"
 }
 
+seed_example_files() {
+  local source relative target created=0 skipped=0
+
+  echo "==> Creating repo-local files from *.example templates..."
+  while IFS= read -r -d '' source; do
+    relative="${source#"$repo_dir/"}"
+    target="$repo_dir/${relative%.example}"
+
+    if [ -e "$target" ] || [ -L "$target" ]; then
+      skipped=$((skipped + 1))
+      continue
+    fi
+
+    mkdir -p -- "$(dirname -- "$target")"
+    cp -p -- "$source" "$target"
+    printf '  created %s\n' "${target#"$repo_dir/"}"
+    created=$((created + 1))
+  done < <(find "$repo_dir" -path "$repo_dir/.git" -prune -o -type f -name '*.example' -print0)
+
+  printf '  created: %s, already existed: %s\n' "$created" "$skipped"
+}
+
+seed_example_files
+
+echo ""
 echo "==> Installing packages..."
 mapfile -t pacman_packages < <(read_package_list "$script_dir/packages.pacman")
 sudo pacman -S --needed "${pacman_packages[@]}"
@@ -29,19 +54,22 @@ stow --restow --target="$HOME" .
 echo ""
 echo "==> Running post-install setups..."
 echo ""
-echo "[1/5] System config files (PAM)"
+echo "[1/6] System config files (PAM)"
 echo "  Run: sudo ~/.dotfiles/scripts/setup-pam"
 echo ""
-echo "[2/5] Power profile automation"
+echo "[2/6] Power profile automation"
 echo "  Run: sudo ~/.dotfiles/scripts/setup-power"
 echo ""
-echo "[3/5] DDC/CI backlight driver (external monitors)"
+echo "[3/6] DDC/CI backlight driver (external monitors)"
 echo "  Run: sudo ~/.dotfiles/scripts/setup-ddcci"
 echo ""
-echo "[4/5] SSH agent service"
+echo "[4/6] SSH agent service"
 echo "  Run: ~/.dotfiles/scripts/setup-ssh-agent"
 echo ""
-echo "[5/5] YubiKey pool"
+echo "[5/6] Home split DNS"
+echo "  Run: ~/.dotfiles/scripts/setup-home-dns"
+echo ""
+echo "[6/6] YubiKey pool"
 echo "  Run: ~/.dotfiles/.local/bin/yubikey-pool-setup"
 echo ""
 echo "Validation: ~/.dotfiles/scripts/doctor"

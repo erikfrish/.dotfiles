@@ -26,6 +26,17 @@
 # DOTFILES_VPN2_LABEL="Рабочий VPN"
 # DOTFILES_VPN2_ICON=""
 
+# Home split DNS for scripts/setup-home-dns. This keeps *.home on the local
+# OPNsense DNS even when a VPN owns the default DNS route (~.).
+# DOTFILES_HOME_DNS_CONNECTION=eth
+# DOTFILES_HOME_DNS_SERVER=10.69.1.1
+# DOTFILES_HOME_DNS_DOMAIN=home
+# DOTFILES_HOME_DNS_VPN_CONNECTIONS="wb vpnchik"
+# DOTFILES_HOME_DNS_ROUTE_PREFIXES="10.69.0.0/16"
+# DOTFILES_HOME_DNS_ROUTE_GATEWAY=10.69.11.1
+# DOTFILES_HOME_DNS_ROUTE_METRIC=5
+# DOTFILES_HOME_DNS_RECONNECT=0
+
 # DDC/CI setup defaults for scripts/setup-ddcci.
 # DOTFILES_DDCCI_BUS=10
 # DOTFILES_DDCCI_ADDR=0x37

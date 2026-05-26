@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_dir="$(cd -- "$script_dir/.." && pwd)"
+
+# shellcheck source=../.config/dotfiles/lib.sh
+. "$repo_dir/.config/dotfiles/lib.sh"
+dotfiles_load_machine_config
+
+connection="${1:-${DOTFILES_HOME_DNS_CONNECTION:-eth}}"
+domain="${DOTFILES_HOME_DNS_DOMAIN:-home}"
+dns_server="${DOTFILES_HOME_DNS_SERVER:-10.69.1.1}"
+vpn_connections="${DOTFILES_HOME_DNS_VPN_CONNECTIONS:-wb vpnchik}"
+home_route_prefixes="${DOTFILES_HOME_DNS_ROUTE_PREFIXES:-10.69.0.0/16}"
+home_route_gateway="${DOTFILES_HOME_DNS_ROUTE_GATEWAY:-}"
+home_route_metric="${DOTFILES_HOME_DNS_ROUTE_METRIC:-5}"
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [networkmanager-connection]
+
+Configure NetworkManager split DNS so *.$domain resolves through $dns_server,
+while VPN connections can keep the default DNS route (~.). Also add home
+network routes so local VLANs bypass full-tunnel VPNs.
+
+Machine-local overrides live in ~/.config/dotfiles/machine.conf:
+  DOTFILES_HOME_DNS_CONNECTION=eth
+  DOTFILES_HOME_DNS_SERVER=10.69.1.1
+  DOTFILES_HOME_DNS_DOMAIN=home
+  DOTFILES_HOME_DNS_VPN_CONNECTIONS="wb vpnchik"
+  DOTFILES_HOME_DNS_ROUTE_PREFIXES="10.69.0.0/16"
+  DOTFILES_HOME_DNS_ROUTE_GATEWAY=10.69.11.1
+  DOTFILES_HOME_DNS_ROUTE_METRIC=5
+EOF
+}
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+  usage
+  exit 0
+fi
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    printf 'missing command: %s\n' "$1" >&2
+    exit 1
+  fi
+}
+
+require_command nmcli
+
+if ! nmcli connection show "$connection" >/dev/null 2>&1; then
+  printf 'NetworkManager connection not found: %s\n' "$connection" >&2
+  printf 'Available connections:\n' >&2
+  nmcli -t -f NAME,TYPE connection show >&2
+  exit 1
+fi
+
+active_device="$(nmcli -g GENERAL.DEVICES connection show "$connection" 2>/dev/null || true)"
+
+printf '==> Configuring split DNS on connection: %s\n' "$connection"
+nmcli connection modify "$connection" \
+  ipv4.dns "$dns_server" \
+  ipv4.dns-search "$domain ~${domain}" \
+  ipv4.dns-priority 0 \
+  ipv4.ignore-auto-dns yes \
+  ipv4.routed-dns yes
+
+if [ -n "$home_route_prefixes" ]; then
+  if [ -z "$home_route_gateway" ] && [ -n "$active_device" ] && [ "$active_device" != "--" ]; then
+    home_route_gateway="$(nmcli -g IP4.GATEWAY device show "$active_device" 2>/dev/null || true)"
+  fi
+
+  if [ -z "$home_route_gateway" ]; then
+    printf 'WARN home route gateway is unknown; set DOTFILES_HOME_DNS_ROUTE_GATEWAY to add VPN bypass routes\n' >&2
+  else
+    current_routes="$(nmcli -g ipv4.routes connection show "$connection" 2>/dev/null || true)"
+    for home_route_prefix in $home_route_prefixes; do
+      case "$current_routes" in
+        *"$home_route_prefix "*)
+          printf '==> Home route already configured: %s\n' "$home_route_prefix"
+          ;;
+        *)
+          printf '==> Adding home route: %s via %s metric %s\n' "$home_route_prefix" "$home_route_gateway" "$home_route_metric"
+          nmcli connection modify "$connection" \
+            +ipv4.routes "$home_route_prefix $home_route_gateway $home_route_metric"
+          current_routes="${current_routes:+$current_routes, }$home_route_prefix $home_route_gateway $home_route_metric"
+          ;;
+      esac
+    done
+  fi
+fi
+
+if [ -n "$vpn_connections" ]; then
+  for vpn_connection in $vpn_connections; do
+    if nmcli connection show "$vpn_connection" >/dev/null 2>&1; then
+      printf '==> Normalizing VPN DNS priority: %s\n' "$vpn_connection"
+      nmcli connection modify "$vpn_connection" \
+        ipv4.dns-priority 0 \
+        ipv6.dns-priority 0
+    else
+      printf 'WARN VPN connection not found, skipped: %s\n' "$vpn_connection" >&2
+    fi
+  done
+fi
+
+if [ -n "$active_device" ] && [ "$active_device" != "--" ]; then
+  printf '==> Reapplying active connection on device: %s\n' "$active_device"
+  nmcli device reapply "$active_device" || {
+    printf 'WARN device reapply failed; reconnect %s manually if DNS does not update immediately\n' "$connection" >&2
+  }
+
+  if [ "${DOTFILES_HOME_DNS_RECONNECT:-0}" = "1" ]; then
+    printf '==> Reconnecting active connection: %s\n' "$connection"
+    nmcli connection up "$connection" >/dev/null
+  fi
+fi
+
+printf '\nConfigured %s:\n' "$connection"
+nmcli -f ipv4.dns,ipv4.dns-search,ipv4.dns-priority,ipv4.ignore-auto-dns,ipv4.routed-dns,ipv4.routes connection show "$connection"
+
+if command -v resolvectl >/dev/null 2>&1; then
+  printf '\nCurrent resolved view for %s:\n' "$active_device"
+  if [ -n "$active_device" ] && [ "$active_device" != "--" ]; then
+    resolvectl status "$active_device" || true
+  else
+    resolvectl status || true
+  fi
+fi

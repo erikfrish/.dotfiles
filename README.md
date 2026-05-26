@@ -61,6 +61,7 @@ sudo ~/.dotfiles/scripts/setup-pam
 sudo ~/.dotfiles/scripts/setup-power
 sudo ~/.dotfiles/scripts/setup-ddcci
 ~/.dotfiles/scripts/setup-ssh-agent
+~/.dotfiles/scripts/setup-home-dns
 ```
 
 Deploy ly config explicitly:
@@ -69,12 +70,26 @@ Deploy ly config explicitly:
 sudo ~/.config/ly/apply.sh
 ```
 
-Optional per-machine overrides:
+`scripts/setup` also creates editable repo-local files from every `*.example`
+template when the matching file without `.example` does not already exist, then
+stows them into `$HOME`.
+
+After setup, edit optional per-machine overrides as needed:
 
 ```sh
-cp ~/.config/dotfiles/machine.conf.example ~/.config/dotfiles/machine.conf
-$EDITOR ~/.config/dotfiles/machine.conf
+$EDITOR ~/.dotfiles/.config/dotfiles/machine.conf
 ```
+
+Configure home split DNS after setting the local NetworkManager connection name
+in `machine.conf` if it is not `eth`:
+
+```sh
+~/.dotfiles/scripts/setup-home-dns
+```
+
+This routes `*.home` to the local OPNsense DNS while VPN default DNS (`~.`)
+continues to handle public names. It also adds a persistent `10.69.0.0/16`
+route through the local gateway so home VLANs bypass full-tunnel VPNs.
 
 Validate a machine after install:
 
