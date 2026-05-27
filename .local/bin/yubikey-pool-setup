@@ -6,6 +6,7 @@ POOL_FILE="$HOME/.ssh/yubikeys.tsv"
 SOURCE_POOL_FILE="$DOTFILES_DIR/.ssh/yubikeys.tsv"
 CURRENT_KEY_SCRIPT="$HOME/.ssh/scripts/current_yubikey"
 START_AGENT_SCRIPT="$HOME/.ssh/scripts/start_ssh_agent"
+GIT_SSH_SCRIPT="$HOME/.ssh/scripts/git_ssh"
 POOL_ADD_SCRIPT="$HOME/.local/bin/yubikey-pool-add"
 SSH_CONFIG="$HOME/.ssh/config"
 SSH_INCLUDE_DIR="$HOME/.ssh/config.d"
@@ -31,10 +32,16 @@ need_cmd() {
 }
 
 expand_path() {
-  case "$1" in
+  local value="$1"
+  local user="${USER:-$(id -un)}"
+  value="${value//\$\{HOME\}/$HOME}"
+  value="${value//\$HOME/$HOME}"
+  value="${value//\$\{USER\}/$user}"
+  value="${value//\$USER/$user}"
+  case "$value" in
     '~') printf '%s\n' "$HOME" ;;
-    '~/'*) printf '%s/%s\n' "$HOME" "${1#\~/}" ;;
-    *) printf '%s\n' "$1" ;;
+    '~/'*) printf '%s/%s\n' "$HOME" "${value#\~/}" ;;
+    *) printf '%s\n' "$value" ;;
   esac
 }
 
@@ -106,7 +113,7 @@ write_ssh_include() {
     while IFS=$'\t' read -r serial name identity_file public_key_file rest; do
       [ -n "${serial:-}" ] || continue
       case "$serial" in \#*) continue ;; esac
-      printf '  IdentityFile %s\n' "$identity_file"
+      printf '  IdentityFile %s\n' "$(expand_path "$identity_file")"
     done < "$POOL_FILE"
   } > "$tmp"
   mv "$tmp" "$SSH_INCLUDE_FILE"
@@ -133,8 +140,9 @@ chmod 700 "$HOME/.ssh/controlmasters"
 ensure_pool_file
 link_if_safe "$DOTFILES_DIR/.ssh/scripts/current_yubikey" "$CURRENT_KEY_SCRIPT"
 link_if_safe "$DOTFILES_DIR/.ssh/scripts/start_ssh_agent" "$START_AGENT_SCRIPT"
+link_if_safe "$DOTFILES_DIR/.ssh/scripts/git_ssh" "$GIT_SSH_SCRIPT"
 link_if_safe "$DOTFILES_DIR/.local/bin/yubikey-pool-add" "$POOL_ADD_SCRIPT"
-chmod +x "$DOTFILES_DIR/.ssh/scripts/current_yubikey" "$DOTFILES_DIR/.ssh/scripts/start_ssh_agent" "$DOTFILES_DIR/.local/bin/yubikey-pool-add"
+chmod +x "$DOTFILES_DIR/.ssh/scripts/current_yubikey" "$DOTFILES_DIR/.ssh/scripts/start_ssh_agent" "$DOTFILES_DIR/.ssh/scripts/git_ssh" "$DOTFILES_DIR/.local/bin/yubikey-pool-add"
 
 write_ssh_include
 prepend_line "$SSH_CONFIG" "$SSH_INCLUDE_LINE"
@@ -142,8 +150,8 @@ prepend_line "$SSH_CONFIG" "$SSH_INCLUDE_LINE"
 git config --global commit.gpgsign true
 git config --global gpg.format ssh
 git config --global gpg.ssh.sshProgram ssh
-git config --global gpg.ssh.defaultKeyCommand "$CURRENT_KEY_SCRIPT"
-git config --global core.sshCommand 'env -u GIT_ASKPASS -u SSH_AUTH_SOCK SSH_ASKPASS=/bin/true SSH_ASKPASS_REQUIRE=never ssh -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o ControlMaster=auto -o ControlPath=~/.ssh/ssh-conn-%C -o ControlPersist=4h'
+git config --global gpg.ssh.defaultKeyCommand 'sh -c '\''exec "$HOME/.ssh/scripts/current_yubikey"'\'''
+git config --global core.sshCommand 'sh -c '\''exec "$HOME/.ssh/scripts/git_ssh" "$@"'\'' -'
 
 ensure_line "$HOME/.config/environment.d/profile.conf" 'SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/ssh-agent.socket'
 ensure_line "$HOME/.zprofile" 'export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"'

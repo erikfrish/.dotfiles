@@ -7,8 +7,8 @@
 	format = ssh
 [gpg "ssh"]
 	sshProgram = ssh
-	defaultKeyCommand = sh -c 'exec "$HOME/.ssh/scripts/current_yubikey"'
+	defaultKeyCommand = sh -c 'exec \"$HOME/.ssh/scripts/current_yubikey\"'
 [core]
-	sshCommand = env -u GIT_ASKPASS -u SSH_AUTH_SOCK SSH_ASKPASS=/bin/true SSH_ASKPASS_REQUIRE=never ssh -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o ControlMaster=auto -o ControlPath=~/.ssh/ssh-conn-%C -o ControlPersist=4h
+	sshCommand = sh -c 'exec \"$HOME/.ssh/scripts/git_ssh\" \"$@\"' -
 [include]
 	path = ~/.gitconfig.local

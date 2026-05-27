@@ -21,6 +21,7 @@
 - `.ssh/yubikeys.tsv` - пул известных аппаратных ключей: `serial`, `name`, `identity_file`, `public_key_file`.
 - `.ssh/scripts/current_yubikey` - динамически выбирает подключенный ключ из пула.
 - `.ssh/scripts/start_ssh_agent` - добавляет ключи из пула в активный SSH-agent.
+- `.ssh/scripts/git_ssh` - git-only SSH wrapper; выбирает только активный YubiKey и не подмешивает весь пул `IdentityFile`.
 - `.local/bin/yubikey-pool-setup` - настраивает git, SSH include, env и user service для `ssh-agent`.
 - `.local/bin/yubikey-pool-add` - создает или регистрирует новый resident hardware key и добавляет его в пул.
 - `.config/systemd/user/ssh-agent.service` - user service с socket path `%t/ssh-agent.socket`.
@@ -97,7 +98,7 @@ ssh-keygen -t ed25519-sk \
 Если ключ уже создан или восстановлен через `ssh-keygen -K`, его можно только зарегистрировать:
 
 ```sh
-yubikey-pool-add --skip-generate --serial 12345678 --identity ~/.ssh/id_ed25519_sk_rk_erikfrish@yubik_5c_nfc yubik_5c_nfc
+yubikey-pool-add --skip-generate --serial 12345678 --identity '~/.ssh/id_ed25519_sk_rk_${USER}@yubik_5c_nfc' yubik_5c_nfc
 ```
 
 Если нужно строго восстановить существующий resident key и не создавать новый:
@@ -131,8 +132,10 @@ Setup и stow-managed `.gitconfig` выставляют общие git-наст�
   sshProgram = ssh
   defaultKeyCommand = ~/.ssh/scripts/current_yubikey
 [core]
-  sshCommand = env -u GIT_ASKPASS -u SSH_AUTH_SOCK SSH_ASKPASS=/bin/true SSH_ASKPASS_REQUIRE=never ssh -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o ControlMaster=auto -o ControlPath=~/.ssh/ssh-conn-%C -o ControlPersist=4h
+  sshCommand = ~/.ssh/scripts/git_ssh
 ```
+
+Wrapper нужен для IDE/Git: обычный SSH config содержит весь пул `IdentityFile`, поэтому OpenSSH может шуметь `device not found` для не вставленных SK-ключей. `git_ssh` берёт `current_yubikey --identity` и запускает gitlab/github только с одним активным ключом.
 
 SSH получает список ключей через include-файл:
 

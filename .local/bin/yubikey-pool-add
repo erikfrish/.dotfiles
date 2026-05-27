@@ -48,19 +48,28 @@ need_cmd() {
 }
 
 expand_path() {
-  case "$1" in
+  local value="$1"
+  local user="${USER:-$(id -un)}"
+  value="${value//\$\{HOME\}/$HOME}"
+  value="${value//\$HOME/$HOME}"
+  value="${value//\$\{USER\}/$user}"
+  value="${value//\$USER/$user}"
+  case "$value" in
     '~') printf '%s\n' "$HOME" ;;
-    '~/'*) printf '%s/%s\n' "$HOME" "${1#\~/}" ;;
-    *) printf '%s\n' "$1" ;;
+    '~/'*) printf '%s/%s\n' "$HOME" "${value#\~/}" ;;
+    *) printf '%s\n' "$value" ;;
   esac
 }
 
 tilde_path() {
-  case "$1" in
-    "$HOME") printf '~\n' ;;
-    "$HOME"/*) printf '~/%s\n' "${1#"$HOME"/}" ;;
-    *) printf '%s\n' "$1" ;;
+  local user="${USER:-$(id -un)}"
+  local value="$1"
+  case "$value" in
+    "$HOME") value='~' ;;
+    "$HOME"/*) value="~/${value#"$HOME"/}" ;;
   esac
+  value="${value//$user/\$\{USER\}}"
+  printf '%s\n' "$value"
 }
 
 safe_name() {
