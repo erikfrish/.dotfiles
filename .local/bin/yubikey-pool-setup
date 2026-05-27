@@ -6,6 +6,7 @@ POOL_FILE="$HOME/.ssh/yubikeys.tsv"
 SOURCE_POOL_FILE="$DOTFILES_DIR/.ssh/yubikeys.tsv"
 CURRENT_KEY_SCRIPT="$HOME/.ssh/scripts/current_yubikey"
 START_AGENT_SCRIPT="$HOME/.ssh/scripts/start_ssh_agent"
+POOL_ADD_SCRIPT="$HOME/.local/bin/yubikey-pool-add"
 SSH_CONFIG="$HOME/.ssh/config"
 SSH_INCLUDE_DIR="$HOME/.ssh/config.d"
 SSH_INCLUDE_FILE="$SSH_INCLUDE_DIR/yubikey-pool.conf"
@@ -132,7 +133,8 @@ chmod 700 "$HOME/.ssh/controlmasters"
 ensure_pool_file
 link_if_safe "$DOTFILES_DIR/.ssh/scripts/current_yubikey" "$CURRENT_KEY_SCRIPT"
 link_if_safe "$DOTFILES_DIR/.ssh/scripts/start_ssh_agent" "$START_AGENT_SCRIPT"
-chmod +x "$DOTFILES_DIR/.ssh/scripts/current_yubikey" "$DOTFILES_DIR/.ssh/scripts/start_ssh_agent"
+link_if_safe "$DOTFILES_DIR/.local/bin/yubikey-pool-add" "$POOL_ADD_SCRIPT"
+chmod +x "$DOTFILES_DIR/.ssh/scripts/current_yubikey" "$DOTFILES_DIR/.ssh/scripts/start_ssh_agent" "$DOTFILES_DIR/.local/bin/yubikey-pool-add"
 
 write_ssh_include
 prepend_line "$SSH_CONFIG" "$SSH_INCLUDE_LINE"

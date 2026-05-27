@@ -84,7 +84,7 @@ yubikey-pool-add yubik_5c_nfc
 yubikey-pool-add --serial 12345678 yubik_5c_nfc
 ```
 
-Скрипт по умолчанию создает resident key:
+Скрипт по умолчанию сначала пытается восстановить уже существующий resident key через `ssh-keygen -K`. Если подходящий ключ не найден, он создает новый resident key:
 
 ```sh
 ssh-keygen -t ed25519-sk \
@@ -98,6 +98,18 @@ ssh-keygen -t ed25519-sk \
 
 ```sh
 yubikey-pool-add --skip-generate --serial 12345678 --identity ~/.ssh/id_ed25519_sk_rk_erikfrish@yubik_5c_nfc yubik_5c_nfc
+```
+
+Если нужно строго восстановить существующий resident key и не создавать новый:
+
+```sh
+yubikey-pool-add --extract-only --serial 12345678 yubik_5c_nfc
+```
+
+Имя можно не указывать, если resident key был создан по dotfiles-схеме с comment/application вида `ssh:$USER@$SSH_KEY_NAME`; скрипт восстановит файл с исходным basename и возьмет имя из comment/application:
+
+```sh
+yubikey-pool-add --extract-only --serial 12345678
 ```
 
 Для PIN перед использованием ключа:

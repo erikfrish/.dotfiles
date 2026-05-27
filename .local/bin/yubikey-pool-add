@@ -1,29 +1,40 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 POOL_FILE="${YUBIKEY_POOL_FILE:-$HOME/.ssh/yubikeys.tsv}"
-KEY_NAME=""
+SETUP_SCRIPT="$DOTFILES_DIR/.local/bin/yubikey-pool-setup"
+
 SERIAL=""
-SSH_USER="$(whoami)"
+NAME=""
 IDENTITY_FILE=""
 PUBLIC_KEY_FILE=""
+IDENTITY_EXPLICIT=0
+PUBLIC_KEY_EXPLICIT=0
 SKIP_GENERATE=0
 VERIFY_REQUIRED=0
+GENERATED_KEY=0
+EXTRACT_ONLY=0
 
 usage() {
   cat <<'EOF'
-Usage: yubikey-pool-add [options] <key-name>
+Usage: yubikey-pool-add [options] [name]
+
+Adds a connected YubiKey to ~/.ssh/yubikeys.tsv and regenerates the SSH include.
+When extracting an existing resident key, name may be omitted; it is inferred
+from the key comment/application, for example ssh:$USER@yubik_5c_nano.
 
 Options:
-  --serial <serial>        YubiKey serial number. Required when multiple keys are connected.
-  --user <user>            SSH key user part. Defaults to whoami.
-  --identity <path>        Existing or target private key stub path.
-  --public-key <path>      Existing or target public key path. Defaults to <identity>.pub.
-  --skip-generate          Do not run ssh-keygen, only register existing key files.
-  --verify-required        Add -O verify-required when generating the resident key.
+  --serial SERIAL       Use a specific YubiKey serial.
+  --identity PATH       Identity file path. Defaults to ~/.ssh/id_ed25519_sk_rk_$USER@<name>.
+  --public-key PATH     Public key path. Defaults to <identity>.pub.
+  --skip-generate       Register an existing identity instead of creating a resident key.
+  --extract-only        Restore a resident key from the YubiKey, but do not generate a new one.
+  --verify-required     Require PIN/user verification for the generated key.
+  -h, --help            Show this help.
 
-Example:
-  yubikey-pool-add --serial 12345678 yubik_5c_nfc
+If one YubiKey is connected, its serial is used automatically. If several are
+connected and --serial is not passed, the script asks which serial to use.
 EOF
 }
 
@@ -44,7 +55,7 @@ expand_path() {
   esac
 }
 
-home_relative() {
+tilde_path() {
   case "$1" in
     "$HOME") printf '~\n' ;;
     "$HOME"/*) printf '~/%s\n' "${1#"$HOME"/}" ;;
@@ -52,113 +63,430 @@ home_relative() {
   esac
 }
 
-detect_serial() {
-  local serials=()
-  mapfile -t serials < <(ykman list -s 2>/dev/null)
-
-  case "${#serials[@]}" in
-    0) die 'no connected YubiKey was detected' ;;
-    1) printf '%s\n' "${serials[0]}" ;;
-    *)
-      printf 'Multiple YubiKeys are connected:\n' >&2
-      printf '  %s\n' "${serials[@]}" >&2
-      die 'pass the target one explicitly with --serial'
-      ;;
-  esac
+safe_name() {
+  printf '%s' "$1" | tr -c 'A-Za-z0-9_.@+-' '_'
 }
 
-pool_has_serial() {
-  local needle="$1" serial name identity_file public_key_file rest
+connected_serials() {
+  ykman list -s 2>/dev/null | sed '/^[[:space:]]*$/d'
+}
+
+yubikey_summary() {
+  local serial="$1"
+  ykman --device "$serial" info 2>/dev/null |
+    awk -F': *' '
+      /^Device type:/ { device=$2 }
+      /^Firmware version:/ { firmware=$2 }
+      /^Form factor:/ { form=$2 }
+      END {
+        if (device != "") {
+          printf "%s", device
+          if (form != "") printf ", %s", form
+          if (firmware != "") printf ", fw %s", firmware
+        }
+      }'
+}
+
+serial_hidraw() {
+  local serial="$1"
+  ykman --diagnose 2>/dev/null |
+    awk -v wanted="$serial" '
+      /CtapYubiKeyDevice\(.*fingerprint=\x27\/dev\/hidraw[0-9]+\x27/ {
+        device=$0
+        sub(/^.*fingerprint=\x27/, "", device)
+        sub(/\x27.*$/, "", device)
+      }
+      /^[[:space:]]+serial:[[:space:]]*/ {
+        found=$0
+        sub(/^.*serial:[[:space:]]*/, "", found)
+        if (found == wanted && device != "") {
+          print device
+          exit
+        }
+      }'
+}
+
+hidraw_port() {
+  local device="$1" path port
+  [ -n "$device" ] || return 0
+  path="$(udevadm info -q path -n "$device" 2>/dev/null || true)"
+  port="$(printf '%s\n' "$path" | sed -E 's#.*(/usb[0-9]+/([^/:]+)).*#\2#; t; d')"
+  if [ -n "$port" ]; then
+    printf '%s usb-port=%s' "$device" "$port"
+  else
+    printf '%s' "$device"
+  fi
+}
+
+yubikey_choice_label() {
+  local serial="$1" summary hidraw port
+  summary="$(yubikey_summary "$serial")"
+  hidraw="$(serial_hidraw "$serial")"
+  port="$(hidraw_port "$hidraw")"
+  printf '%s' "$serial"
+  [ -n "$summary" ] && printf ' | %s' "$summary"
+  [ -n "$port" ] && printf ' | %s' "$port"
+}
+
+serial_known() {
+  local serial="$1" pool_serial rest
   [ -r "$POOL_FILE" ] || return 1
-  while IFS=$'\t' read -r serial name identity_file public_key_file rest; do
-    [ -n "${serial:-}" ] || continue
-    case "$serial" in \#*) continue ;; esac
-    [ "$serial" = "$needle" ] && return 0
+  while IFS=$'\t' read -r pool_serial rest; do
+    [ -n "${pool_serial:-}" ] || continue
+    case "$pool_serial" in \#*) continue ;; esac
+    [ "$pool_serial" = "$serial" ] && return 0
   done < "$POOL_FILE"
   return 1
 }
 
+pool_entry_exists() {
+  local serial="$1" identity="$2" public_key="$3"
+  local pool_serial pool_name pool_identity pool_public rest
+  [ -r "$POOL_FILE" ] || return 1
+  while IFS=$'\t' read -r pool_serial pool_name pool_identity pool_public rest; do
+    [ -n "${pool_serial:-}" ] || continue
+    case "$pool_serial" in \#*) continue ;; esac
+    if [ "$pool_serial" = "$serial" ] || [ "$pool_identity" = "$identity" ] || [ "$pool_public" = "$public_key" ]; then
+      return 0
+    fi
+  done < "$POOL_FILE"
+  return 1
+}
+
+hidraw_serial() {
+  local device="$1"
+  udevadm info -q property -n "$device" 2>/dev/null |
+    sed -n 's/^ID_SERIAL_SHORT=//p' |
+    sed -n '1p'
+}
+
+parse_touched_serial() {
+  local log_file="$1" device serial
+  while IFS= read -r device; do
+    serial="$(hidraw_serial "$device")"
+    [ -n "$serial" ] && { printf '%s\n' "$serial"; return 0; }
+  done < <(grep -Eo '/dev/hidraw[0-9]+' "$log_file" | awk '!seen[$0]++')
+  return 1
+}
+
+ensure_pool_file() {
+  mkdir -p "$(dirname "$POOL_FILE")"
+  if [ ! -e "$POOL_FILE" ]; then
+    printf '# serial\tname\tidentity_file\tpublic_key_file\n' > "$POOL_FILE"
+    chmod 600 "$POOL_FILE"
+  fi
+}
+
+choose_serial_before_generate() {
+  local count first choice index serial
+  local serials=()
+  while IFS= read -r serial; do
+    [ -n "$serial" ] && serials+=("$serial")
+  done < <(connected_serials)
+
+  count="${#serials[@]}"
+  first="${serials[0]:-}"
+  case "$count" in
+    0) die 'no connected YubiKey found' ;;
+    1) SERIAL="$first" ;;
+    *)
+      [ -t 0 ] || die 'several YubiKeys are connected; pass the target one explicitly with --serial SERIAL'
+      printf 'Several YubiKeys are connected. Choose one to add:\n' >&2
+      index=1
+      for serial in "${serials[@]}"; do
+        printf '  %d) %s\n' "$index" "$(yubikey_choice_label "$serial")" >&2
+        index=$((index + 1))
+      done
+      printf 'Serial or number: ' >&2
+      IFS= read -r choice
+      [ -n "$choice" ] || die 'selection cannot be empty'
+      if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$count" ]; then
+        SERIAL="${serials[$((choice - 1))]}"
+      else
+        for serial in "${serials[@]}"; do
+          if [ "$serial" = "$choice" ]; then
+            SERIAL="$serial"
+            break
+          fi
+        done
+      fi
+      [ -n "$SERIAL" ] || die "selected serial is not connected: $choice"
+      ;;
+  esac
+}
+
+prompt_name() {
+  local entered
+  [ -t 0 ] || die 'name is required when several YubiKeys are connected and serial is not known before generation'
+  printf 'Name for this YubiKey entry (example: yubik_5_nano): ' >&2
+  IFS= read -r entered
+  [ -n "$entered" ] || die 'name cannot be empty'
+  NAME="$entered"
+}
+
+generate_key() {
+  local identity="$1" log_file tmp_code app_name
+  app_name="ssh:$USER@$NAME"
+  log_file="$(mktemp)"
+
+  if [ -e "$identity" ] || [ -e "$identity.pub" ]; then
+    printf 'Using existing identity: %s\n' "$identity" >&2
+    rm -f "$log_file"
+    return 0
+  fi
+
+  printf 'Generating resident ED25519-SK key: %s\n' "$identity" >&2
+  set +e
+  if [ "$VERIFY_REQUIRED" -eq 1 ]; then
+    ssh-keygen -vvv -t ed25519-sk -C "$app_name" -f "$identity" -O resident -O verify-required -O "application=$app_name" 2>"$log_file"
+  else
+    ssh-keygen -vvv -t ed25519-sk -C "$app_name" -f "$identity" -O resident -O "application=$app_name" 2>"$log_file"
+  fi
+  tmp_code=$?
+  set -e
+
+  if [ "$tmp_code" -ne 0 ]; then
+    sed -n '1,120p' "$log_file" >&2
+    rm -f "$log_file"
+    die 'ssh-keygen failed'
+  fi
+
+  GENERATED_KEY=1
+
+  if [ -z "$SERIAL" ]; then
+    SERIAL="$(parse_touched_serial "$log_file" || true)"
+  fi
+  rm -f "$log_file"
+}
+
+infer_name_from_key() {
+  local key="$1" comment base prefix
+  comment="$(awk '{print $3}' "$key.pub" 2>/dev/null || true)"
+  case "$comment" in
+    ssh:"$USER"@*)
+      printf '%s\n' "${comment#ssh:$USER@}"
+      return 0
+      ;;
+  esac
+
+  base="$(basename "$key")"
+  prefix="id_ed25519_sk_rk_$USER@"
+  case "$base" in
+    "$prefix"*) printf '%s\n' "${base#"$prefix"}"; return 0 ;;
+  esac
+
+  return 1
+}
+
+restore_resident_key() {
+  local identity="$1" public_key="$2" tmp_dir key key_count selected expected_comment public_comment index choice inferred_name target_base
+
+  if { [ -n "$identity" ] && [ -e "$identity" ]; } || { [ -n "$public_key" ] && [ -e "$public_key" ]; }; then
+    return 1
+  fi
+
+  tmp_dir="$(mktemp -d)"
+  printf 'Trying to restore resident key from connected YubiKey(s)...\n' >&2
+  if ! (cd "$tmp_dir" && ssh-keygen -K >/dev/null 2>&1); then
+    rm -rf "$tmp_dir"
+    return 1
+  fi
+
+  expected_comment=""
+  [ -n "$NAME" ] && expected_comment="ssh:$USER@$NAME"
+  selected=""
+
+  if [ -n "$expected_comment" ]; then
+    while IFS= read -r key; do
+      [ -r "$key.pub" ] || continue
+      public_comment="$(awk '{print $3}' "$key.pub" 2>/dev/null || true)"
+      if [ "$public_comment" = "$expected_comment" ]; then
+        selected="$key"
+        break
+      fi
+    done < <(find "$tmp_dir" -maxdepth 1 -type f ! -name '*.pub' | sort)
+  fi
+
+  if [ -z "$selected" ]; then
+    key_count="$(find "$tmp_dir" -maxdepth 1 -type f ! -name '*.pub' | wc -l)"
+    if [ "$key_count" -eq 1 ]; then
+      selected="$(find "$tmp_dir" -maxdepth 1 -type f ! -name '*.pub' | sed -n '1p')"
+    fi
+  fi
+
+  if [ -z "$selected" ] && [ -t 0 ]; then
+    printf 'Several resident keys were restored. Choose one to register:\n' >&2
+    index=1
+    while IFS= read -r key; do
+      [ -r "$key.pub" ] || continue
+      public_comment="$(awk '{print $3}' "$key.pub" 2>/dev/null || true)"
+      printf '  %d) %s | %s\n' "$index" "$(basename "$key")" "$public_comment" >&2
+      index=$((index + 1))
+    done < <(find "$tmp_dir" -maxdepth 1 -type f ! -name '*.pub' | sort)
+    printf 'Number: ' >&2
+    IFS= read -r choice
+    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$key_count" ]; then
+      selected="$(find "$tmp_dir" -maxdepth 1 -type f ! -name '*.pub' | sort | sed -n "${choice}p")"
+    fi
+  fi
+
+  if [ -z "$selected" ]; then
+    if [ -n "$expected_comment" ]; then
+      printf 'Resident key restore found multiple/no keys and none matched comment %s.\n' "$expected_comment" >&2
+    else
+      printf 'Resident key restore found multiple/no keys; pass name or choose interactively.\n' >&2
+    fi
+    find "$tmp_dir" -maxdepth 1 -type f -name '*.pub' -exec awk '{print "  " FILENAME ": " $3}' {} \; >&2 || true
+    rm -rf "$tmp_dir"
+    return 1
+  fi
+
+  inferred_name="$(infer_name_from_key "$selected" || true)"
+  if [ -z "$NAME" ]; then
+    [ -n "$inferred_name" ] || { rm -rf "$tmp_dir"; die 'could not infer key name from resident key comment or filename'; }
+    NAME="$(safe_name "$inferred_name")"
+  fi
+
+  if [ -z "$IDENTITY_FILE" ]; then
+    target_base="$(basename "$selected")"
+    IDENTITY_FILE="$HOME/.ssh/$target_base"
+  fi
+  if [ -z "$PUBLIC_KEY_FILE" ]; then
+    PUBLIC_KEY_FILE="$IDENTITY_FILE.pub"
+  fi
+
+  cp "$selected" "$IDENTITY_FILE"
+  cp "$selected.pub" "$PUBLIC_KEY_FILE"
+  chmod 600 "$IDENTITY_FILE"
+  chmod 644 "$PUBLIC_KEY_FILE"
+  rm -rf "$tmp_dir"
+  printf 'Restored resident key: %s\n' "$IDENTITY_FILE" >&2
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --serial) SERIAL="${2:-}"; shift 2 ;;
-    --user) SSH_USER="${2:-}"; shift 2 ;;
-    --identity) IDENTITY_FILE="${2:-}"; shift 2 ;;
-    --public-key) PUBLIC_KEY_FILE="${2:-}"; shift 2 ;;
-    --skip-generate) SKIP_GENERATE=1; shift ;;
-    --verify-required) VERIFY_REQUIRED=1; shift ;;
-    -h|--help) usage; exit 0 ;;
-    --*) usage >&2; exit 2 ;;
+    --serial)
+      [ "$#" -ge 2 ] || die '--serial requires a value'
+      SERIAL="$2"
+      shift 2
+      ;;
+    --identity)
+      [ "$#" -ge 2 ] || die '--identity requires a value'
+      IDENTITY_FILE="$2"
+      IDENTITY_EXPLICIT=1
+      shift 2
+      ;;
+    --public-key)
+      [ "$#" -ge 2 ] || die '--public-key requires a value'
+      PUBLIC_KEY_FILE="$2"
+      PUBLIC_KEY_EXPLICIT=1
+      shift 2
+      ;;
+    --skip-generate)
+      SKIP_GENERATE=1
+      shift
+      ;;
+    --extract-only)
+      EXTRACT_ONLY=1
+      shift
+      ;;
+    --verify-required)
+      VERIFY_REQUIRED=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --*)
+      usage >&2
+      exit 2
+      ;;
     *)
-      [ -z "$KEY_NAME" ] || die 'only one key-name is supported'
-      KEY_NAME="$1"
+      [ -z "$NAME" ] || die 'only one name may be passed'
+      NAME="$1"
       shift
       ;;
   esac
 done
 
-[ -n "$KEY_NAME" ] || { usage >&2; exit 2; }
-
+need_cmd awk
+need_cmd grep
+need_cmd sed
 need_cmd ssh-keygen
+need_cmd udevadm
 need_cmd ykman
 
-[ -n "$SERIAL" ] || SERIAL="$(detect_serial)"
-[ -n "$SERIAL" ] || die 'serial is empty'
+ensure_pool_file
+
+if [ -z "$SERIAL" ]; then
+  choose_serial_before_generate
+fi
+
+if [ -n "$SERIAL" ] && serial_known "$SERIAL"; then
+  die "YubiKey serial is already registered: $SERIAL"
+fi
+
+if [ -z "$NAME" ]; then
+  if [ "$EXTRACT_ONLY" -eq 1 ] && [ "$IDENTITY_EXPLICIT" -eq 0 ]; then
+    :
+  else
+    prompt_name
+  fi
+fi
+[ -z "$NAME" ] || NAME="$(safe_name "$NAME")"
+
+if [ -z "$IDENTITY_FILE" ] && [ -n "$NAME" ]; then
+  IDENTITY_FILE="$HOME/.ssh/id_ed25519_sk_rk_$USER@$NAME"
+else
+  [ -z "$IDENTITY_FILE" ] || IDENTITY_FILE="$(expand_path "$IDENTITY_FILE")"
+fi
+
+if [ -z "$PUBLIC_KEY_FILE" ] && [ -n "$IDENTITY_FILE" ]; then
+  PUBLIC_KEY_FILE="$IDENTITY_FILE.pub"
+else
+  [ -z "$PUBLIC_KEY_FILE" ] || PUBLIC_KEY_FILE="$(expand_path "$PUBLIC_KEY_FILE")"
+fi
 
 mkdir -p "$HOME/.ssh"
 chmod 700 "$HOME/.ssh"
 
-if [ -z "$IDENTITY_FILE" ]; then
-  IDENTITY_FILE="$HOME/.ssh/id_ed25519_sk_rk_${SSH_USER}@${KEY_NAME}"
-else
-  IDENTITY_FILE="$(expand_path "$IDENTITY_FILE")"
-fi
-
-if [ -z "$PUBLIC_KEY_FILE" ]; then
-  PUBLIC_KEY_FILE="$IDENTITY_FILE.pub"
-else
-  PUBLIC_KEY_FILE="$(expand_path "$PUBLIC_KEY_FILE")"
-fi
-
-if pool_has_serial "$SERIAL"; then
-  die "serial is already registered in $POOL_FILE: $SERIAL"
-fi
-
 if [ "$SKIP_GENERATE" -eq 0 ]; then
-  if [ ! -f "$IDENTITY_FILE" ] && [ ! -f "$PUBLIC_KEY_FILE" ]; then
-    options=(-O resident -O "application=ssh:${SSH_USER}@${KEY_NAME}")
-    if [ "$VERIFY_REQUIRED" -eq 1 ]; then
-      options+=(-O verify-required)
-    fi
-    ssh-keygen -t ed25519-sk \
-      -C "ssh:${SSH_USER}@${KEY_NAME}" \
-      -f "$IDENTITY_FILE" \
-      "${options[@]}"
-  elif [ ! -f "$IDENTITY_FILE" ] || [ ! -f "$PUBLIC_KEY_FILE" ]; then
-    die 'key pair is incomplete; restore the missing file or pass explicit paths'
+  if ! restore_resident_key "$IDENTITY_FILE" "$PUBLIC_KEY_FILE"; then
+    [ "$EXTRACT_ONLY" -eq 0 ] || die 'resident key was not restored; refusing to generate because --extract-only was passed'
+    generate_key "$IDENTITY_FILE"
   fi
+else
+  [ -n "$IDENTITY_FILE" ] || die '--identity is required with --skip-generate when name is omitted'
+  [ -n "$PUBLIC_KEY_FILE" ] || PUBLIC_KEY_FILE="$IDENTITY_FILE.pub"
+  [ -r "$IDENTITY_FILE" ] || die "identity file is missing: $IDENTITY_FILE"
+  [ -r "$PUBLIC_KEY_FILE" ] || die "public key file is missing: $PUBLIC_KEY_FILE"
 fi
 
-[ -r "$IDENTITY_FILE" ] || die "identity file is missing: $IDENTITY_FILE"
+[ -n "$SERIAL" ] || die 'could not determine selected YubiKey serial; rerun with --serial SERIAL'
+[ -n "$NAME" ] || die 'could not determine key name from resident key; pass name explicitly'
+[ -n "$IDENTITY_FILE" ] || die 'identity file is missing'
+[ -n "$PUBLIC_KEY_FILE" ] || PUBLIC_KEY_FILE="$IDENTITY_FILE.pub"
 [ -r "$PUBLIC_KEY_FILE" ] || die "public key file is missing: $PUBLIC_KEY_FILE"
 
-if [ ! -e "$POOL_FILE" ]; then
-  printf '# serial\tname\tidentity_file\tpublic_key_file\n' > "$POOL_FILE"
+IDENTITY_TSV="$(tilde_path "$IDENTITY_FILE")"
+PUBLIC_TSV="$(tilde_path "$PUBLIC_KEY_FILE")"
+
+if pool_entry_exists "$SERIAL" "$IDENTITY_TSV" "$PUBLIC_TSV"; then
+  if [ "$GENERATED_KEY" -eq 1 ]; then
+    rm -f "$IDENTITY_FILE" "$PUBLIC_KEY_FILE"
+  fi
+  die "pool entry already exists for serial/path: $SERIAL"
 fi
 
-printf '%s\t%s\t%s\t%s\n' \
-  "$SERIAL" \
-  "$KEY_NAME" \
-  "$(home_relative "$IDENTITY_FILE")" \
-  "$(home_relative "$PUBLIC_KEY_FILE")" >> "$POOL_FILE"
+printf '%s\t%s\t%s\t%s\n' "$SERIAL" "$NAME" "$IDENTITY_TSV" "$PUBLIC_TSV" >> "$POOL_FILE"
+chmod 600 "$POOL_FILE"
 
-if command -v yubikey-pool-setup >/dev/null 2>&1; then
-  yubikey-pool-setup --no-systemd
-elif [ -x "$HOME/.local/bin/yubikey-pool-setup" ]; then
-  "$HOME/.local/bin/yubikey-pool-setup" --no-systemd
+if [ -x "$SETUP_SCRIPT" ]; then
+  "$SETUP_SCRIPT" --no-systemd >/dev/null
 fi
 
-if SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ssh-agent.socket}" ssh-add -l >/dev/null 2>&1; then
-  SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ssh-agent.socket}" ssh-add "$IDENTITY_FILE" >/dev/null 2>&1 || true
-fi
-
-printf 'Registered YubiKey %s (%s) in %s\n' "$KEY_NAME" "$SERIAL" "$POOL_FILE"
+printf 'Added YubiKey to pool:\n'
+printf '  serial: %s\n' "$SERIAL"
+printf '  name:   %s\n' "$NAME"
+printf '  key:    %s\n' "$IDENTITY_TSV"
