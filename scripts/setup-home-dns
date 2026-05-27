@@ -8,13 +8,14 @@ repo_dir="$(cd -- "$script_dir/.." && pwd)"
 . "$repo_dir/.config/dotfiles/lib.sh"
 dotfiles_load_machine_config
 
-connection="${1:-${DOTFILES_HOME_DNS_CONNECTION:-eth}}"
+connection="${1:-${DOTFILES_HOME_DNS_CONNECTION:-}}"
 domain="${DOTFILES_HOME_DNS_DOMAIN:-home}"
 dns_server="${DOTFILES_HOME_DNS_SERVER:-10.69.1.1}"
 vpn_connections="${DOTFILES_HOME_DNS_VPN_CONNECTIONS:-wb vpnchik}"
 home_route_prefixes="${DOTFILES_HOME_DNS_ROUTE_PREFIXES:-10.69.0.0/16}"
 home_route_gateway="${DOTFILES_HOME_DNS_ROUTE_GATEWAY:-}"
 home_route_metric="${DOTFILES_HOME_DNS_ROUTE_METRIC:-5}"
+restart_services="${DOTFILES_HOME_DNS_RESTART_SERVICES:-auto}"
 
 usage() {
   cat <<EOF
@@ -24,6 +25,9 @@ Configure NetworkManager split DNS so *.$domain resolves through $dns_server,
 while VPN connections can keep the default DNS route (~.). Also add home
 network routes so local VLANs bypass full-tunnel VPNs.
 
+If networkmanager-connection is omitted, the first active ethernet/Wi-Fi
+connection is used.
+
 Machine-local overrides live in ~/.config/dotfiles/machine.conf:
   DOTFILES_HOME_DNS_CONNECTION=eth
   DOTFILES_HOME_DNS_SERVER=10.69.1.1
@@ -32,6 +36,7 @@ Machine-local overrides live in ~/.config/dotfiles/machine.conf:
   DOTFILES_HOME_DNS_ROUTE_PREFIXES="10.69.0.0/16"
   DOTFILES_HOME_DNS_ROUTE_GATEWAY=10.69.11.1
   DOTFILES_HOME_DNS_ROUTE_METRIC=5
+  DOTFILES_HOME_DNS_RESTART_SERVICES=auto
 EOF
 }
 
@@ -48,6 +53,51 @@ require_command() {
 }
 
 require_command nmcli
+
+run_sudo() {
+  if [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo "$@"
+  else
+    return 1
+  fi
+}
+
+resolved_has_home_dns() {
+  local device="$1"
+  [ -n "$device" ] || return 1
+  command -v resolvectl >/dev/null 2>&1 || return 1
+  resolvectl status "$device" 2>/dev/null |
+    grep -F "DNS Servers: $dns_server" >/dev/null || return 1
+  resolvectl status "$device" 2>/dev/null |
+    grep -F "DNS Domain:" | grep -F "~$domain" >/dev/null || return 1
+}
+
+home_dns_resolves() {
+  command -v resolvectl >/dev/null 2>&1 || return 1
+  resolvectl query "compik.$domain" >/dev/null 2>&1
+}
+
+if [ -z "$connection" ]; then
+  while IFS=: read -r name type device; do
+    [ -n "$name" ] || continue
+    [ -n "$device" ] || continue
+    case "$type" in
+      802-3-ethernet|802-11-wireless)
+        connection="$name"
+        break
+        ;;
+    esac
+  done < <(nmcli -t -f NAME,TYPE,DEVICE connection show --active)
+fi
+
+[ -n "$connection" ] || {
+  printf 'No active ethernet/Wi-Fi NetworkManager connection found. Pass one explicitly.\n' >&2
+  printf 'Available connections:\n' >&2
+  nmcli -t -f NAME,TYPE connection show >&2
+  exit 1
+}
 
 if ! nmcli connection show "$connection" >/dev/null 2>&1; then
   printf 'NetworkManager connection not found: %s\n' "$connection" >&2
@@ -114,6 +164,19 @@ if [ -n "$active_device" ] && [ "$active_device" != "--" ]; then
     printf '==> Reconnecting active connection: %s\n' "$connection"
     nmcli connection up "$connection" >/dev/null
   fi
+
+  if ! resolved_has_home_dns "$active_device" && [ "$restart_services" != "0" ]; then
+    printf 'WARN systemd-resolved did not receive DNS for %s after reapply\n' "$active_device" >&2
+    if [ "$restart_services" = "auto" ] || [ "$restart_services" = "1" ]; then
+      printf '==> Restarting systemd-resolved and NetworkManager to apply DNS integration\n'
+      printf 'WARN active VPN connections may need to be reconnected after this step\n' >&2
+      run_sudo systemctl restart systemd-resolved NetworkManager || {
+        printf 'WARN service restart failed; reboot or run manually: sudo systemctl restart systemd-resolved NetworkManager\n' >&2
+      }
+      sleep 3
+      active_device="$(nmcli -g GENERAL.DEVICES connection show "$connection" 2>/dev/null || true)"
+    fi
+  fi
 fi
 
 printf '\nConfigured %s:\n' "$connection"
@@ -126,4 +189,11 @@ if command -v resolvectl >/dev/null 2>&1; then
   else
     resolvectl status || true
   fi
+fi
+
+if home_dns_resolves; then
+  printf '\nValidation: compik.%s resolves successfully.\n' "$domain"
+else
+  printf '\nWARN compik.%s still does not resolve through systemd-resolved.\n' "$domain" >&2
+  printf 'Direct DNS test: dig +short @%s compik.%s\n' "$dns_server" "$domain" >&2
 fi
