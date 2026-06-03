@@ -100,6 +100,9 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `nm-applet` | Network tray icon (part of `network-manager-applet`) |
 | `bluez` | Bluetooth stack |
 | `blueman` | Bluetooth GUI + tray applet |
+| `amneziawg-dkms` | AmneziaWG kernel module (required for NM plugin) |
+| `amneziawg-tools` | `awg`, `awg-quick` CLI utilities |
+| `network-manager-amneziawg` | NM VPN plugin (built from [vovochka404/network-manager-amneziawg](https://github.com/vovochka404/network-manager-amneziawg)) |
 
 ## Input & Fingerprint
 
@@ -199,3 +202,25 @@ scripts/packages.aur
 
 # YubiKey pool
 # Run: ~/.dotfiles/.local/bin/yubikey-pool-setup
+
+# AmneziaWG (NM plugin)
+# The NM plugin needs both the kernel module AND a correctly compiled service binary.
+# Run: sudo modprobe amneziawg
+#
+# Build the NM plugin from source (must match host CPU ISA level):
+#   cd ~/Developer/GitHub/network-manager-amneziawg
+#   mkdir build && cd build
+#   cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib \
+#     -DCMAKE_C_FLAGS="-march=x86-64-v3" -DCMAKE_CXX_FLAGS="-march=x86-64-v3"
+#   cmake --build . -j$(nproc)
+#   sudo cmake --install .
+#
+# IMPORTANT: Building on a different host (e.g. compik.home with AVX-512) produces
+# a binary requiring x86-64-v4. Intel Arrow Lake (Core Ultra 200H) dropped AVX-512
+# and only supports x86-64-v3. The service will fail with:
+#   "CPU ISA level is lower than required"
+# Always build on the target host, or set -march=x86-64-v3 for portability.
+#
+# The AmneziaVPN GUI client works without the kernel module because it uses
+# wireguard-go (userspace). The NM plugin cannot — it creates kernel interfaces
+# via netlink and requires the amneziawg kernel module.
