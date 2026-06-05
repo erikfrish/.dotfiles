@@ -154,6 +154,10 @@ binds {
     Mod+Shift+WheelScrollUp { focus-column-left; }
     Mod+Shift+Ctrl+WheelScrollDown { move-column-right; }
     Mod+Shift+Ctrl+WheelScrollUp { move-column-left; }
+    Mod+WheelScrollRight cooldown-ms=150 { focus-column-right; }
+    Mod+WheelScrollLeft cooldown-ms=150 { focus-column-left; }
+    Mod+Ctrl+WheelScrollLeft cooldown-ms=150 { move-column-left; }
+    Mod+Ctrl+WheelScrollRight cooldown-ms=150 { move-column-right; }
     Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-window-to-workspace-down; }
     Mod+Ctrl+WheelScrollUp cooldown-ms=150 { move-window-to-workspace-up; }
 
