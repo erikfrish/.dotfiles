@@ -1,0 +1,620 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ACTION="open"
+DEVICE=""
+DISK_ID=""
+LUKS_UUID=""
+NAME=""
+MOUNTPOINT=""
+YUBIKEY_SERIAL=""
+MOUNT_BASE="${LUKS_FIDO_MOUNT_BASE:-/run/media/${USER:-user}}"
+FIDO2_OPTIONS="${LUKS_FIDO_OPTIONS:-fido2-device=auto}"
+SKIP_TOKEN_CHECK="${LUKS_FIDO_SKIP_TOKEN_CHECK:-0}"
+
+usage() {
+  cat <<'EOF'
+Usage: luks-fido [open|close|status|list] [options]
+
+Finds connected LUKS devices enrolled with systemd FIDO2/YubiKey tokens,
+unlocks the selected one, and mounts its inner filesystem.
+
+Commands:
+  open       Unlock and mount a FIDO2 LUKS device. Default command.
+  close      Unmount and close an open crypt mapper.
+  status     Show connected LUKS devices and open crypt mappers.
+  list       Same as status.
+
+Options:
+  --id ID            Use a disk id: UUID, by-id name, or block device path.
+  --device PATH       Use a specific LUKS block device.
+  --uuid UUID         Use a specific LUKS UUID.
+  --name NAME         Mapper name to use when opening.
+  --mountpoint PATH   Mountpoint to use when mounting.
+  --yubikey-serial N  Use a specific YubiKey serial for FIDO2 unlock.
+  -h, --help          Show this help.
+
+Environment:
+  LUKS_FIDO_MOUNT_BASE        Default mount base. Default: /run/media/$USER
+  LUKS_FIDO_OPTIONS           systemd-cryptsetup options. Default: fido2-device=auto
+  LUKS_FIDO_SKIP_TOKEN_CHECK  Set to 1 to show/open LUKS devices without checking FIDO2 tokens.
+EOF
+}
+
+die() {
+  printf 'luks-fido: %s\n' "$*" >&2
+  exit 1
+}
+
+need_cmd() {
+  command -v "$1" >/dev/null 2>&1 || die "required command is missing: $1"
+}
+
+sanitize_name() {
+  local value="$1"
+  value="${value//[^A-Za-z0-9_.-]/-}"
+  value="${value##-}"
+  value="${value%%-}"
+  printf '%s\n' "${value:-luks-disk}"
+}
+
+luks_uuid_for() {
+  lsblk -nrpo UUID "$1" 2>/dev/null | sed -n '1p'
+}
+
+path_for_uuid() {
+  local uuid="$1"
+  local by_uuid="/dev/disk/by-uuid/$uuid"
+
+  if [ -e "$by_uuid" ]; then
+    printf '%s\n' "$by_uuid"
+    return 0
+  fi
+
+  if command -v blkid >/dev/null 2>&1; then
+    blkid -U "$uuid" 2>/dev/null && return 0
+  fi
+
+  return 1
+}
+
+path_for_id() {
+  local id="$1"
+
+  if [ -e "$id" ]; then
+    printf '%s\n' "$id"
+    return 0
+  fi
+
+  if [ -e "/dev/disk/by-id/$id" ]; then
+    printf '%s\n' "/dev/disk/by-id/$id"
+    return 0
+  fi
+
+  if [ -e "/dev/disk/by-uuid/$id" ]; then
+    printf '%s\n' "/dev/disk/by-uuid/$id"
+    return 0
+  fi
+
+  path_for_uuid "$id" 2>/dev/null && return 0
+  return 1
+}
+
+canonical_path() {
+  readlink -f "$1" 2>/dev/null || printf '%s\n' "$1"
+}
+
+is_luks() {
+  [ "$(lsblk -nrpo FSTYPE "$1" 2>/dev/null | sed -n '1p')" = "crypto_LUKS" ]
+}
+
+luks_device_from_path() {
+  local path="$1"
+  local found=()
+  local child fstype
+
+  [ -e "$path" ] || return 1
+  path="$(canonical_path "$path")"
+
+  if is_luks "$path"; then
+    printf '%s\n' "$path"
+    return 0
+  fi
+
+  while read -r child fstype; do
+    [ "$fstype" = "crypto_LUKS" ] || continue
+    found+=("$child")
+  done < <(lsblk -nrpo PATH,FSTYPE "$path" 2>/dev/null)
+
+  case "${#found[@]}" in
+    0) return 1 ;;
+    1) printf '%s\n' "${found[0]}" ;;
+    *) die "several LUKS children under $path; pass the partition path or UUID" ;;
+  esac
+}
+
+yubikey_device_for_serial() {
+  local serial="$1"
+  local path found_serial device
+
+  if command -v ykman >/dev/null 2>&1; then
+    device="$(ykman --diagnose 2>/dev/null |
+      awk -v wanted="$serial" '
+        /CtapYubiKeyDevice\(.*fingerprint=.*\/dev\/hidraw[0-9]+/ {
+          device=$0
+          sub(/^.*fingerprint=/, "", device)
+          gsub(/\047/, "", device)
+          sub(/\).*/, "", device)
+          in_ctap=1
+          next
+        }
+        in_ctap && /^[[:space:]]+serial:[[:space:]]*/ {
+          found=$0
+          sub(/^.*serial:[[:space:]]*/, "", found)
+          if (found == wanted && device != "") {
+            print device
+            exit
+          }
+          in_ctap=0
+        }')"
+    if [ -n "$device" ]; then
+      printf '%s\n' "$device"
+      return 0
+    fi
+  fi
+
+  need_cmd systemd-cryptenroll
+  need_cmd udevadm
+
+  while read -r path; do
+    [ -n "$path" ] || continue
+    found_serial="$(udevadm info -q property -n "$path" 2>/dev/null | sed -n 's/^ID_SERIAL_SHORT=//p' | sed -n '1p')"
+    [ "$found_serial" = "$serial" ] || continue
+    printf '%s\n' "$path"
+    return 0
+  done < <(systemd-cryptenroll --fido2-device=list 2>/dev/null | sed -n 's#^\(/dev/hidraw[0-9][0-9]*\).*#\1#p')
+
+  return 1
+}
+
+fido2_options() {
+  local device options
+
+  if [ -z "$YUBIKEY_SERIAL" ]; then
+    printf '%s\n' "$FIDO2_OPTIONS"
+    return 0
+  fi
+
+  device="$(yubikey_device_for_serial "$YUBIKEY_SERIAL")" || die "YubiKey serial not found as FIDO2 device: $YUBIKEY_SERIAL"
+  options="$(printf '%s\n' "$FIDO2_OPTIONS" | sed -E "s#(^|,)fido2-device=[^,]*#\1fido2-device=$device#")"
+  if [ "$options" = "$FIDO2_OPTIONS" ]; then
+    options="$options,fido2-device=$device"
+  fi
+  printf '%s\n' "$options"
+}
+
+has_fido2_token() {
+  local device="$1"
+
+  [ "$SKIP_TOKEN_CHECK" = "1" ] && return 0
+  sudo cryptsetup luksDump "$device" 2>/dev/null | grep -qi 'systemd-fido2\|fido2'
+}
+
+open_mapper_for() {
+  local device="$1"
+  device="$(canonical_path "$device")"
+  lsblk -rnpo NAME,TYPE "$device" 2>/dev/null |
+    while read -r child type; do
+      if [ "$type" = "crypt" ]; then
+        printf '%s\n' "$child"
+        return 0
+      fi
+    done
+}
+
+mountpoint_for_mapper() {
+  findmnt -rn --source "$1" -o TARGET 2>/dev/null | sed -n '1p' || true
+}
+
+show_mount_users() {
+  local mountpoint="$1"
+
+  printf 'mountpoint is busy: %s\n' "$mountpoint" >&2
+  if command -v fuser >/dev/null 2>&1; then
+    fuser -vm "$mountpoint" >&2 || true
+  elif command -v lsof >/dev/null 2>&1; then
+    lsof +f -- "$mountpoint" >&2 || true
+  fi
+  printf 'Close these apps or leave directories under %s, then retry.\n' "$mountpoint" >&2
+}
+
+unmount_volume() {
+  local mountpoint="$1"
+
+  if umount "$mountpoint" 2>/dev/null; then
+    return 0
+  fi
+
+  if sudo umount "$mountpoint" 2>/dev/null; then
+    return 0
+  fi
+
+  show_mount_users "$mountpoint"
+  return 1
+}
+
+label_for_mapper() {
+  lsblk -nrpo LABEL "$1" 2>/dev/null | sed -n '1p'
+}
+
+luks_candidates() {
+  lsblk -rpno PATH,FSTYPE,UUID,SIZE,TYPE |
+    while read -r path fstype uuid size type; do
+      [ "$fstype" = "crypto_LUKS" ] || continue
+      [ -n "$uuid" ] || continue
+      printf '%s\t%s\t%s\t%s\n' "$path" "$uuid" "$size" "$type"
+    done
+}
+
+open_crypt_mappers() {
+  lsblk -rpno PATH,TYPE,SIZE,LABEL |
+    while read -r path type size label; do
+      [ "$type" = "crypt" ] || continue
+      printf '%s\t%s\t%s\n' "$path" "$size" "${label:-}"
+    done
+}
+
+describe_luks() {
+  local path="$1" uuid="$2" size="$3"
+  local parent parent_path parent_desc mapper mount
+  path="$(canonical_path "$path")"
+
+  parent="$(lsblk -nrpo PKNAME "$path" 2>/dev/null | sed -n '1p')"
+  parent_path="${parent:-$path}"
+  parent_desc="$(lsblk -dno TRAN,MODEL,SERIAL "$parent_path" 2>/dev/null | tr -s ' ' | sed 's/^ //; s/ $//')"
+  mapper="$(open_mapper_for "$path" | sed -n '1p')"
+  mount=""
+  [ -n "$mapper" ] && mount="$(mountpoint_for_mapper "$mapper")"
+
+  printf '%s | %s | %s' "$path" "$size" "$uuid"
+  [ -n "$parent_desc" ] && printf ' | %s' "$parent_desc"
+  [ -n "$mapper" ] && printf ' | open:%s' "$(basename "$mapper")"
+  [ -n "$mount" ] && printf ' | mounted:%s' "$mount"
+}
+
+choose_luks_device() {
+  local rows=()
+  local path uuid size type row choice count index selected
+
+  if [ -n "$DEVICE" ]; then
+    path="$(luks_device_from_path "$DEVICE")" || die "not a LUKS device: $DEVICE"
+    printf '%s\n' "$path"
+    return 0
+  fi
+
+  if [ -n "$DISK_ID" ]; then
+    path="$(path_for_id "$DISK_ID")" || die "disk id not found: $DISK_ID"
+    path="$(luks_device_from_path "$path")" || die "not a LUKS device: $DISK_ID"
+    printf '%s\n' "$path"
+    return 0
+  fi
+
+  if [ -n "$LUKS_UUID" ]; then
+    path="$(path_for_uuid "$LUKS_UUID")" || die "LUKS UUID not found: $LUKS_UUID"
+    is_luks "$path" || die "not a LUKS device: $path"
+    printf '%s\n' "$path"
+    return 0
+  fi
+
+  while IFS=$'\t' read -r path uuid size type; do
+    if has_fido2_token "$path"; then
+      rows+=("$path"$'\t'"$uuid"$'\t'"$size"$'\t'"$type")
+    fi
+  done < <(luks_candidates)
+
+  count="${#rows[@]}"
+  case "$count" in
+    0)
+      die 'no connected LUKS devices with FIDO2 tokens found'
+      ;;
+    1)
+      IFS=$'\t' read -r path uuid size type <<< "${rows[0]}"
+      printf '%s\n' "$path"
+      ;;
+    *)
+      [ -t 0 ] || die 'several FIDO2 LUKS devices found; pass --uuid or --device'
+      printf 'Choose LUKS device to open:\n' >&2
+      index=1
+      for row in "${rows[@]}"; do
+        IFS=$'\t' read -r path uuid size type <<< "$row"
+        printf '  %d) %s\n' "$index" "$(describe_luks "$path" "$uuid" "$size")" >&2
+        index=$((index + 1))
+      done
+      printf 'Number: ' >&2
+      IFS= read -r choice
+      case "$choice" in
+        ''|*[!0-9]*) die "invalid selection: $choice" ;;
+      esac
+      [ "$choice" -ge 1 ] && [ "$choice" -le "$count" ] || die "selection out of range: $choice"
+      selected="${rows[$((choice - 1))]}"
+      IFS=$'\t' read -r path uuid size type <<< "$selected"
+      printf '%s\n' "$path"
+      ;;
+  esac
+}
+
+mapper_name_for() {
+  local device="$1"
+  local uuid mapper label short
+
+  if [ -n "$NAME" ]; then
+    printf '%s\n' "$NAME"
+    return 0
+  fi
+
+  mapper="$(open_mapper_for "$device" | sed -n '1p')"
+  if [ -n "$mapper" ]; then
+    basename "$mapper"
+    return 0
+  fi
+
+  label="$(lsblk -nrpo LABEL "$device" 2>/dev/null | sed -n '1p')"
+  if [ -n "$label" ]; then
+    sanitize_name "$label"
+    return 0
+  fi
+
+  uuid="$(luks_uuid_for "$device")"
+  short="${uuid%%-*}"
+  sanitize_name "luks-$short"
+}
+
+mountpoint_for_open() {
+  local mapper="$1" name="$2"
+  local label
+
+  if [ -n "$MOUNTPOINT" ]; then
+    printf '%s\n' "$MOUNTPOINT"
+    return 0
+  fi
+
+  label="$(label_for_mapper "$mapper")"
+  printf '%s/%s\n' "$MOUNT_BASE" "$(sanitize_name "${label:-$name}")"
+}
+
+open_volume() {
+  local device name mapper mountpoint existing_mount
+
+  need_cmd findmnt
+  need_cmd grep
+  need_cmd lsblk
+  need_cmd sed
+  need_cmd sudo
+  need_cmd systemd-cryptsetup
+
+  device="$(choose_luks_device)"
+  name="$(mapper_name_for "$device")"
+  mapper="$(open_mapper_for "$device" | sed -n '1p')"
+
+  if [ -z "$mapper" ]; then
+    sudo systemd-cryptsetup attach "$name" "$device" - "$(fido2_options)"
+    mapper="/dev/mapper/$name"
+  else
+    name="$(basename "$mapper")"
+    printf '%s already unlocked as %s; mounting without asking YubiKey\n' "$name" "$mapper"
+  fi
+
+  existing_mount="$(mountpoint_for_mapper "$mapper")"
+  if [ -n "$existing_mount" ]; then
+    printf '%s already mounted at %s\n' "$name" "$existing_mount"
+    return 0
+  fi
+
+  mountpoint="$(mountpoint_for_open "$mapper" "$name")"
+  sudo mkdir -p "$mountpoint"
+  sudo mount "$mapper" "$mountpoint"
+  printf '%s mounted at %s\n' "$name" "$mountpoint"
+}
+
+choose_open_mapper() {
+  local rows=()
+  local path size label row choice count index selected mapper
+
+  if [ -n "$DEVICE" ] || [ -n "$DISK_ID" ] || [ -n "$LUKS_UUID" ]; then
+    if [ -n "$DEVICE" ]; then
+      path="$(luks_device_from_path "$DEVICE")" || die "not a LUKS device: $DEVICE"
+    elif [ -n "$DISK_ID" ]; then
+      path="$(path_for_id "$DISK_ID")" || die "disk id not found: $DISK_ID"
+      path="$(luks_device_from_path "$path")" || die "not a LUKS device: $DISK_ID"
+    else
+      path="$(path_for_uuid "$LUKS_UUID")" || die "LUKS UUID not found: $LUKS_UUID"
+      path="$(luks_device_from_path "$path")" || die "not a LUKS device: $path"
+    fi
+
+    mapper="$(open_mapper_for "$path" | sed -n '1p')"
+    [ -n "$mapper" ] || die "mapper is not open for: $path"
+    printf '%s\n' "$mapper"
+    return 0
+  fi
+
+  if [ -n "$NAME" ]; then
+    path="/dev/mapper/$NAME"
+    [ -e "$path" ] || die "mapper is not open: $NAME"
+    printf '%s\n' "$path"
+    return 0
+  fi
+
+  while IFS=$'\t' read -r path size label; do
+    rows+=("$path"$'\t'"$size"$'\t'"$label")
+  done < <(open_crypt_mappers)
+
+  count="${#rows[@]}"
+  case "$count" in
+    0) die 'no open crypt mappers found' ;;
+    1)
+      IFS=$'\t' read -r path size label <<< "${rows[0]}"
+      printf '%s\n' "$path"
+      ;;
+    *)
+      [ -t 0 ] || die 'several open crypt mappers found; pass --name'
+      printf 'Choose mapper to close:\n' >&2
+      index=1
+      for row in "${rows[@]}"; do
+        IFS=$'\t' read -r path size label <<< "$row"
+        printf '  %d) %s | %s' "$index" "$path" "$size" >&2
+        [ -n "$label" ] && printf ' | %s' "$label" >&2
+        printf '\n' >&2
+        index=$((index + 1))
+      done
+      printf 'Number: ' >&2
+      IFS= read -r choice
+      case "$choice" in
+        ''|*[!0-9]*) die "invalid selection: $choice" ;;
+      esac
+      [ "$choice" -ge 1 ] && [ "$choice" -le "$count" ] || die "selection out of range: $choice"
+      selected="${rows[$((choice - 1))]}"
+      IFS=$'\t' read -r path size label <<< "$selected"
+      printf '%s\n' "$path"
+      ;;
+  esac
+}
+
+close_volume() {
+  local mapper name mount
+
+  need_cmd findmnt
+  need_cmd lsblk
+  need_cmd sudo
+
+  mapper="$(choose_open_mapper)"
+  name="$(basename "$mapper")"
+  mount="$(mountpoint_for_mapper "$mapper")"
+
+  if [ -n "$mount" ]; then
+    unmount_volume "$mount"
+  fi
+
+  if command -v systemd-cryptsetup >/dev/null 2>&1; then
+    sudo systemd-cryptsetup detach "$name" || sudo cryptsetup close "$name"
+  else
+    sudo cryptsetup close "$name"
+  fi
+}
+
+list_status() {
+  local found=0
+  local path uuid size type mapper mount
+
+  need_cmd findmnt
+  need_cmd lsblk
+  need_cmd sed
+
+  printf 'LUKS devices:\n'
+  if [ -n "$DEVICE" ] || [ -n "$DISK_ID" ] || [ -n "$LUKS_UUID" ]; then
+    if [ -n "$DEVICE" ]; then
+      path="$(luks_device_from_path "$DEVICE" 2>/dev/null || true)"
+    elif [ -n "$DISK_ID" ]; then
+      path="$(path_for_id "$DISK_ID" 2>/dev/null || true)"
+      [ -z "$path" ] || path="$(luks_device_from_path "$path" 2>/dev/null || true)"
+    else
+      path="$(path_for_uuid "$LUKS_UUID" 2>/dev/null || true)"
+    fi
+    if [ -n "$path" ] && is_luks "$path"; then
+      uuid="$(luks_uuid_for "$path")"
+      size="$(lsblk -nrpo SIZE "$path" 2>/dev/null | sed -n '1p')"
+      printf '  %s\n' "$(describe_luks "$path" "$uuid" "$size")"
+      found=1
+    fi
+  else
+    while IFS=$'\t' read -r path uuid size type; do
+      found=1
+      printf '  %s\n' "$(describe_luks "$path" "$uuid" "$size")"
+    done < <(luks_candidates)
+  fi
+  [ "$found" -eq 1 ] || printf '  none\n'
+
+  found=0
+  printf '\nOpen crypt mappers:\n'
+  if [ -n "${path:-}" ]; then
+    mapper="$(open_mapper_for "$path" | sed -n '1p')"
+    if [ -n "$mapper" ]; then
+      size="$(lsblk -nrpo SIZE "$mapper" 2>/dev/null | sed -n '1p')"
+      label="$(label_for_mapper "$mapper")"
+      mount="$(mountpoint_for_mapper "$mapper")"
+      found=1
+      printf '  %s | %s' "$mapper" "$size"
+      [ -n "$label" ] && printf ' | %s' "$label"
+      [ -n "$mount" ] && printf ' | mounted:%s' "$mount"
+      printf '\n'
+    fi
+  else
+    while IFS=$'\t' read -r mapper size label; do
+      found=1
+      mount="$(mountpoint_for_mapper "$mapper")"
+      printf '  %s | %s' "$mapper" "$size"
+      [ -n "$label" ] && printf ' | %s' "$label"
+      [ -n "$mount" ] && printf ' | mounted:%s' "$mount"
+      printf '\n'
+    done < <(open_crypt_mappers)
+  fi
+  [ "$found" -eq 1 ] || printf '  none\n'
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    open|mount|close|unmount|umount|status|list)
+      ACTION="$1"
+      shift
+      ;;
+    --device)
+      [ "$#" -ge 2 ] || die '--device requires a value'
+      DEVICE="$2"
+      shift 2
+      ;;
+    --id)
+      [ "$#" -ge 2 ] || die '--id requires a value'
+      DISK_ID="$2"
+      shift 2
+      ;;
+    --uuid)
+      [ "$#" -ge 2 ] || die '--uuid requires a value'
+      LUKS_UUID="$2"
+      shift 2
+      ;;
+    --name)
+      [ "$#" -ge 2 ] || die '--name requires a value'
+      NAME="$2"
+      shift 2
+      ;;
+    --mountpoint)
+      [ "$#" -ge 2 ] || die '--mountpoint requires a value'
+      MOUNTPOINT="$2"
+      shift 2
+      ;;
+    --yubikey-serial|--yk-serial)
+      [ "$#" -ge 2 ] || die '--yubikey-serial requires a value'
+      YUBIKEY_SERIAL="$2"
+      shift 2
+      ;;
+    -h|--help|help)
+      usage
+      exit 0
+      ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+case "$ACTION" in
+  open|mount)
+    open_volume
+    ;;
+  close|unmount|umount)
+    close_volume
+    ;;
+  status|list)
+    list_status
+    ;;
+esac

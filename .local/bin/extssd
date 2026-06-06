@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+
+exec "$SCRIPT_DIR/luks-fido" "$@" \
+  --id "${EXTSSD_ID:-${EXTSSD_LUKS_UUID:-ffe33d05-bbf8-40ab-a24b-d7737c4dfe07}}" \
+  --name "${EXTSSD_NAME:-extssd}" \
+  --mountpoint "${EXTSSD_MOUNTPOINT:-/mnt/extssd}"
