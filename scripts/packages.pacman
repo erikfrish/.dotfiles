@@ -60,7 +60,13 @@ stow
 shellcheck
 ttf-jetbrains-mono-nerd
 noto-fonts-emoji
+adw-gtk-theme
 xkeyboard-config
 libxkbcommon
 nautilus
+dolphin
+nextcloud-client
+breeze
+qt5ct
+qt6ct
 sshpass

@@ -20,6 +20,15 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `stow` | Dotfile symlink management |
 | `shellcheck` | Optional script lint used by `scripts/doctor` |
 
+## Toolkit Theming
+
+| Package | Purpose |
+|---|---|
+| `adw-gtk-theme` | GTK3/GTK4 Adwaita-compatible theme used by presets |
+| `qt5ct` | Qt5 palette/config loader for generated theme files |
+| `qt6ct` | Qt6 palette/config loader for generated theme files |
+| `breeze` | KDE/Qt6 widget style and icons used by KDE Frameworks apps, including Dolphin |
+
 `scripts/test` runs portable checks in a temporary home: Bash syntax, Niri validation, Stow simulation, theme generation, and local override behavior.
 
 ## Display Manager & Lock
@@ -155,6 +164,8 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 |---|---|
 | `code` / `visual-studio-code-bin` | IDE (`Mod+I`) |
 | `nautilus` | File manager (`Mod+E`) |
+| `dolphin` | KDE/Qt file manager; themed through generated KDE/Qt files and wrapper |
+| `nextcloud-client` | Desktop sync client; follows the global Qt theme environment |
 | `zen-browser` | Browser (autostart WS1) |
 | `forkgram-desktop` | Telegram client (autostart WS3) |
 | `band-desktop` (AppImage) | Work messenger (autostart WS3) |

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export QT_QPA_PLATFORMTHEME=kde
+export KDE_SESSION_VERSION=6
+export XDG_CURRENT_DESKTOP=KDE
+
+exec /usr/bin/dolphin "$@"

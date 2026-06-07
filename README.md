@@ -14,7 +14,7 @@ The setup is intentionally boring in the places that should be reliable: one com
 - **Idle:** swayidle, calling `hyprlock` and Niri monitor power actions.
 - **Display manager:** ly on `tty1`.
 - **Wallpaper:** `awww` for images and `mpvpaper` for videos.
-- **Themes:** one preset system applies Waybar, Rofi, GTK, swaync, hyprlock, and wlogout together.
+- **Themes:** one preset system applies Waybar, Rofi, GTK/libadwaita, Qt/KDE, swaync, hyprlock, and wlogout together.
 
 ## Layout
 
@@ -153,7 +153,7 @@ The laptop panel is fixed at `3072x1920@120.000` with VRR disabled for stable fr
 
 ## Themes
 
-Themes are flat presets in `.config/themes/*.conf`. Applying a theme generates runtime files for the rest of the desktop.
+Themes are flat presets in `.config/themes/*.conf`. Applying a theme generates runtime files for the rest of the desktop. Each preset has `theme_mode=dark` or `theme_mode=light`; this drives GTK/libadwaita `color-scheme`, shell exports, and portal-aware apps such as browsers.
 
 ```sh
 ~/.config/themes/theme-switch list
@@ -163,6 +163,10 @@ Themes are flat presets in `.config/themes/*.conf`. Applying a theme generates r
 ```
 
 Theme previews are captured on an empty Niri workspace with each preset's `bg` color applied as a solid wallpaper.
+
+GTK3 uses the configured `gtk_theme` plus generated `gtk.css`. GTK4/libadwaita apps read the generated `gtk-4.0/gtk.css` and `org.gnome.desktop.interface color-scheme`. GTK surfaces get a subtle automatic tint by blending each theme's `bg`, `muted`, and `accent`; presets can override this with `gtk_surface`, `gtk_sidebar`, and `gtk_header`. Already-running GTK apps may need to be restarted manually to reload generated CSS. Qt apps are themed globally through `QT_QPA_PLATFORMTHEME=qt6ct`, generated `qt5ct`/`qt6ct` palettes, and a small `dotfiles.qss` for menus and popups. Dolphin is the exception: it is launched through `~/.local/bin/dolphin` with the KDE platform theme so it uses KDE's native dark palette instead of Qt stylesheet file-view hacks.
+
+Toolkit styling expects `adw-gtk-theme`, `qt5ct`, `qt6ct`, and `breeze` to be installed. `adw-gtk-theme` provides the GTK theme presets use, `qt5ct`/`qt6ct` load generated Qt palettes, and `breeze` provides KDE/Qt styling for Dolphin.
 
 | Theme | Preview |
 | --- | --- |
@@ -200,11 +204,14 @@ Generated files are ignored by Git:
 ~/.config/wob/wob.ini
 ~/.config/swayosd/style.css
 ~/.config/alacritty/theme.toml
+~/.config/kdeglobals
+~/.local/share/color-schemes/Dotfiles.colors
 ~/.config/Code/User/dotfiles-theme.generated.json
 ~/.config/qt5ct/colors/dotfiles.conf
 ~/.config/qt6ct/colors/dotfiles.conf
 ~/.config/qt5ct/qt5ct.conf
 ~/.config/qt6ct/qt6ct.conf
+~/.config/qt6ct/dotfiles.qss
 ~/.config/ly/theme.ini
 ~/.config/shell/theme.sh
 ```
