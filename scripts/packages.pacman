@@ -59,6 +59,7 @@ curl
 stow
 shellcheck
 ttf-jetbrains-mono-nerd
+ttf-fira-sans
 noto-fonts-emoji
 adw-gtk-theme
 xkeyboard-config

@@ -157,6 +157,7 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | Package | Purpose |
 |---|---|
 | `ttf-jetbrains-mono-nerd` | Bar/lock screen font (JetBrainsMono Nerd Font) |
+| `ttf-fira-sans` | GTK/Qt interface font referenced by generated toolkit configs |
 
 ## Apps (referenced in keybinds/autostart)
 

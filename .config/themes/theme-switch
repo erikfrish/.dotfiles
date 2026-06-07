@@ -176,7 +176,6 @@ generated_missing() {
         "$config_dir/qt5ct/qt5ct.conf"
         "$config_dir/qt6ct/qt6ct.conf"
         "$config_dir/qt6ct/dotfiles.qss"
-        "${XDG_DATA_HOME:-$HOME/.local/share}/dolphin/view_properties/global/.directory"
         "$config_dir/ly/theme.ini"
         "$config_dir/shell/theme.sh"
         "${XDG_CACHE_HOME:-$HOME/.cache}/waybar/theme.css"
