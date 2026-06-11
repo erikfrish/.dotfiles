@@ -11,6 +11,7 @@ YUBIKEY_SERIAL=""
 MOUNT_BASE="${LUKS_FIDO_MOUNT_BASE:-/run/media/${USER:-user}}"
 FIDO2_OPTIONS="${LUKS_FIDO_OPTIONS:-fido2-device=auto}"
 SKIP_TOKEN_CHECK="${LUKS_FIDO_SKIP_TOKEN_CHECK:-0}"
+FORCE=0
 
 usage() {
   cat <<'EOF'
@@ -32,6 +33,7 @@ Options:
   --name NAME         Mapper name to use when opening.
   --mountpoint PATH   Mountpoint to use when mounting.
   --yubikey-serial N  Use a specific YubiKey serial for FIDO2 unlock.
+  -f, --force         Force close: kill processes and lazy unmount.
   -h, --help          Show this help.
 
 Environment:
@@ -231,12 +233,27 @@ show_mount_users() {
 unmount_volume() {
   local mountpoint="$1"
 
+  if ! findmnt -rn --target "$mountpoint" >/dev/null 2>&1; then
+    return 0
+  fi
+
   if umount "$mountpoint" 2>/dev/null; then
     return 0
   fi
 
   if sudo umount "$mountpoint" 2>/dev/null; then
     return 0
+  fi
+
+  if [ "$FORCE" -eq 1 ]; then
+    if command -v fuser >/dev/null 2>&1; then
+      sudo fuser -km -M "$mountpoint" 2>/dev/null || true
+    fi
+    sleep 1
+    if sudo umount "$mountpoint" 2>/dev/null; then
+      return 0
+    fi
+    sudo umount -l "$mountpoint" 2>/dev/null && return 0
   fi
 
   show_mount_users "$mountpoint"
@@ -412,13 +429,20 @@ open_volume() {
 
   mountpoint="$(mountpoint_for_open "$mapper" "$name")"
   sudo mkdir -p "$mountpoint"
-  sudo mount "$mapper" "$mountpoint"
+  sudo mount -o rw "$mapper" "$mountpoint"
   printf '%s mounted at %s\n' "$name" "$mountpoint"
 }
 
 choose_open_mapper() {
   local rows=()
   local path size label row choice count index selected mapper
+
+  if [ -n "$NAME" ]; then
+    path="/dev/mapper/$NAME"
+    [ -e "$path" ] || die "mapper is not open: $NAME"
+    printf '%s\n' "$path"
+    return 0
+  fi
 
   if [ -n "$DEVICE" ] || [ -n "$DISK_ID" ] || [ -n "$LUKS_UUID" ]; then
     if [ -n "$DEVICE" ]; then
@@ -434,13 +458,6 @@ choose_open_mapper() {
     mapper="$(open_mapper_for "$path" | sed -n '1p')"
     [ -n "$mapper" ] || die "mapper is not open for: $path"
     printf '%s\n' "$mapper"
-    return 0
-  fi
-
-  if [ -n "$NAME" ]; then
-    path="/dev/mapper/$NAME"
-    [ -e "$path" ] || die "mapper is not open: $NAME"
-    printf '%s\n' "$path"
     return 0
   fi
 
@@ -480,7 +497,7 @@ choose_open_mapper() {
 }
 
 close_volume() {
-  local mapper name mount
+  local mapper name mount real_mapper
 
   need_cmd findmnt
   need_cmd lsblk
@@ -494,11 +511,39 @@ close_volume() {
     unmount_volume "$mount"
   fi
 
-  if command -v systemd-cryptsetup >/dev/null 2>&1; then
-    sudo systemd-cryptsetup detach "$name" || sudo cryptsetup close "$name"
-  else
-    sudo cryptsetup close "$name"
+  if [ "$FORCE" -eq 1 ] && command -v fuser >/dev/null 2>&1; then
+    printf 'force: killing processes using %s\n' "$mapper" >&2
+    sudo fuser -k "$mapper" 2>/dev/null || true
+    real_mapper="$(readlink -f "$mapper" 2>/dev/null || true)"
+    if [ -n "$real_mapper" ] && [ "$real_mapper" != "$mapper" ]; then
+      printf 'force: killing processes using %s\n' "$real_mapper" >&2
+      sudo fuser -k "$real_mapper" 2>/dev/null || true
+    fi
+    sleep 1
   fi
+
+  if command -v systemd-cryptsetup >/dev/null 2>&1; then
+    sudo systemd-cryptsetup detach "$name" && return 0
+    sudo cryptsetup close "$name" && return 0
+  else
+    sudo cryptsetup close "$name" && return 0
+  fi
+
+  if [ "$FORCE" -eq 1 ] && command -v dmsetup >/dev/null 2>&1; then
+    printf 'force: removing device-mapper node %s\n' "$name" >&2
+    if command -v udevadm >/dev/null 2>&1; then
+      sudo udevadm settle 2>/dev/null || true
+    fi
+    sudo dmsetup suspend --noflush "$name" 2>/dev/null || true
+    sudo dmsetup remove --force --retry --noudevsync "$name" && return 0
+    sudo dmsetup remove --force --retry "$name" && return 0
+    sudo dmsetup remove --deferred --force --retry --noudevsync "$name" && return 0
+    sudo dmsetup remove --deferred --force "$name" && return 0
+    sudo dmsetup remove --force "$name"
+    return $?
+  fi
+
+  return 1
 }
 
 list_status() {
@@ -595,6 +640,10 @@ while [ "$#" -gt 0 ]; do
       [ "$#" -ge 2 ] || die '--yubikey-serial requires a value'
       YUBIKEY_SERIAL="$2"
       shift 2
+      ;;
+    -f|--force)
+      FORCE=1
+      shift
       ;;
     -h|--help|help)
       usage
