@@ -203,6 +203,7 @@
     "interval": 5,
     "return-type": "json",
     "on-click": "~/.config/desktop/scripts/brightness --cycle",
+    "on-click-right": "~/.config/desktop/scripts/brightness --set 1",
     "on-scroll-up": "~/.config/desktop/scripts/brightness --inc",
     "on-scroll-down": "~/.config/desktop/scripts/brightness --dec",
     "smooth-scrolling-threshold": 1,
