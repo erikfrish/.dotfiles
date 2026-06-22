@@ -10,6 +10,22 @@ window-rule {
     default-column-width { proportion 1.0; }
 }
 
+// Chats workspace: Band 60 %, Telegram 40 %.
+window-rule {
+    match app-id="Band"
+    default-column-width { proportion 0.6; }
+}
+
+window-rule {
+    match app-id=r#"^io\.github\.forkgram\.tdesktop"#
+    default-column-width { proportion 0.4; }
+}
+
+window-rule {
+    match app-id=r#"^org\.telegram\.desktop"#
+    default-column-width { proportion 0.4; }
+}
+
 // Picture-in-picture windows should stay small and floating regardless of app.
 window-rule {
     match app-id=r#"^org\.pulseaudio\.pavucontrol$"#

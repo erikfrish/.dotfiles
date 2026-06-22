@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=OpenCode
+Comment=Launch OpenCode in a terminal
+TryExec=/usr/sbin/alacritty
+Exec=/usr/sbin/alacritty --working-directory /home/erikfrish -e /usr/sbin/opencode
+Terminal=false
+Icon=Alacritty
+Categories=Development;IDE;
+Keywords=opencode;ai;terminal;code;
+StartupNotify=false

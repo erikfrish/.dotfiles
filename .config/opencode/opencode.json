@@ -129,7 +129,7 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "llama-server CUDA local",
       "options": {
-        "baseURL": "http://10.69.11.110:7070/v1"
+        "baseURL": "http://compik.home:7070/v1"
       },
       "models": {
         "qwen3.6-35b-a3b": {
