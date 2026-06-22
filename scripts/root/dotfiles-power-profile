@@ -39,12 +39,30 @@ set_wifi_powersave() {
   done
 }
 
+set_gpu_min_freq() {
+  local min_freq="$1"
+  local freq_file rp0 max_freq
+  shopt -s nullglob
+  for freq_file in /sys/class/drm/card*/gt_min_freq_mhz; do
+    [ -w "$freq_file" ] || continue
+    rp0="${freq_file%/gt_min_freq_mhz}/gt_RP0_freq_mhz"
+    [ -f "$rp0" ] || continue
+    max_freq=$(<"$rp0")
+    [ "$min_freq" -le "$max_freq" ] 2>/dev/null || continue
+    printf '%s\n' "$min_freq" > "$freq_file" 2>/dev/null || true
+  done
+}
+
 if is_ac_online; then
   set_power_profile balanced
   set_pcie_aspm default
+  # Raise GPU minimum frequency so the compositor can sustain 120 FPS
+  # without waiting for the Intel GPU governor to boost from idle.
+  set_gpu_min_freq 1200
 else
   set_power_profile power-saver
   set_pcie_aspm powersave
+  set_gpu_min_freq 100
 fi
 
 # Keep Wi-Fi power saving enabled in both modes. NetworkManager also gets a
