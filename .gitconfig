@@ -8,7 +8,14 @@
 [gpg "ssh"]
 	sshProgram = ssh
 	defaultKeyCommand = sh -c 'exec \"$HOME/.ssh/scripts/current_yubikey\"'
+	allowedSignersFile = /home/erikfrish/.ssh/allowed_signers
 [core]
 	sshCommand = sh -c 'exec \"$HOME/.ssh/scripts/git_ssh\" \"$@\"' -
 [include]
 	path = ~/.gitconfig.local
+
+[includeIf "hasconfig:remote.*.url:git@gitlab.wildberries.ru:*/**"]
+	path = ~/.gitconfig-wb
+[includeIf "hasconfig:remote.*.url:https://gitlab.wildberries.ru/**"]
+	path = ~/.gitconfig-wb
+
