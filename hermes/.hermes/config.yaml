@@ -22,13 +22,7 @@ onboarding:
 # OpenAI-compatible custom integrations mirrored from OpenCode.
 # Select one with /model custom:<provider>:<model>.
 custom_providers:
-  - name: kilo-openrouter
-    base_url: https://api.kilo.ai/api/openrouter
-    api_mode: chat_completions
-    models:
-      "z-ai/glm-5:free": {}
-
-  - name: corellm-coder
+  - name: wb-corellm-coder
     base_url: https://corellm.wb.ru/coder/v1
     key_env: CORELLM_API_KEY
     api_mode: chat_completions
@@ -38,7 +32,7 @@ custom_providers:
       glm-51:
         context_length: 202752
 
-  - name: corellm-reviewer-a
+  - name: wb-corellm-reviewer-a
     base_url: https://aimodels.wb.ru/reviewer-a/v1
     key_env: CORELLM_API_KEY
     api_mode: chat_completions
@@ -46,7 +40,7 @@ custom_providers:
       berrylm-l:
         context_length: 262144
 
-  - name: corellm-reviewer-b
+  - name: wb-corellm-reviewer-b
     base_url: https://aimodels.wb.ru/reviewer-b/v1
     key_env: CORELLM_API_KEY
     api_mode: chat_completions

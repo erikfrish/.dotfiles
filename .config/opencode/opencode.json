@@ -79,22 +79,6 @@
         }
       }
     },
-    "kilo-openrouter": {
-      "models": {
-        "z-ai/glm-5:free": {
-          "name": "GLM-5 (free via Kilo)"
-        }
-      },
-      "name": "Kilo OpenRouter (public)",
-      "npm": "@ai-sdk/openai-compatible",
-      "options": {
-        "baseURL": "https://api.kilo.ai/api/openrouter",
-        "headers": {
-          "HTTP-Referer": "https://kilocode.ai",
-          "X-Title": "Kilo Code"
-        }
-      }
-    },
     "corellm": {
       "name": "wb-core-tools",
       "npm": "@ai-sdk/openai-compatible",
