@@ -1,10 +1,8 @@
-# Managed by GNU Stow from ~/.dotfiles/hermes/.hermes/config.yaml.
-# Secrets stay outside this repository: CORELLM_API_KEY must be supplied via
-# ~/.hermes/.env or the process environment.
 model:
-  provider: openai-codex
-  base_url: https://chatgpt.com/backend-api/codex
-  default: gpt-5.6-terra
+  provider: custom:wb-corellm-coder
+  base_url: ''
+  default: wb-coder
+  context_length: 202752
 agent:
   max_turns: 150
 display:
@@ -18,9 +16,6 @@ onboarding:
   seen:
     tool_progress_prompt: true
     busy_input_prompt: true
-
-# OpenAI-compatible custom integrations mirrored from OpenCode.
-# Select one with /model custom:<provider>:<model>.
 custom_providers:
   - name: wb-corellm-coder
     base_url: https://corellm.wb.ru/coder/v1
@@ -31,7 +26,6 @@ custom_providers:
         context_length: 202752
       glm-51:
         context_length: 202752
-
   - name: wb-corellm-reviewer-a
     base_url: https://aimodels.wb.ru/reviewer-a/v1
     key_env: CORELLM_API_KEY
@@ -39,7 +33,6 @@ custom_providers:
     models:
       berrylm-l:
         context_length: 262144
-
   - name: wb-corellm-reviewer-b
     base_url: https://aimodels.wb.ru/reviewer-b/v1
     key_env: CORELLM_API_KEY
@@ -47,7 +40,6 @@ custom_providers:
     models:
       berrylm-l-v2:
         context_length: 262144
-
   - name: llama-cpp
     base_url: http://compik.home:7070/v1
     api_mode: chat_completions
