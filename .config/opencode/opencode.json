@@ -103,22 +103,54 @@
       },
       "models": {
         "wb-coder": {
-          "name": "wb-coder",
+          "name": "wb-coder (GLM-5.1 alias)",
+          "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
+          "limit": { "context": 202752, "output": 16384 },
+          "modalities": { "input": ["text"], "output": ["text"] },
           "provider": {
             "api": "https://corellm.wb.ru/coder/v1"
           },
           "options": {
             "reasoning_effort": "low"
+          },
+          "variants": {
+            "low": { "reasoning_effort": "low" },
+            "medium": { "reasoning_effort": "medium" },
+            "high": { "reasoning_effort": "high" }
+          }
+        },
+        "glm-51": {
+          "name": "GLM-5.1 (coder)",
+          "reasoning": true,
+          "interleaved": { "field": "reasoning_content" },
+          "limit": { "context": 202752, "output": 16384 },
+          "modalities": { "input": ["text"], "output": ["text"] },
+          "provider": {
+            "api": "https://corellm.wb.ru/coder/v1"
+          },
+          "variants": {
+            "low": { "reasoning_effort": "low" },
+            "medium": { "reasoning_effort": "medium" },
+            "high": { "reasoning_effort": "high" }
           }
         },
         "berrylm-l": {
-          "name": "wb-reviewer-berrylm-l",
+          "name": "BerryLM-L (reviewer-a)",
+          "reasoning": true,
+          "interleaved": { "field": "reasoning" },
+          "limit": { "context": 262144, "output": 16384 },
+          "modalities": { "input": ["text"], "output": ["text"] },
           "provider": {
             "api": "https://aimodels.wb.ru/reviewer-a/v1"
           }
         },
         "berrylm-l-v2": {
-          "name": "wb-autocomplete-berrylm-l-v2",
+          "name": "BerryLM-L v2 (autocomplete)",
+          "reasoning": true,
+          "interleaved": { "field": "reasoning" },
+          "limit": { "context": 262144, "output": 16384 },
+          "modalities": { "input": ["text"], "output": ["text"] },
           "provider": {
             "api": "https://aimodels.wb.ru/reviewer-b/v1"
           }
@@ -159,7 +191,7 @@
             "context": 162144,
             "output": 8192
           }
-        },
+        }
       }
     }
   },

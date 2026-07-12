@@ -32,6 +32,8 @@ grim
 slurp
 awww
 ffmpeg
+whisper-cpp
+wtype
 networkmanager
 nm-connection-editor
 network-manager-applet

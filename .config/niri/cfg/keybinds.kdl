@@ -41,6 +41,9 @@ binds {
     Mod+W { spawn-sh "~/.config/themes/theme-switch menu"; }
     Mod+B { spawn-sh "systemctl --user restart waybar.service || ~/.config/waybar/scripts/statusbar"; }
     Mod+C { spawn-sh "~/.config/desktop/scripts/clipboard_history"; }
+    // Local Whisper dictation: press once to record, then again to transcribe
+    // Russian/English speech and type it into the focused app.
+    Mod+Shift+D hotkey-overlay-title="Toggle voice dictation" { spawn-sh "~/.config/desktop/scripts/dictation"; }
 
     // -------------------------------------------------------------------------
     // Hardware Keys

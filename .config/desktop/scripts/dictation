@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Toggle local Whisper voice dictation. First run starts recording; second run
+# transcribes the recording and types it into the currently focused Wayland app.
+set -euo pipefail
+
+runtime_dir="${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is required}"
+state_dir="$runtime_dir/dotfiles-dictation"
+audio_file="$state_dir/recording.wav"
+pid_file="$state_dir/pw-record.pid"
+model_file="${XDG_DATA_HOME:-$HOME/.local/share}/whisper-cpp/ggml-small.bin"
+
+notify() {
+    notify-send --app-name="Dictation" "$@"
+}
+
+recording_pid=""
+if [[ -f "$pid_file" ]]; then
+    recording_pid=$(<"$pid_file")
+fi
+
+if [[ -n "$recording_pid" ]] && kill -0 "$recording_pid" 2>/dev/null; then
+    kill -INT "$recording_pid"
+    for _ in {1..30}; do
+        kill -0 "$recording_pid" 2>/dev/null || break
+        sleep 0.1
+    done
+    rm -f "$pid_file"
+
+    if [[ ! -s "$audio_file" ]] || (( $(stat -c %s "$audio_file") < 1024 )); then
+        notify "Диктовка" "Запись слишком короткая — текст не распознан."
+        exit 0
+    fi
+    if [[ ! -f "$model_file" ]]; then
+        notify "Диктовка" "Не найдена модель Whisper: $model_file"
+        exit 1
+    fi
+
+    notify "Диктовка" "Распознаю…"
+    text=$(whisper-cli \
+        --model "$model_file" \
+        --file "$audio_file" \
+        --language auto \
+        --prompt "Russian and English speech only. Transcribe verbatim; do not translate." \
+        --no-timestamps \
+        --no-prints 2>/dev/null || true)
+    text=$(printf '%s' "$text" | tr '\n' ' ' | xargs)
+
+    if [[ -z "$text" ]]; then
+        notify "Диктовка" "Речь не распознана."
+        exit 0
+    fi
+
+    wtype "$text"
+    notify "Диктовка" "Готово"
+    exit 0
+fi
+
+rm -rf "$state_dir"
+mkdir -p "$state_dir"
+
+if wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | grep -q 'MUTED'; then
+    notify "Диктовка" "Микрофон выключен. Включите его и повторите."
+    exit 0
+fi
+
+pw-record --container wav --rate 16000 --channels 1 --format s16 "$audio_file" >/dev/null 2>&1 &
+echo "$!" > "$pid_file"
+notify "Диктовка" "Запись началась. Нажмите Super+Shift+D ещё раз, чтобы закончить."
