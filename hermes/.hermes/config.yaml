@@ -1,0 +1,68 @@
+# Managed by GNU Stow from ~/.dotfiles/hermes/.hermes/config.yaml.
+# Secrets stay outside this repository: CORELLM_API_KEY must be supplied via
+# ~/.hermes/.env or the process environment.
+model:
+  provider: openai-codex
+  base_url: https://chatgpt.com/backend-api/codex
+  default: gpt-5.6-terra
+agent:
+  max_turns: 150
+display:
+  tool_progress: all
+  timestamps: true
+  skin: default
+_config_version: 33
+session_reset:
+  mode: none
+onboarding:
+  seen:
+    tool_progress_prompt: true
+    busy_input_prompt: true
+
+# OpenAI-compatible custom integrations mirrored from OpenCode.
+# Select one with /model custom:<provider>:<model>.
+custom_providers:
+  - name: kilo-openrouter
+    base_url: https://api.kilo.ai/api/openrouter
+    api_mode: chat_completions
+    models:
+      "z-ai/glm-5:free": {}
+
+  - name: corellm-coder
+    base_url: https://corellm.wb.ru/coder/v1
+    key_env: CORELLM_API_KEY
+    api_mode: chat_completions
+    models:
+      wb-coder:
+        context_length: 202752
+      glm-51:
+        context_length: 202752
+
+  - name: corellm-reviewer-a
+    base_url: https://aimodels.wb.ru/reviewer-a/v1
+    key_env: CORELLM_API_KEY
+    api_mode: chat_completions
+    models:
+      berrylm-l:
+        context_length: 262144
+
+  - name: corellm-reviewer-b
+    base_url: https://aimodels.wb.ru/reviewer-b/v1
+    key_env: CORELLM_API_KEY
+    api_mode: chat_completions
+    models:
+      berrylm-l-v2:
+        context_length: 262144
+
+  - name: llama-cpp
+    base_url: http://compik.home:7070/v1
+    api_mode: chat_completions
+    models:
+      qwen3.6-35b-a3b:
+        context_length: 80072
+      Qwen3-Coder-Next-UD-Q4_K_M-80072:
+        context_length: 80072
+      Qwen3-Coder-Next-UD-Q4_K_M-262144:
+        context_length: 162144
+      Qwen3-Coder-Next-UD-Q4_K_M-162144:
+        context_length: 162144
