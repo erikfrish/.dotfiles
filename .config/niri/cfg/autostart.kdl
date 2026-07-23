@@ -19,6 +19,9 @@ spawn-sh-at-startup "systemctl --user daemon-reload; systemctl --user start gamm
 // OSD helper for layout/Caps Lock notifications.
 spawn-sh-at-startup "~/.config/desktop/scripts/lang_switch_osd"
 
+// Low battery notifier
+spawn-sh-at-startup "~/.config/desktop/scripts/battery_notify"
+
 // Niri-specific helpers.
 spawn-sh-at-startup "~/.config/niri/scripts/niri_pip_sticky"
 

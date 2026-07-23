@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+battery_dir="${BATTERY_SYSFS_DIR:-/sys/class/power_supply}"
+shopt -s nullglob
+batteries=("$battery_dir"/BAT*)
+
+# Desktop systems have no BAT* devices, so do not leave a background process.
+((${#batteries[@]})) || exit 0
+
+battery_level() {
+  local battery capacity status lowest=101
+
+  for battery in "${batteries[@]}"; do
+    [ -r "$battery/capacity" ] && [ -r "$battery/status" ] || continue
+    read -r capacity < "$battery/capacity"
+    read -r status < "$battery/status"
+    [[ "$capacity" =~ ^[0-9]+$ ]] && [ "$status" = "Discharging" ] || continue
+    if ((capacity < lowest)); then
+      lowest=$capacity
+    fi
+  done
+
+  ((lowest <= 100)) && printf '%s\n' "$lowest"
+}
+
+notified_at_10=0
+notified_at_5=0
+
+while :; do
+  if level=$(battery_level); then
+    if ((level <= 5)); then
+      if (( ! notified_at_5 )); then
+        notify-send --urgency=critical --app-name=Battery 'Battery critical' "${level}% remaining"
+        notified_at_5=1
+      fi
+    elif ((level <= 10)); then
+      if (( ! notified_at_10 )); then
+        notify-send --urgency=normal --app-name=Battery 'Battery low' "${level}% remaining"
+        notified_at_10=1
+      fi
+    else
+      notified_at_10=0
+      notified_at_5=0
+    fi
+  else
+    notified_at_10=0
+    notified_at_5=0
+  fi
+
+  sleep 30
+done

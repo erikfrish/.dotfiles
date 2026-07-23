@@ -112,10 +112,19 @@ test_vpn_status_without_connection() {
   PATH="$fakebin:$PATH" XDG_CONFIG_HOME="$tmp/config" "$script" vpn1 | grep -q 'not configured'
 }
 
+test_battery_notifier_without_battery() {
+  local tmp script
+  tmp=$(mktemp -d)
+  tmp_dirs+=("$tmp")
+  script="$repo_dir/.config/desktop/scripts/battery_notify"
+  BATTERY_SYSFS_DIR="$tmp" "$script"
+}
+
 run "bash syntax" test_bash_syntax
 run "niri config" test_niri_config
 run "stow clean target" test_stow_clean_home
 run "theme-switch generation" test_theme_switch_generates
 run "vpn status local override" test_vpn_status_without_connection
+run "battery notifier without battery" test_battery_notifier_without_battery
 
 exit "$failed"
