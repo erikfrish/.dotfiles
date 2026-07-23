@@ -11,6 +11,7 @@
 	allowedSignersFile = /home/erikfrish/.ssh/allowed_signers
 [core]
 	sshCommand = sh -c 'exec \"$HOME/.ssh/scripts/git_ssh\" \"$@\"' -
+	editor = nvim
 [include]
 	path = ~/.gitconfig.local
 

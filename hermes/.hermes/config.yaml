@@ -1,14 +1,16 @@
 model:
-  provider: custom:wb-corellm-coder
+  provider: openai-codex
   base_url: ''
-  default: wb-coder
+  default: gpt-5.6-luna
   context_length: 202752
 agent:
   max_turns: 150
+  reasoning_effort: xhigh
 display:
   tool_progress: all
   timestamps: true
-  skin: default
+  skin: ares
+  show_reasoning: true
 _config_version: 33
 session_reset:
   mode: none

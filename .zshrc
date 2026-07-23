@@ -78,3 +78,5 @@ fi
 # Local overrides
 [ -r "$HOME/.config/shell/theme.sh" ] && source "$HOME/.config/shell/theme.sh"
 [ -r "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
+
+if [ -e /home/erikfrish/.nix-profile/etc/profile.d/nix.sh ]; then . /home/erikfrish/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer

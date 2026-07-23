@@ -6,6 +6,8 @@ Conflicts=ssh-agent.socket
 [Service]
 Type=simple
 ExecStart=/usr/bin/ssh-agent -D -a %t/ssh-agent.socket
+Restart=on-failure
+RestartSec=2s
 
 [Install]
 WantedBy=default.target
