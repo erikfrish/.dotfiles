@@ -13,6 +13,7 @@ binds {
     // so the space keypress is consumed and XWayland apps properly receive the
     // layout change notification.
     Mod+Space { switch-layout "next"; }
+    // Shift+Ctrl { switch-layout "next"; }
 
     // -------------------------------------------------------------------------
     // Launchers
@@ -43,7 +44,7 @@ binds {
     Mod+C { spawn-sh "~/.config/desktop/scripts/clipboard_history"; }
     // Local Whisper dictation: press once to record, then again to transcribe
     // Russian/English speech and type it into the focused app.
-    Mod+Shift+D hotkey-overlay-title="Toggle voice dictation" { spawn-sh "~/.config/desktop/scripts/dictation"; }
+    Mod+D hotkey-overlay-title="Toggle voice dictation" { spawn-sh "~/.config/desktop/scripts/dictation"; }
 
     // -------------------------------------------------------------------------
     // Hardware Keys

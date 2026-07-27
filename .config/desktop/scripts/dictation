@@ -65,4 +65,4 @@ fi
 
 pw-record --container wav --rate 16000 --channels 1 --format s16 "$audio_file" >/dev/null 2>&1 &
 echo "$!" > "$pid_file"
-notify "Диктовка" "Запись началась. Нажмите Super+Shift+D ещё раз, чтобы закончить."
+notify "Диктовка" "Запись началась. Нажмите Super+D ещё раз, чтобы закончить."
