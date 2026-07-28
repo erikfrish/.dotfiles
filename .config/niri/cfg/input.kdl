@@ -18,10 +18,10 @@ input {
 
             // Alt+Shift toggles layout at the XKB level. This is needed for
             // XWayland apps (AppImage/Electron via xwayland-satellite) which
-            // cannot see Niri's switch-layout keybind. Alt+Shift does not
-            // leak printable characters into apps unlike win_space_toggle.
-            // Wayland-native apps use the Mod+Space keybind instead.
-            // options "grp:alt_shift_toggle"
+            // cannot see Niri's switch-layout keybind. Wayland-native apps
+            // also receive this XKB group change, while Mod+Space is handled
+            // by Niri directly so the space keypress is consumed.
+            options "grp:alt_shift_toggle"
         }
 
         // Always start sessions with NumLock enabled.

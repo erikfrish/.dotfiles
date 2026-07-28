@@ -183,7 +183,7 @@ Voice dictation uses the multilingual `ggml-small.bin` Whisper model (Russian an
 | `libxkbcommon` | Provides `xkbcli` for custom layout validation |
 
 The custom layout lives in `~/.config/xkb/symbols/dotfiles` and is activated by:
-- **Niri**: `layout "us,dotfiles"` + `variant ",ru_ctrl_shortcuts"` + `xkb_options "grp:alt_shift_toggle"` in `cfg/input.kdl`
+- **Niri**: `layout "us,dotfiles"` + `variant ",ru_ctrl_shortcuts"` + `options "grp:alt_shift_toggle"` in `cfg/input.kdl`
 
 ## Install Everything (Arch/CachyOS)
 

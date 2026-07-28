@@ -9,11 +9,11 @@ binds {
     // Show Niri's built-in cheat sheet for the bindings below.
     Mod+Shift+Slash { show-hotkey-overlay; }
 
-    // Layout toggle. Using a Niri keybind instead of XKB grp:win_space_toggle
-    // so the space keypress is consumed and XWayland apps properly receive the
-    // layout change notification.
+    // Layout toggle. Mod+Space is a Niri keybind instead of XKB
+    // grp:win_space_toggle so the space keypress is consumed and XWayland apps
+    // properly receive the layout change notification. Alt+Shift is handled by
+    // the XKB group-toggle option in input.kdl.
     Mod+Space { switch-layout "next"; }
-    // Shift+Ctrl { switch-layout "next"; }
 
     // -------------------------------------------------------------------------
     // Launchers
