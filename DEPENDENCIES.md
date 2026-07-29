@@ -59,7 +59,7 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `wpctl` | WirePlumber CLI (part of `wireplumber`) |
 | `pactl` | PulseAudio CLI (part of `libpulse`) |
 | `whisper-cpp` | Local/offline Whisper transcription used by `Super+D` dictation |
-| `wtype` | Types recognized text into the focused Wayland application |
+| `wtype` | Triggers pasting recognized text into the focused Wayland application |
 
 Voice dictation uses the multilingual `ggml-small.bin` Whisper model (Russian and English), stored outside the repository at `~/.local/share/whisper-cpp/ggml-small.bin`. The `~/.config/desktop/scripts/dictation` toggle starts recording on the first `Super+D`, then transcribes and types text on the second press. It never sends audio to a remote service.
 

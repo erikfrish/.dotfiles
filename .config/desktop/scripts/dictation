@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Toggle local Whisper voice dictation. First run starts recording; second run
-# transcribes the recording and types it into the currently focused Wayland app.
+# transcribes the recording and pastes it into the currently focused Wayland app.
 set -euo pipefail
 
 runtime_dir="${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is required}"
@@ -50,7 +50,8 @@ if [[ -n "$recording_pid" ]] && kill -0 "$recording_pid" 2>/dev/null; then
         exit 0
     fi
 
-    wtype "$text"
+    printf '%s' "$text" | wl-copy
+    wtype -M ctrl -k v -m ctrl
     notify "Диктовка" "Готово"
     exit 0
 fi

@@ -88,7 +88,7 @@
       },
       "models": {
         "wb-coder": {
-          "name": "wb-coder (GLM-5.1 alias)",
+          "name": "wb-coder (Kimi-K2.7-Code)",
           "reasoning": true,
           "interleaved": { "field": "reasoning_content" },
           "limit": { "context": 202752, "output": 16384 },
@@ -106,7 +106,7 @@
           }
         },
         "glm-51": {
-          "name": "GLM-5.1 (coder)",
+          "name": "glm-51 (Kimi-K2.7-Code alias)",
           "reasoning": true,
           "interleaved": { "field": "reasoning_content" },
           "limit": { "context": 202752, "output": 16384 },
@@ -121,7 +121,7 @@
           }
         },
         "berrylm-l": {
-          "name": "BerryLM-L (reviewer-a)",
+          "name": "BerryLM-L (reviewer-a, deprecated)",
           "reasoning": true,
           "interleaved": { "field": "reasoning" },
           "limit": { "context": 262144, "output": 16384 },
@@ -131,7 +131,7 @@
           }
         },
         "berrylm-l-v2": {
-          "name": "BerryLM-L v2 (autocomplete)",
+          "name": "BerryLM-L v2 (autocomplete, deprecated)",
           "reasoning": true,
           "interleaved": { "field": "reasoning" },
           "limit": { "context": 262144, "output": 16384 },
