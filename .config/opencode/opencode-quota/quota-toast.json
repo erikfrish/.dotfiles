@@ -1,0 +1,16 @@
+{
+  "enableToast": false,
+  "tuiCommandDisplay": "inline",
+  "showSessionTokens": false,
+  "sessionTokenScope": "current",
+  "enabledProviders": "auto",
+  "formatStyle": "allWindows",
+  "percentDisplayMode": "remaining",
+  "tuiSidebarPanel": {
+    "enabled": true
+  },
+  "maintainerAnnouncements": {
+    "enabled": true,
+    "home": true
+  }
+}

@@ -8,6 +8,11 @@ state_dir="$runtime_dir/dotfiles-dictation"
 audio_file="$state_dir/recording.wav"
 pid_file="$state_dir/pw-record.pid"
 model_file="${XDG_DATA_HOME:-$HOME/.local/share}/whisper-cpp/ggml-small.bin"
+local_whisper_cli="${XDG_DATA_HOME:-$HOME/.local/share}/whisper-cpp/bin/whisper-cli"
+whisper_cli=$(command -v whisper-cli 2>/dev/null || true)
+if [[ -z "$whisper_cli" ]] && [[ -x "$local_whisper_cli" ]]; then
+    whisper_cli="$local_whisper_cli"
+fi
 
 notify() {
     notify-send --app-name="Dictation" "$@"
@@ -34,9 +39,13 @@ if [[ -n "$recording_pid" ]] && kill -0 "$recording_pid" 2>/dev/null; then
         notify "Диктовка" "Не найдена модель Whisper: $model_file"
         exit 1
     fi
+    if [[ -z "$whisper_cli" ]]; then
+        notify "Диктовка" "Не найден whisper-cli. Установите whisper.cpp."
+        exit 1
+    fi
 
     notify "Диктовка" "Распознаю…"
-    text=$(whisper-cli \
+    text=$("$whisper_cli" \
         --model "$model_file" \
         --file "$audio_file" \
         --language auto \
@@ -54,6 +63,15 @@ if [[ -n "$recording_pid" ]] && kill -0 "$recording_pid" 2>/dev/null; then
     wtype -M ctrl -k v -m ctrl
     notify "Диктовка" "Готово"
     exit 0
+fi
+
+if [[ ! -f "$model_file" ]]; then
+    notify "Диктовка" "Не найдена модель Whisper: $model_file"
+    exit 1
+fi
+if [[ -z "$whisper_cli" ]]; then
+    notify "Диктовка" "Не найден whisper-cli. Установите whisper.cpp."
+    exit 1
 fi
 
 rm -rf "$state_dir"

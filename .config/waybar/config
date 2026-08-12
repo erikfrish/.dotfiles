@@ -258,7 +258,8 @@
       "activated": "",
       "deactivated": ""
     },
-    "tooltip": true
+    "tooltip": true,
+    "on-click-right": "~/.config/desktop/scripts/screenshot_area"
   },
 
   "custom/language": {
