@@ -4,9 +4,10 @@
 ^scripts
 ^etc
 .*bak(/.*)?
-\.swp$
-\.bak$
-.*\.md
+ \.swp$
+ \.bak$
+ ^\.config/gtk-4\.0/servers$
+ .*\.md
 .*\.sh
 .*\.png
 ^\.zshrc\.local$
