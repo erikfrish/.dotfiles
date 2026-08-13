@@ -1,0 +1,347 @@
+{
+  "layer": "top",
+  "position": "top",
+  "exclusive": true,
+  "passthrough": false,
+  "fixed-center": true,
+  "ipc": true,
+  "margin-left": 0,
+  "margin-right": 0,
+  "margin-bottom": 0,
+  "spacing": 4,
+
+  "modules-left": [
+    "custom/ws1",
+    "custom/ws2",
+    "custom/ws3",
+    "custom/ws4",
+    "custom/ws5",
+    "custom/ws6",
+    "custom/ws7",
+    "custom/ws8",
+    "custom/ws9",
+    "custom/ws10",
+    "custom/cycle_wall",
+    "custom/menu",
+    "cpu",
+    "temperature",
+    "memory",
+    "custom/wakatime"
+  ],
+  "modules-center": [
+    "clock",
+    "custom/notification"
+  ],
+  "modules-right": [
+    "tray",
+    "custom/vpn1",
+    "custom/vpn2",
+    "custom/gammastep",
+    "custom/backlight",
+    "custom/audio-volume",
+    "pulseaudio#microphone",
+    "battery",
+    "idle_inhibitor",
+    "custom/language",
+    "custom/power"
+  ],
+
+  "custom/ws1": {
+    "exec": "~/.config/waybar/scripts/hypr_workspace 1",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.config/waybar/scripts/hypr_workspace_dispatch 1",
+    "on-scroll-up": "~/.config/waybar/scripts/hypr_workspace_dispatch prev",
+    "on-scroll-down": "~/.config/waybar/scripts/hypr_workspace_dispatch next"
+  },
+  "custom/ws2": {
+    "exec": "~/.config/waybar/scripts/hypr_workspace 2",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.config/waybar/scripts/hypr_workspace_dispatch 2",
+    "on-scroll-up": "~/.config/waybar/scripts/hypr_workspace_dispatch prev",
+    "on-scroll-down": "~/.config/waybar/scripts/hypr_workspace_dispatch next"
+  },
+  "custom/ws3": {
+    "exec": "~/.config/waybar/scripts/hypr_workspace 3",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.config/waybar/scripts/hypr_workspace_dispatch 3",
+    "on-scroll-up": "~/.config/waybar/scripts/hypr_workspace_dispatch prev",
+    "on-scroll-down": "~/.config/waybar/scripts/hypr_workspace_dispatch next"
+  },
+  "custom/ws4": {
+    "exec": "~/.config/waybar/scripts/hypr_workspace 4",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.config/waybar/scripts/hypr_workspace_dispatch 4",
+    "on-scroll-up": "~/.config/waybar/scripts/hypr_workspace_dispatch prev",
+    "on-scroll-down": "~/.config/waybar/scripts/hypr_workspace_dispatch next"
+  },
+  "custom/ws5": {
+    "exec": "~/.config/waybar/scripts/hypr_workspace 5",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.config/waybar/scripts/hypr_workspace_dispatch 5",
+    "on-scroll-up": "~/.config/waybar/scripts/hypr_workspace_dispatch prev",
+    "on-scroll-down": "~/.config/waybar/scripts/hypr_workspace_dispatch next"
+  },
+  "custom/ws6": {
+    "exec": "~/.config/waybar/scripts/hypr_workspace 6",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.config/waybar/scripts/hypr_workspace_dispatch 6",
+    "on-scroll-up": "~/.config/waybar/scripts/hypr_workspace_dispatch prev",
+    "on-scroll-down": "~/.config/waybar/scripts/hypr_workspace_dispatch next"
+  },
+  "custom/ws7": {
+    "exec": "~/.config/waybar/scripts/hypr_workspace 7",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.config/waybar/scripts/hypr_workspace_dispatch 7",
+    "on-scroll-up": "~/.config/waybar/scripts/hypr_workspace_dispatch prev",
+    "on-scroll-down": "~/.config/waybar/scripts/hypr_workspace_dispatch next"
+  },
+  "custom/ws8": {
+    "exec": "~/.config/waybar/scripts/hypr_workspace 8",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.config/waybar/scripts/hypr_workspace_dispatch 8",
+    "on-scroll-up": "~/.config/waybar/scripts/hypr_workspace_dispatch prev",
+    "on-scroll-down": "~/.config/waybar/scripts/hypr_workspace_dispatch next"
+  },
+  "custom/ws9": {
+    "exec": "~/.config/waybar/scripts/hypr_workspace 9",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.config/waybar/scripts/hypr_workspace_dispatch 9",
+    "on-scroll-up": "~/.config/waybar/scripts/hypr_workspace_dispatch prev",
+    "on-scroll-down": "~/.config/waybar/scripts/hypr_workspace_dispatch next"
+  },
+  "custom/ws10": {
+    "exec": "~/.config/waybar/scripts/hypr_workspace 10",
+    "return-type": "json",
+    "interval": 1,
+    "on-click": "~/.config/waybar/scripts/hypr_workspace_dispatch 10",
+    "on-scroll-up": "~/.config/waybar/scripts/hypr_workspace_dispatch prev",
+    "on-scroll-down": "~/.config/waybar/scripts/hypr_workspace_dispatch next"
+  },
+
+  "custom/cycle_wall": {
+    "format": "",
+    "tooltip": true,
+    "tooltip-format": "Wallpaper / themes",
+    "on-click": "~/.config/desktop/scripts/wallpaper_switcher",
+    "on-click-right": "~/.config/themes/theme-switch menu",
+    "on-click-middle": "~/.config/desktop/scripts/change_wallpaper random"
+  },
+
+  "custom/menu": {
+    "format": "",
+    "tooltip": false,
+    "on-click": "$HOME/.config/desktop/scripts/menu"
+  },
+
+  "clock": {
+    "format": " {:%H:%M   %F, %a}",
+    "format-alt": " {:%H:%M}",
+    "format-alt-click": "click-right",
+    "locale": "en_US.UTF-8",
+    "on-click": "swaync-client -t -sw",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    "calendar": {
+      "mode": "year",
+      "mode-mon-col": 3,
+      "weeks-pos": "right",
+      "on-scroll": 1,
+      "on-click-right": "mode",
+      "format": {
+        "months": "<span color='#ffead3'><b>{}</b></span>",
+        "days": "<span color='#ecc6d9'><b>{}</b></span>",
+        "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+        "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+        "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+      }
+    }
+  },
+
+  "custom/notification": {
+    "tooltip": false,
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "<span foreground='red'><sup></sup></span>",
+      "none": "",
+      "dnd-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-none": "",
+      "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "inhibited-none": "",
+      "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+      "dnd-inhibited-none": ""
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  },
+
+  "cpu": {
+    "format": "{max_frequency}GHz <span color=\"darkgray\">| {usage}%</span>",
+    "format-alt": "{icon0}{icon1}{icon2}{icon3} {usage:>2}% ",
+    "format-alt-click": "click",
+    "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"],
+    "interval": 1,
+    "max-length": 13,
+    "min-length": 13
+  },
+
+  "temperature": {
+    "interval": 4,
+    "critical-threshold": 80,
+    "format-critical": "  {temperatureC}°C",
+    "format": "{icon}  {temperatureC}°C",
+    "format-icons": ["", "", ""],
+    "max-length": 7,
+    "min-length": 7
+  },
+
+  "memory": {
+    "interval": 10,
+    "format": "{used:0.1f}G 󰘚",
+    "on-click": "alacritty -e btop"
+  },
+
+  "custom/wakatime": {
+    "format": "󱑎 {text}",
+    "return-type": "json",
+    "interval": 300,
+    "exec": "~/.config/waybar/scripts/wakatime",
+    "on-click-right": "xdg-open https://wakapi.dev/summary?interval=yesterday",
+    "tooltip": true
+  },
+
+  "custom/gammastep": {
+    "interval": 5,
+    "return-type": "json",
+    "exec": {
+      "pre": "if unit_status=\"$(systemctl --user is-active gammastep)\"; then\nstatus=\"$unit_status ($(journalctl --user -u gammastep.service -g 'Period: ' | tail -1 | cut -d ':' -f6 | xargs))\"\nelse\nstatus=\"$unit_status\"\nfi",
+      "alt": "${status:-inactive}",
+      "tooltip": "Gammastep is $status"
+    },
+    "format": "{icon}",
+    "format-icons": {
+      "activating": "󰁪 ",
+      "deactivating": "󰁪 ",
+      "inactive": "? ",
+      "active (Night)": " ",
+      "active (Nighttime)": " ",
+      "active (Transition (Night)": " ",
+      "active (Transition (Nighttime)": " ",
+      "active (Day)": " ",
+      "active (Daytime)": " ",
+      "active (Transition (Day)": " ",
+      "active (Transition (Daytime)": " "
+    },
+    "on-click": "systemctl --user is-active gammastep && systemctl --user stop gammastep || systemctl --user start gammastep"
+  },
+
+  "custom/backlight": {
+    "exec": "~/.config/desktop/scripts/brightness --json",
+    "interval": 5,
+    "return-type": "json",
+    "on-click": "~/.config/desktop/scripts/brightness --cycle",
+    "on-scroll-up": "~/.config/desktop/scripts/brightness --inc",
+    "on-scroll-down": "~/.config/desktop/scripts/brightness --dec",
+    "smooth-scrolling-threshold": 1,
+    "signal": 10
+  },
+
+  "custom/audio-volume": {
+    "exec": "~/.config/desktop/scripts/volume --get",
+    "format": " {}%",
+    "interval": "once",
+    "signal": 8,
+    "on-click": "~/.config/desktop/scripts/volume --toggle",
+    "on-click-right": "pavucontrol",
+    "on-scroll-up": "~/.config/desktop/scripts/volume --inc",
+    "on-scroll-down": "~/.config/desktop/scripts/volume --dec",
+    "smooth-scrolling-threshold": 1
+  },
+
+  "pulseaudio#microphone": {
+    "format": "{format_source}",
+    "format-source": " {volume} %",
+    "format-source-muted": " muted",
+    "on-click": "~/.config/desktop/scripts/volume --toggle-mic",
+    "on-click-right": "pavucontrol",
+    "on-scroll-up": "~/.config/desktop/scripts/volume --mic-inc",
+    "on-scroll-down": "~/.config/desktop/scripts/volume --mic-dec",
+    "scroll-step": 5
+  },
+
+  "battery": {
+    "interval": 20,
+    "full-at": 100,
+    "design-capacity": false,
+    "states": {
+      "good": 95,
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon}  {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": " {capacity}%",
+    "format-full": "{icon} Full",
+    "format-alt": "{icon} {time}",
+    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "format-time": "{H}h {M}min",
+    "tooltip": true
+  },
+
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "",
+      "deactivated": ""
+    },
+    "tooltip": true
+  },
+
+  "custom/language": {
+    "exec": "~/.config/desktop/scripts/lang_indicator",
+    "interval": 1,
+    "format": "{}",
+    "on-click": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "on-scroll-up": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "on-scroll-down": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
+    "signal": 1
+  },
+
+  "custom/power": {
+    "format": "<span rise='3072'>󰐥</span>",
+    "tooltip": false,
+    "on-click": "sh -c '(sleep 0.1s; ~/.config/desktop/scripts/power_menu)' & disown"
+  },
+
+  "tray": {
+    "icon-size": 16,
+    "spacing": 6
+  },
+
+  "custom/vpn1": {
+    "format": "{}",
+    "exec": "~/.config/desktop/scripts/vpn_status vpn1",
+    "return-type": "json",
+    "interval": 2,
+    "on-click": "~/.config/desktop/scripts/vpn_toggle vpn1"
+  },
+
+  "custom/vpn2": {
+    "format": "{}",
+    "exec": "~/.config/desktop/scripts/vpn_status vpn2",
+    "return-type": "json",
+    "interval": 2,
+    "on-click": "~/.config/desktop/scripts/vpn_toggle vpn2"
+  }
+}

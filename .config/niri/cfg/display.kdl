@@ -9,12 +9,18 @@
 output "eDP-1" {
     mode "3072x1920@120.000"
     scale 1.75
-    variable-refresh-rate
+    // Disabled while testing niri + NVIDIA frame pacing.
+    // variable-refresh-rate
 }
 
 output "DP-4" {
     mode "2560x1440@164.833"
-    variable-refresh-rate
+    // Disabled while testing niri + NVIDIA frame pacing.
+    // variable-refresh-rate
+}
+
+output "DP-3" {
+    mode "2560x1440@164.833"
 }
 
 output "HDMI-A-2" {

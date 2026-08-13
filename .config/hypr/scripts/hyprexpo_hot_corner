@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${DOTFILES_HYPREXPO_HOT_CORNER:=1}"
+: "${DOTFILES_HYPREXPO_HOT_CORNER_POSITION:=top-left}"
+: "${DOTFILES_HYPREXPO_HOT_CORNER_SIZE:=8}"
+: "${DOTFILES_HYPREXPO_HOT_CORNER_COOLDOWN_MS:=400}"
+: "${DOTFILES_HYPREXPO_HOT_CORNER_POLL:=0.12}"
+
+[ "${XDG_CURRENT_DESKTOP:-}" = "Hyprland" ] || exit 0
+[ "$DOTFILES_HYPREXPO_HOT_CORNER" = 1 ] || exit 0
+
+lock_file="${XDG_RUNTIME_DIR:-/tmp}/hyprexpo-hot-corner.lock"
+exec 9>"$lock_file"
+flock -n 9 || exit 0
+
+last_trigger=0
+armed=1
+
+inside_corner() {
+    local x="$1" y="$2" mx="$3" my="$4" mw="$5" mh="$6" size="$7"
+
+    case "$DOTFILES_HYPREXPO_HOT_CORNER_POSITION" in
+        top-left)
+            [ "$x" -le $((mx + size)) ] && [ "$y" -le $((my + size)) ]
+            ;;
+        top-right)
+            [ "$x" -ge $((mx + mw - size)) ] && [ "$y" -le $((my + size)) ]
+            ;;
+        bottom-left)
+            [ "$x" -le $((mx + size)) ] && [ "$y" -ge $((my + mh - size)) ]
+            ;;
+        bottom-right)
+            [ "$x" -ge $((mx + mw - size)) ] && [ "$y" -ge $((my + mh - size)) ]
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+trigger_hyprexpo() {
+    hyprctl dispatch 'function() hl.plugin.hyprexpo.expo("toggle") end' >/dev/null 2>&1 || true
+}
+
+while true; do
+    cursor_json="$(hyprctl -j cursorpos 2>/dev/null || true)"
+    monitors_json="$(hyprctl -j monitors 2>/dev/null || true)"
+
+    if [ -n "$cursor_json" ] && [ -n "$monitors_json" ]; then
+        x="$(jq -r '.x // empty' <<<"$cursor_json")"
+        y="$(jq -r '.y // empty' <<<"$cursor_json")"
+        monitor="$(jq -r --argjson x "$x" --argjson y "$y" '
+            map(select($x >= .x and $x < (.x + .width) and $y >= .y and $y < (.y + .height)))[0]
+            | select(. != null)
+            | [.x, .y, .width, .height]
+            | @tsv
+        ' <<<"$monitors_json")"
+
+        if [ -n "$monitor" ]; then
+            read -r mx my mw mh <<<"$monitor"
+            if inside_corner "$x" "$y" "$mx" "$my" "$mw" "$mh" "$DOTFILES_HYPREXPO_HOT_CORNER_SIZE"; then
+                now="$(date +%s%3N)"
+                if [ "$armed" = 1 ] && [ $((now - last_trigger)) -ge "$DOTFILES_HYPREXPO_HOT_CORNER_COOLDOWN_MS" ]; then
+                    trigger_hyprexpo
+                    last_trigger="$now"
+                    armed=0
+                fi
+            else
+                armed=1
+            fi
+        fi
+    fi
+
+    sleep "$DOTFILES_HYPREXPO_HOT_CORNER_POLL"
+done

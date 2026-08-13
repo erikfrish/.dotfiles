@@ -9,14 +9,22 @@ normalize_layout() {
   esac
 }
 
-if ! niri msg keyboard-layouts >/dev/null 2>&1; then
+if command -v hyprctl >/dev/null 2>&1 && hyprctl version >/dev/null 2>&1; then
+  if [ "${1:-}" = "next" ]; then
+    hyprctl switchxkblayout all next >/dev/null 2>&1 || true
+  fi
+  layout=$(hyprctl devices -j 2>/dev/null | python3 -c "import sys,json;[print(k['active_keymap']) for k in json.load(sys.stdin).get('keyboards',[]) if k.get('main')]" 2>/dev/null | head -1)
+  if [ -n "$layout" ]; then
+    normalize_layout "$layout"
+  else
+    printf -- '--\n'
+  fi
+elif command -v niri >/dev/null 2>&1 && niri msg keyboard-layouts >/dev/null 2>&1; then
+  if [ "${1:-}" = "next" ]; then
+    niri msg action switch-layout next >/dev/null 2>&1 || true
+  fi
+  layout=$(niri msg keyboard-layouts | awk '/^ \*/ { sub(/^ \* [0-9]+ /, ""); print; exit }')
+  normalize_layout "$layout"
+else
   printf -- '--\n'
-  exit 0
 fi
-
-if [ "${1:-}" = "next" ]; then
-  niri msg action switch-layout next >/dev/null 2>&1 || true
-fi
-
-layout=$(niri msg keyboard-layouts | awk '/^ \*/ { sub(/^ \* [0-9]+ /, ""); print; exit }')
-normalize_layout "$layout"

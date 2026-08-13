@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+target="${1:?workspace target required}"
+
+case "$target" in
+    next)
+        dispatcher='hl.dsp.focus({ workspace = "e+1" })'
+        ;;
+    prev)
+        dispatcher='hl.dsp.focus({ workspace = "e-1" })'
+        ;;
+    *[!0-9]* | "")
+        exit 2
+        ;;
+    *)
+        dispatcher="hl.dsp.focus({ workspace = $target })"
+        ;;
+esac
+
+hyprctl dispatch "$dispatcher" >/dev/null 2>&1
