@@ -120,11 +120,17 @@ test_battery_notifier_without_battery() {
   BATTERY_SYSFS_DIR="$tmp" "$script"
 }
 
+test_stt_server_compiles() {
+  command -v python3 >/dev/null 2>&1 || return 0
+  python3 -m py_compile "$repo_dir/.config/stt-server/server.py"
+}
+
 run "bash syntax" test_bash_syntax
 run "niri config" test_niri_config
 run "stow clean target" test_stow_clean_home
 run "theme-switch generation" test_theme_switch_generates
 run "vpn status local override" test_vpn_status_without_connection
 run "battery notifier without battery" test_battery_notifier_without_battery
+run "STT server compiles" test_stt_server_compiles
 
 exit "$failed"

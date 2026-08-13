@@ -38,9 +38,17 @@ script_files() {
   } | sort -u
 }
 
-for cmd in bash stow niri waybar rofi jq ffmpeg awww mpvpaper wl-paste cliphist wob swayosd-server; do
+for cmd in bash stow niri waybar rofi jq ffmpeg awww mpvpaper wl-paste cliphist wob swayosd-server uv python3; do
   check_command "$cmd"
 done
+
+if command -v python3 >/dev/null 2>&1; then
+  if python3 -m py_compile "$repo_dir/.config/stt-server/server.py"; then
+    ok "STT server compiles"
+  else
+    fail "STT server failed to compile"
+  fi
+fi
 
 if command -v niri >/dev/null 2>&1; then
   if niri validate -c "$repo_dir/.config/niri/config.kdl" >/dev/null; then

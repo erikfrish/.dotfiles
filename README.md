@@ -62,6 +62,7 @@ sudo ~/.dotfiles/scripts/setup-power
 sudo ~/.dotfiles/scripts/setup-ddcci
 ~/.dotfiles/scripts/setup-ssh-agent
 ~/.dotfiles/scripts/setup-home-dns
+~/.dotfiles/scripts/setup-stt
 ```
 
 Deploy ly config explicitly:

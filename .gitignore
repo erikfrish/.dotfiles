@@ -30,3 +30,5 @@ ignore_me
 .config/ly/theme.ini
 .config/shell/theme.sh
 .config/opencode/package-lock.json
+__pycache__/
+*.pyc

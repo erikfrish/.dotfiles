@@ -58,10 +58,23 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `pavucontrol` | Volume mixer (floating window rule) |
 | `wpctl` | WirePlumber CLI (part of `wireplumber`) |
 | `pactl` | PulseAudio CLI (part of `libpulse`) |
-| `whisper-cpp` | Local/offline Whisper transcription used by `Super+D` dictation |
+| `uv` | Creates the Python venv for the local STT server |
 | `wtype` | Triggers pasting recognized text into the focused Wayland application |
 
-Voice dictation uses the multilingual `ggml-small.bin` Whisper model (Russian and English), stored outside the repository at `~/.local/share/whisper-cpp/ggml-small.bin`. The `~/.config/desktop/scripts/dictation` toggle starts recording on the first `Super+D`, then transcribes and types text on the second press. It never sends audio to a remote service.
+Voice dictation and OpenChamber share one local server at `http://127.0.0.1:8001/v1`, backed by NVIDIA Parakeet TDT 0.6B v3 (int8) via sherpa-onnx on the CPU. The server is `~/.config/stt-server/server.py`, runs through `stt-server.service`, and keeps the model in `~/.local/share/stt-server/models/`. No GPU or VRAM is used. Run `~/.dotfiles/scripts/setup-stt` after the main setup; it installs the model, creates the venv, starts the service, and points a running OpenChamber instance at the same endpoint. Audio stays on localhost.
+
+The `~/.config/desktop/scripts/dictation` toggle checks server health before recording, starts recording on the first `Super+D`, then sends the WAV to `/v1/audio/transcriptions` and pastes the returned text on the second press. In OpenChamber, use provider `OpenAI-compatible`, URL `http://127.0.0.1:8001/v1`, model `parakeet-tdt-0.6b-v3-int8`, no API key, and an empty language field for automatic Russian/English detection.
+
+Operations:
+
+```bash
+systemctl --user status stt-server.service
+journalctl --user -u stt-server.service -f
+systemctl --user restart stt-server.service
+
+# Roll back/disable the shared STT server
+systemctl --user disable --now stt-server.service
+```
 
 ## Brightness & Volume OSD
 
@@ -218,6 +231,9 @@ scripts/packages.aur
 
 # YubiKey pool
 # Run: ~/.dotfiles/.local/bin/yubikey-pool-setup
+
+# Local speech-to-text server and shared OpenChamber dictation (Parakeet)
+# Run: ~/.dotfiles/scripts/setup-stt
 
 # AmneziaWG (NM plugin)
 # The NM plugin needs both the kernel module AND a correctly compiled service binary.

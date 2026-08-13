@@ -1,18 +1,15 @@
 #!/usr/bin/env bash
-# Toggle local Whisper voice dictation. First run starts recording; second run
-# transcribes the recording and pastes it into the currently focused Wayland app.
+# Toggle local voice dictation (NVIDIA Parakeet TDT v3 via the shared STT
+# server). First run starts recording; second run transcribes and pastes.
 set -euo pipefail
 
 runtime_dir="${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is required}"
 state_dir="$runtime_dir/dotfiles-dictation"
 audio_file="$state_dir/recording.wav"
 pid_file="$state_dir/pw-record.pid"
-model_file="${XDG_DATA_HOME:-$HOME/.local/share}/whisper-cpp/ggml-small.bin"
-local_whisper_cli="${XDG_DATA_HOME:-$HOME/.local/share}/whisper-cpp/bin/whisper-cli"
-whisper_cli=$(command -v whisper-cli 2>/dev/null || true)
-if [[ -z "$whisper_cli" ]] && [[ -x "$local_whisper_cli" ]]; then
-    whisper_cli="$local_whisper_cli"
-fi
+stt_base_url="${DICTATION_STT_BASE_URL:-http://127.0.0.1:8001/v1}"
+stt_health_url="${stt_base_url%/v1}/health"
+stt_model="${DICTATION_STT_MODEL:-parakeet-tdt-0.6b-v3-int8}"
 
 notify() {
     notify-send --app-name="Dictation" "$@"
@@ -35,24 +32,21 @@ if [[ -n "$recording_pid" ]] && kill -0 "$recording_pid" 2>/dev/null; then
         notify "Диктовка" "Запись слишком короткая — текст не распознан."
         exit 0
     fi
-    if [[ ! -f "$model_file" ]]; then
-        notify "Диктовка" "Не найдена модель Whisper: $model_file"
-        exit 1
-    fi
-    if [[ -z "$whisper_cli" ]]; then
-        notify "Диктовка" "Не найден whisper-cli. Установите whisper.cpp."
-        exit 1
-    fi
-
     notify "Диктовка" "Распознаю…"
-    text=$("$whisper_cli" \
-        --model "$model_file" \
-        --file "$audio_file" \
-        --language auto \
-        --prompt "Russian and English speech only. Transcribe verbatim; do not translate." \
-        --no-timestamps \
-        --no-prints 2>/dev/null || true)
-    text=$(printf '%s' "$text" | tr '\n' ' ' | xargs)
+    curl_args=(
+        --fail --silent --show-error --max-time 180
+        --form "file=@$audio_file;type=audio/wav"
+        --form "model=$stt_model"
+        --form 'response_format=json'
+    )
+    if [[ -n "${DICTATION_STT_LANGUAGE:-}" ]]; then
+        curl_args+=(--form "language=$DICTATION_STT_LANGUAGE")
+    fi
+    if ! response=$(curl "${curl_args[@]}" "$stt_base_url/audio/transcriptions" 2>/dev/null); then
+        notify "Диктовка" "Сервер распознавания недоступен или вернул ошибку."
+        exit 1
+    fi
+    text=$(jq -r '.text // empty' <<<"$response" | tr '\n' ' ' | xargs)
 
     if [[ -z "$text" ]]; then
         notify "Диктовка" "Речь не распознана."
@@ -65,12 +59,8 @@ if [[ -n "$recording_pid" ]] && kill -0 "$recording_pid" 2>/dev/null; then
     exit 0
 fi
 
-if [[ ! -f "$model_file" ]]; then
-    notify "Диктовка" "Не найдена модель Whisper: $model_file"
-    exit 1
-fi
-if [[ -z "$whisper_cli" ]]; then
-    notify "Диктовка" "Не найден whisper-cli. Установите whisper.cpp."
+if ! curl --fail --silent --max-time 2 "$stt_health_url" >/dev/null; then
+    notify "Диктовка" "STT-сервер недоступен: $stt_health_url"
     exit 1
 fi
 

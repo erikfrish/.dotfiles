@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Sets up the local OpenAI-compatible speech-to-text server (NVIDIA Parakeet
+# TDT v3 on CPU via sherpa-onnx). Downloads/installs the model, creates a
+# Python venv, and enables the user systemd service.
+#
+# The model is reused from OpenChamber's copy when present to avoid
+# re-downloading ~641 MB.
+
+model="parakeet-tdt-0.6b-v3-int8"
+model_archive="sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8.tar.bz2"
+model_url="https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/$model_archive"
+base_url="http://127.0.0.1:8001/v1"
+
+data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/stt-server"
+models_dir="$data_dir/models"
+model_dir="$models_dir/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8"
+venv_dir="$data_dir/venv"
+
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/stt-server"
+requirements="$config_dir/requirements.txt"
+server_script="$config_dir/server.py"
+
+openchamber_model_dir="${XDG_CONFIG_HOME:-$HOME/.config}/openchamber/speech-models/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8"
+openchamber_settings="${XDG_CONFIG_HOME:-$HOME/.config}/openchamber/settings.json"
+
+for command in curl uv; do
+    if ! command -v "$command" >/dev/null 2>&1; then
+        printf 'Missing dependency: %s\nRun ~/.dotfiles/scripts/setup first.\n' "$command" >&2
+        exit 1
+    fi
+done
+
+for file in "$requirements" "$server_script"; do
+    if [[ ! -f "$file" ]]; then
+        printf 'Missing %s; run stow from ~/.dotfiles first.\n' "$file" >&2
+        exit 1
+    fi
+done
+
+if [[ ! -d "$model_dir" ]]; then
+    mkdir -p "$models_dir"
+    if [[ -d "$openchamber_model_dir" ]]; then
+        echo "==> Reusing Parakeet model from OpenChamber..."
+        cp -a "$openchamber_model_dir" "$model_dir"
+    else
+        echo "==> Downloading Parakeet v3 model..."
+        curl -fL --retry 3 --continue-at - \
+            --output "$data_dir/$model_archive" "$model_url"
+        tar -xjf "$data_dir/$model_archive" -C "$models_dir"
+        rm -f "$data_dir/$model_archive"
+    fi
+fi
+
+echo "==> Creating Python venv and installing dependencies..."
+uv venv "$venv_dir" --python 3.12 >/dev/null 2>&1 || uv venv "$venv_dir"
+uv pip install --python "$venv_dir/bin/python" --requirement "$requirements"
+
+echo "==> Starting the STT server..."
+systemctl --user daemon-reload
+systemctl --user enable stt-server.service >/dev/null
+systemctl --user restart stt-server.service
+
+echo "==> Waiting for STT health check..."
+for _ in {1..60}; do
+    if curl --fail --silent --max-time 2 "${base_url%/v1}/health" >/dev/null; then
+        break
+    fi
+    sleep 2
+done
+curl --fail --silent --max-time 5 "${base_url%/v1}/health" >/dev/null
+
+if [[ -f "$openchamber_settings" ]]; then
+    port=$(jq -r '.desktopLocalPort // empty' "$openchamber_settings")
+    if [[ -n "$port" ]] && curl --fail --silent --max-time 2 "http://127.0.0.1:$port/health" >/dev/null 2>&1; then
+        echo "==> Configuring OpenChamber to use the shared STT server..."
+        curl --fail --silent --max-time 10 \
+            --request PUT \
+            --header 'Content-Type: application/json' \
+            --data "$(jq -cn --arg url "$base_url" --arg model "$model" \
+                '{sttProvider:"openai-compatible",sttServerUrl:$url,sttModel:$model,sttLanguage:""}')" \
+            "http://127.0.0.1:$port/api/config/settings" >/dev/null
+    else
+        echo "OpenChamber is not running; configure its Voice settings manually:"
+        printf '  Provider: OpenAI-compatible\n  URL: %s\n  Model: %s\n  Language: empty (auto)\n' "$base_url" "$model"
+    fi
+fi
+
+echo "STT is ready at $base_url"

@@ -1,0 +1,13 @@
+[Unit]
+Description=Local OpenAI-compatible speech-to-text server (Parakeet TDT v3)
+PartOf=dotfiles-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/share/stt-server/venv/bin/python %h/.config/stt-server/server.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=dotfiles-session.target
