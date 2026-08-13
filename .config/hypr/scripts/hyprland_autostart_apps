@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
+[ -r "$lib_file" ] && . "$lib_file"
+type dotfiles_load_machine_config >/dev/null 2>&1 && dotfiles_load_machine_config
+
+: "${DOTFILES_ENABLE_AUTOSTART_APPS:=1}"
+: "${DOTFILES_BROWSER_CMD:=zen-browser}"
+: "${DOTFILES_BROWSER_CLASS:=zen}"
+
+[ "$DOTFILES_ENABLE_AUTOSTART_APPS" = 1 ] || exit 0
+
+clients_json() {
+    hyprctl clients -j 2>/dev/null || printf '[]\n'
+}
+
+window_exists() {
+    local jq_filter="$1"
+    clients_json | jq -e "map(select($jq_filter)) | length > 0" >/dev/null
+}
+
+spawn_cmd() {
+    local cmd="$1"
+    [ -n "$cmd" ] || return 0
+    sh -c "$cmd" >/dev/null 2>&1 &
+}
+
+window_exists ".class == \"$DOTFILES_BROWSER_CLASS\"" || spawn_cmd "$DOTFILES_BROWSER_CMD"
+
+hyprctl dispatch workspace 1 >/dev/null 2>&1 || true

@@ -2,9 +2,12 @@
 
 CACHED_CONFIG="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/config"
 CONFIG="$HOME/.config/waybar/config"
+HYPRLAND_CONFIG="$HOME/.config/waybar/config.hyprland"
 STYLE="$HOME/.config/waybar/style.css"
 
-if [[ -s "$CACHED_CONFIG" ]]; then
+if [[ "${XDG_CURRENT_DESKTOP:-}" == "Hyprland" && -s "$HYPRLAND_CONFIG" ]]; then
+	CONFIG="$HYPRLAND_CONFIG"
+elif [[ -s "$CACHED_CONFIG" ]]; then
 	CONFIG="$CACHED_CONFIG"
 fi
 

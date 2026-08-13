@@ -1,0 +1,13 @@
+[Unit]
+Description=Hyprland Hyprexpo hot corner
+PartOf=dotfiles-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.config/hypr/scripts/hyprexpo_hot_corner
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=dotfiles-session.target
