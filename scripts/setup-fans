@@ -23,17 +23,15 @@ deploy "$repo_dir/scripts/root/dotfiles-fancontrol" "/usr/local/libexec/dotfiles
 deploy "$repo_dir/etc/systemd/system/fancontrol.service.d/override.conf" "/etc/systemd/system/fancontrol.service.d/override.conf" 644
 deploy "$repo_dir/etc/modprobe.d/nct6683_blacklist.conf" "/etc/modprobe.d/nct6683_blacklist.conf" 644
 deploy "$repo_dir/etc/modules-load.d/nct6687.conf" "/etc/modules-load.d/nct6687.conf" 644
-deploy "$repo_dir/etc/systemd/system/dotfiles-wol.service" "/etc/systemd/system/dotfiles-wol.service" 644
 
 printf '\n==> Regenerating /etc/fancontrol...\n'
 /usr/local/libexec/dotfiles-fancontrol
 
 printf '\n==> Enabling services...\n'
 sudo systemctl daemon-reload
-sudo systemctl enable --now dotfiles-wol.service
 sudo systemctl enable fancontrol.service
 sudo systemctl restart fancontrol.service
 
 printf '\nDone. Status:\n'
-systemctl is-active dotfiles-wol.service fancontrol.service || true
-systemctl is-enabled dotfiles-wol.service fancontrol.service || true
+systemctl is-active fancontrol.service || true
+systemctl is-enabled fancontrol.service || true
