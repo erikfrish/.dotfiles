@@ -31,7 +31,7 @@ FCFANS=$hwdev/pwm3=$hwdev/fan3_input
 MINTEMP=$hwdev/pwm3=55
 MAXTEMP=$hwdev/pwm3=72
 MINSTART=$hwdev/pwm3=45
-MINSTOP=$hwdev/pwm3=35
+MINSTOP=$hwdev/pwm3=40
 MINPWM=$hwdev/pwm3=40
 MAXPWM=$hwdev/pwm3=150
 
@@ -40,7 +40,7 @@ FCFANS=$hwdev/pwm5=$hwdev/fan5_input
 MINTEMP=$hwdev/pwm5=55
 MAXTEMP=$hwdev/pwm5=72
 MINSTART=$hwdev/pwm5=45
-MINSTOP=$hwdev/pwm5=35
+MINSTOP=$hwdev/pwm5=40
 MINPWM=$hwdev/pwm5=40
 MAXPWM=$hwdev/pwm5=150
 EOF
