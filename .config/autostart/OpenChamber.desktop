@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=OpenChamber
+Comment=OpenChamber server for remote access
+Exec=/home/erikfrish/Applications/OpenChamber-1.18.3-linux-x86_64_0379fab1d9e4f2e2ca876363c6b85d87.AppImage --no-sandbox
+Terminal=false
+StartupNotify=false
+X-GNOME-Autostart-enabled=true

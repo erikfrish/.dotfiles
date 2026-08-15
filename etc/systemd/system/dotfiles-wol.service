@@ -1,0 +1,11 @@
+[Unit]
+Description=Enable Wake-on-LAN on wired NIC (enp12s0)
+After=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/ethtool -s enp12s0 wol g
+
+[Install]
+WantedBy=multi-user.target
