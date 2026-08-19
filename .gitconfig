@@ -9,6 +9,7 @@
 	sshProgram = ssh
 	defaultKeyCommand = sh -c 'exec \"$HOME/.ssh/scripts/current_yubikey\"'
 	allowedSignersFile = /home/erikfrish/.ssh/allowed_signers
+	program = /home/erikfrish/.ssh/scripts/ssh-keygen-notify
 [core]
 	sshCommand = sh -c 'exec \"$HOME/.ssh/scripts/git_ssh\" \"$@\"' -
 	editor = nvim

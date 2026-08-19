@@ -2,7 +2,8 @@
   "$schema": "https://opencode.ai/config.json",
   "plugin": [
     "opencode-antigravity-auth@latest",
-    "@slkiser/opencode-quota@latest"
+    "@slkiser/opencode-quota@latest",
+    "@mohak34/opencode-notifier@0.2.8"
   ],
 
   "provider": {
@@ -235,6 +236,6 @@
     "external_directory": {
       "/tmp/**": "allow",
       "/tmp/*": "allow"
-    }
+		}
   }
 }
