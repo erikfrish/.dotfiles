@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Sets up the Exchange -> Nextcloud calendar mirror: copies the committed
+# config examples into the real (git-ignored) files, walks you through
+# systemd-creds encryption for the Nextcloud password, and enables the timer.
+#
+# Fill in ~/.config/outlook-nextcloud-sync/config.toml and credentials.toml
+# first, then run this script. Secrets never enter git (see .gitignore).
+
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/outlook-nextcloud-sync"
+config_toml="$config_dir/config.toml"
+credentials_toml="$config_dir/credentials.toml"
+nextcloud_cred="$config_dir/nextcloud_password.cred"
+
+mkdir -p "$config_dir"
+
+for file in config.toml credentials.toml; do
+    if [[ ! -f "$config_dir/$file" ]]; then
+        cp "$config_dir/$file.example" "$config_dir/$file"
+        echo "==> Created $config_dir/$file from example - edit it now."
+    fi
+done
+
+chmod 0600 "$credentials_toml"
+
+if ! command -v uv >/dev/null 2>&1; then
+    printf 'Missing dependency: uv\nRun ~/.dotfiles/scripts/setup first.\n' >&2
+    exit 1
+fi
+
+echo
+echo "==> Encrypting the Nextcloud password for systemd."
+echo "    Paste the Nextcloud app password when prompted (Ctrl-D when done)."
+if [[ -f "$nextcloud_cred" ]]; then
+    rm -f "$nextcloud_cred"
+fi
+systemd-creds encrypt -p -n nextcloud_password "$nextcloud_cred"
+
+systemctl --user daemon-reload
+systemctl --user enable --now outlook-nextcloud-sync.timer
+
+echo
+echo "==> Sync timer enabled. Run once with:"
+echo "    systemctl --user start outlook-nextcloud-sync.service"
+echo "    journalctl --user -u outlook-nextcloud-sync.service -n 20"

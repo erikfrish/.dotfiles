@@ -30,5 +30,8 @@ ignore_me
 .config/ly/theme.ini
 .config/shell/theme.sh
 .config/opencode/package-lock.json
+.config/outlook-nextcloud-sync/credentials.toml
+.config/outlook-nextcloud-sync/config.toml
+.config/outlook-nextcloud-sync/*.cred
 __pycache__/
 *.pyc

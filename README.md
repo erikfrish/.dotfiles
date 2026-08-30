@@ -327,6 +327,28 @@ cat /sys/module/pcie_aspm/parameters/policy
 iw dev wlan0 get power_save
 ```
 
+## Calendar
+
+A user timer mirrors the work Exchange calendar into Nextcloud via CalDAV, so
+the work availability shows up outside the Outlook/Exchange client.
+
+```text
+outlook-nextcloud-sync.service  oneshot mirror (ends each run)
+outlook-nextcloud-sync.timer    every 10 minutes, deferred on boot
+```
+
+Sources live in `.config/outlook-nextcloud-sync/` (`sync.py` plus committed
+`config.toml.example` / `credentials.toml.example`). Real configs and the
+systemd-encrypted Nextcloud password are git-ignored. Initialize with:
+
+```sh
+~/.dotfiles/scripts/setup-outlook-sync
+```
+
+The service uses `systemd-creds` (LoadCredentialEncrypted) for the Nextcloud
+password and runs hardened (`ProtectSystem=strict`, `PrivateTmp`,
+`NoNewPrivileges`, `UMask=0077`).
+
 ## Notes
 
 - `DEPENDENCIES.md` lists the package set and post-install commands.

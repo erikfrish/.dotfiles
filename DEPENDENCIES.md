@@ -235,6 +235,13 @@ scripts/packages.aur
 # Local speech-to-text server and shared OpenChamber dictation (Parakeet)
 # Run: ~/.dotfiles/scripts/setup-stt
 
+# Exchange -> Nextcloud calendar mirror (work busy time)
+# Run: ~/.dotfiles/scripts/setup-outlook-sync
+#
+# Requires `uv` (inlines caldav/exchangelib/icalendar at first run) and
+# systemd-creds (systemd >= 250) for the Nextcloud password. Real configs and
+# encrypted creds are git-ignored; copy the committed *.example files first.
+
 # AmneziaWG (NM plugin)
 # The NM plugin needs both the kernel module AND a correctly compiled service binary.
 # Run: sudo modprobe amneziawg
