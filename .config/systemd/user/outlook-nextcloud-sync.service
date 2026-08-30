@@ -1,0 +1,15 @@
+[Unit]
+Description=Mirror Exchange calendar details to Nextcloud Work
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/uv run --script %h/.config/outlook-nextcloud-sync/sync.py
+LoadCredentialEncrypted=nextcloud_password:%h/.config/outlook-nextcloud-sync/nextcloud_password.cred
+Environment=UV_NO_PROGRESS=1
+TimeoutStartSec=90
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
