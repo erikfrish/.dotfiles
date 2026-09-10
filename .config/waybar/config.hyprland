@@ -26,6 +26,7 @@
     "cpu",
     "temperature",
     "memory",
+    "custom/gpu",
     "custom/wakatime"
   ],
   "modules-center": [
@@ -212,6 +213,16 @@
     "on-click": "alacritty -e btop"
   },
 
+  "custom/gpu": {
+    "format": "{text}",
+    "return-type": "json",
+    "interval": 10,
+    "exec": "~/.config/waybar/scripts/gpu",
+    "on-click": "alacritty -e amdgpu_top",
+    "on-click-right": "~/.config/waybar/scripts/gpu --toggle",
+    "tooltip": true
+  },
+
   "custom/wakatime": {
     "format": "󱑎 {text}",
     "return-type": "json",
@@ -334,7 +345,8 @@
     "exec": "~/.config/desktop/scripts/vpn_status vpn1",
     "return-type": "json",
     "interval": 2,
-    "on-click": "~/.config/desktop/scripts/vpn_toggle vpn1"
+    "on-click": "~/.config/desktop/scripts/vpn_toggle vpn1",
+    "on-click-right": "~/.config/desktop/scripts/vpn_select vpn1"
   },
 
   "custom/vpn2": {
@@ -342,6 +354,7 @@
     "exec": "~/.config/desktop/scripts/vpn_status vpn2",
     "return-type": "json",
     "interval": 2,
-    "on-click": "~/.config/desktop/scripts/vpn_toggle vpn2"
+    "on-click": "~/.config/desktop/scripts/vpn_toggle vpn2",
+    "on-click-right": "~/.config/desktop/scripts/vpn_select vpn2"
   }
 }
