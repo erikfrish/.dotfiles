@@ -18,7 +18,8 @@
 # DOTFILES_ENABLE_BAND=1
 # DOTFILES_BAND_GLOB="$HOME/Applications/band-desktop-*.AppImage"
 
-# Waybar VPN modules. Leave connection empty to hide/inactivate a module.
+# Waybar VPN slots. These are defaults; right-click a slot to select any
+# NetworkManager VPN/WireGuard profile. The selection persists in XDG_STATE_HOME.
 # DOTFILES_VPN1_CONNECTION=vpnchik
 # DOTFILES_VPN1_LABEL="Личный VPN"
 # DOTFILES_VPN1_ICON=""

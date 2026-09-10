@@ -12,6 +12,8 @@ plugins=(vscode git golang history sudo)
 alias zshconfig="nvim ~/.zshrc"
 alias vi="nvim"
 alias path='echo "${PATH//:/$"\n"}"'
+# omp with OpenAI model roles overlay (default global roles = Chinese)
+alias omp-oa='omp --config ~/.omp/agent/roles-openai.yml'
 alias ttl='sudo sysctl -w net.inet.ip.ttl=65'
 
 alias docker_clean_images='docker rmi $(docker images -a --filter=dangling=true -q)'
@@ -57,6 +59,7 @@ export GOPATH="$HOME/go"
 export PATH="$GOPATH/bin/:$PATH"
 export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/.cargo/bin"
+export PATH="/home/erikfrish/.bun/bin:$PATH" 
 
 # Prompt
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

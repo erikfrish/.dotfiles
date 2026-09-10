@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+profile="${1:-}"
+
+case "$profile" in
+  64k)
+    context=65536
+    model_id=qwen3.8-27b-64k
+    fit_target=512
+    ;;
+  128k)
+    context=131072
+    model_id=qwen3.8-27b-128k
+    fit_target=768
+    ;;
+  262k)
+    context=262144
+    model_id=qwen3.8-27b-262k
+    fit_target=1024
+    ;;
+  stop)
+    systemctl --user stop llama-qwen38 2>/dev/null || true
+    exit 0
+    ;;
+  status)
+    systemctl --user status llama-qwen38 --no-pager
+    exit $?
+    ;;
+  *)
+    printf 'Usage: qwen38 {64k|128k|262k|stop|status}\n' >&2
+    exit 2
+    ;;
+esac
+
+systemctl --user stop llama-qwen38 2>/dev/null || true
+
+exec systemd-run --user \
+  --unit=llama-qwen38 \
+  --description="Qwen3.8 27B llama.cpp ROCm ${profile}" \
+  --property=Restart=on-failure \
+  --property=RestartSec=5 \
+  --setenv=HIP_VISIBLE_DEVICES=0 \
+  --setenv=ROCR_VISIBLE_DEVICES=0 \
+  --setenv=LD_LIBRARY_PATH=/opt/rocm/lib:/opt/rocm/lib64 \
+  /home/erikfrish/.local/src/llama.cpp-rocm/build/bin/llama-server \
+  --model /home/erikfrish/.cache/llama.cpp/Qwen3.8-27B-UD-Q4_K_S.gguf \
+  --ctx-size "$context" \
+  --parallel 1 \
+  --host 127.0.0.1 \
+  --port 7070 \
+  --device ROCm0 \
+  --n-gpu-layers auto \
+  --fit on \
+  --fit-target "$fit_target" \
+  --flash-attn on \
+  --cache-type-k q4_0 \
+  --cache-type-v q4_0 \
+  --threads 8 \
+  --threads-batch 16 \
+  --batch-size 2048 \
+  --ubatch-size 512 \
+  --cache-ram 2048 \
+  --no-mmproj \
+  --temp 1.0 \
+  --top-p 0.95 \
+  --top-k 20 \
+  --min-p 0.0 \
+  --reasoning-effort medium \
+  --alias "$model_id"

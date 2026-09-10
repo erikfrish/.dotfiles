@@ -186,6 +186,12 @@ generated_missing() {
         [[ -s "$file" ]] || return 0
     done
 
+    local waybar_theme_css="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/theme.css"
+    local import
+    while IFS= read -r import; do
+        [[ -f "$import" ]] || return 0
+    done < <(awk -F'"' '/^@import "/ { print $2 }' "$waybar_theme_css")
+
     return 1
 }
 

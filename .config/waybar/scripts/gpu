@@ -1,0 +1,62 @@
+#!/bin/bash
+
+state_file="${XDG_CACHE_HOME:-$HOME/.cache}/waybar/gpu-mode"
+mode=usage
+[[ -r "$state_file" ]] && mode="$(<"$state_file")"
+
+if [[ "${1:-}" == "--toggle" ]]; then
+  if [[ "$mode" == temperatures ]]; then
+    mode=usage
+  else
+    mode=temperatures
+  fi
+  mkdir -p "${state_file%/*}"
+  printf '%s\n' "$mode" > "$state_file"
+  exit 0
+fi
+
+gpu=
+total=0
+
+for total_path in /sys/class/drm/card*/device/mem_info_vram_total; do
+  [[ -r "$total_path" ]] || continue
+  candidate_total="$(<"$total_path")"
+  if (( candidate_total > total )); then
+    gpu="${total_path%/mem_info_vram_total}"
+    total="$candidate_total"
+  fi
+done
+
+[[ -n "$gpu" ]] || exit 0
+
+runtime_status="$(<"$gpu/power/runtime_status")"
+if [[ "$runtime_status" == suspended ]]; then
+  printf '{"text":"󰢮 sleep","tooltip":"GPU is runtime-suspended"}\n'
+  exit 0
+fi
+
+usage="$(<"$gpu/gpu_busy_percent")"
+used="$(<"$gpu/mem_info_vram_used")"
+memory_usage="$(<"$gpu/mem_busy_percent")"
+hwmon_paths=("$gpu"/hwmon/hwmon*)
+hwmon="${hwmon_paths[0]}"
+edge="$(<"$hwmon/temp1_input")"
+hotspot="$(<"$hwmon/temp2_input")"
+memory_temp="$(<"$hwmon/temp3_input")"
+power="$(<"$hwmon/power1_average")"
+power_cap="$(<"$hwmon/power1_cap")"
+core_clock="$(<"$hwmon/freq1_input")"
+memory_clock="$(<"$hwmon/freq2_input")"
+fan="$(<"$hwmon/fan1_input")"
+
+awk -v mode="$mode" -v usage="$usage" -v used="$used" -v total="$total" -v memory_usage="$memory_usage" -v edge="$edge" -v hotspot="$hotspot" -v memory_temp="$memory_temp" -v power="$power" -v power_cap="$power_cap" -v core_clock="$core_clock" -v memory_clock="$memory_clock" -v fan="$fan" '
+  BEGIN {
+    if (mode == "temperatures")
+      text = sprintf("󰢮 %d°C <span color='\''darkgray'\''>| %d°C</span>", edge / 1000, hotspot / 1000)
+    else
+      text = sprintf("󰢮 %d%% <span color='\''darkgray'\''>| %.1fG</span>", usage, used / 1073741824)
+
+    tooltip = sprintf("GPU: %d%%\\nVRAM: %.1f / %.1f GiB\\nMemory activity: %d%%\\nTemperature: %d°C\\nHotspot: %d°C\\nMemory temperature: %d°C\\nPower: %.0f / %.0f W\\nCore clock: %.0f MHz\\nMemory clock: %.0f MHz\\nFan: %d RPM", usage, used / 1073741824, total / 1073741824, memory_usage, edge / 1000, hotspot / 1000, memory_temp / 1000, power / 1000000, power_cap / 1000000, core_clock / 1000000, memory_clock / 1000000, fan)
+    printf "{\"text\":\"%s\",\"tooltip\":\"%s\"}\n", text, tooltip
+  }
+'

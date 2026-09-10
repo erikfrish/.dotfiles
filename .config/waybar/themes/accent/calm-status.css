@@ -3,6 +3,7 @@
 }
 
 #cpu,
+#custom-gpu,
 #temperature {
     color: @warm;
 }

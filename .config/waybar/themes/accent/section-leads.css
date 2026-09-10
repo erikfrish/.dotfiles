@@ -12,6 +12,7 @@
 }
 
 #cpu,
+#custom-gpu,
 #memory,
 #temperature {
     border-color: @warm;

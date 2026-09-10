@@ -9,11 +9,12 @@ spawn-at-startup "fcitx5" "-d"
 spawn-at-startup "nm-applet" "--indicator"
 spawn-at-startup "blueman-applet"
 
-// Authentication prompts for privileged actions such as fingerprint enrollment.
-spawn-sh-at-startup "pgrep -f /usr/lib/polkit-kde-authentication-agent-1 >/dev/null || /usr/lib/polkit-kde-authentication-agent-1"
-
 // User services shared by the desktop session.
 spawn-sh-at-startup "dbus-update-activation-environment --systemd SSH_AUTH_SOCK XDG_RUNTIME_DIR WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP"
+
+// Authentication prompts for privileged actions such as fingerprint enrollment.
+spawn-sh-at-startup "systemctl --user start plasma-polkit-agent.service"
+
 spawn-sh-at-startup "systemctl --user daemon-reload; systemctl --user start gammastep.service swaync.service arch-update-tray.service dotfiles-session.target"
 
 // OSD helper for layout/Caps Lock notifications.

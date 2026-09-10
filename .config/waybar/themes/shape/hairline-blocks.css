@@ -13,6 +13,7 @@ window#waybar > box {
 #clock,
 #battery,
 #cpu,
+#custom-gpu,
 #memory,
 #disk,
 #temperature,

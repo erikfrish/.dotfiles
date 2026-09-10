@@ -9,12 +9,10 @@ slot="${1:-vpn1}"
 
 case "$slot" in
   vpn1)
-    connection="${DOTFILES_VPN1_CONNECTION-vpnchik}"
     label="${DOTFILES_VPN1_LABEL:-Личный VPN}"
     icon="${DOTFILES_VPN1_ICON:-}"
     ;;
   vpn2)
-    connection="${DOTFILES_VPN2_CONNECTION-wb}"
     label="${DOTFILES_VPN2_LABEL:-Рабочий VPN}"
     icon="${DOTFILES_VPN2_ICON:-}"
     ;;
@@ -24,13 +22,15 @@ case "$slot" in
     ;;
 esac
 
+connection="$(dotfiles_vpn_connection "$slot")"
+
 if [ -z "$connection" ]; then
   printf '{"text":"","class":"inactive","tooltip":"%s: not configured"}\n' "$label"
   exit 0
 fi
 
-if nmcli connection show --active | grep -Fq "$connection"; then
-  printf '{"text":"%s","class":"active","tooltip":"%s: Включен"}\n' "$icon" "$label"
+if nmcli -g NAME connection show --active | grep -Fxq -- "$connection"; then
+  printf '{"text":"%s","class":"active","tooltip":"%s\\n%s: включен\\nЛКМ: выключить · ПКМ: выбрать"}\n' "$icon" "$label" "$connection"
 else
-  printf '{"text":"%s","class":"inactive","tooltip":"%s: Выключен"}\n' "$icon" "$label"
+  printf '{"text":"%s","class":"inactive","tooltip":"%s\\n%s: выключен\\nЛКМ: включить · ПКМ: выбрать"}\n' "$icon" "$label" "$connection"
 fi

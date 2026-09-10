@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
+[ -r "$lib_file" ] && . "$lib_file"
+type dotfiles_load_machine_config >/dev/null 2>&1 && dotfiles_load_machine_config
+
+slot="${1:-vpn1}"
+case "$slot" in
+  vpn1) label="${DOTFILES_VPN1_LABEL:-Личный VPN}" ;;
+  vpn2) label="${DOTFILES_VPN2_LABEL:-Рабочий VPN}" ;;
+  *) exit 0 ;;
+esac
+
+current="$(dotfiles_vpn_connection "$slot")"
+[ -n "$current" ] || exit 0
+
+mapfile -t connections < <(
+  nmcli -t -f NAME,TYPE connection show |
+    awk -F: '$NF == "vpn" || $NF == "wireguard" { sub(/:[^:]+$/, ""); print }' |
+    sort -u
+)
+((${#connections[@]})) || exit 0
+
+selected_row=0
+for i in "${!connections[@]}"; do
+  if [[ "${connections[$i]}" == "$current" ]]; then
+    selected_row="$i"
+    break
+  fi
+done
+
+choice="$(printf '%s\n' "${connections[@]}" | rofi -dmenu \
+  -i \
+  -no-custom \
+  -p "$label" \
+  -selected-row "$selected_row" \
+  -format s \
+  -sync)" || exit 0
+[[ -n "$choice" && "$choice" != "$current" ]] || exit 0
+
+state_file="$(dotfiles_vpn_state_file "$slot")"
+mkdir -p "${state_file%/*}"
+pending="${state_file}.new.$$"
+trap 'rm -f "$pending"' EXIT
+printf '%s\n' "$choice" > "$pending"
+
+if nmcli -g NAME connection show --active | grep -Fxq -- "$current"; then
+  amneziawg=0
+  if [[ "$(nmcli -g vpn.service-type connection show "$current" 2>/dev/null || true)" == "org.freedesktop.NetworkManager.amneziawg" ]]; then
+    amneziawg=1
+  fi
+
+  nmcli connection down "$current"
+
+  # The single-instance AmneziaWG plugin tears down asynchronously.
+  ((amneziawg)) && sleep 0.1
+
+  if ! nmcli connection up "$choice"; then
+    nmcli connection up "$current" || true
+    exit 1
+  fi
+fi
+
+mv "$pending" "$state_file"
+trap - EXIT

@@ -5,82 +5,237 @@
     "@slkiser/opencode-quota@latest",
     "@mohak34/opencode-notifier@0.2.8"
   ],
-
   "provider": {
     "google": {
       "models": {
         "antigravity-gemini-3-pro": {
           "name": "Gemini 3 Pro (Antigravity)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] },
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
           "variants": {
-            "low": { "thinkingLevel": "low" },
-            "high": { "thinkingLevel": "high" }
+            "low": {
+              "thinkingLevel": "low"
+            },
+            "high": {
+              "thinkingLevel": "high"
+            }
           }
         },
         "antigravity-gemini-3.1-pro": {
           "name": "Gemini 3.1 Pro (Antigravity)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] },
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
           "variants": {
-            "low": { "thinkingLevel": "low" },
-            "high": { "thinkingLevel": "high" }
+            "low": {
+              "thinkingLevel": "low"
+            },
+            "high": {
+              "thinkingLevel": "high"
+            }
           }
         },
         "antigravity-gemini-3-flash": {
           "name": "Gemini 3 Flash (Antigravity)",
-          "limit": { "context": 1048576, "output": 65536 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] },
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
           "variants": {
-            "minimal": { "thinkingLevel": "minimal" },
-            "low": { "thinkingLevel": "low" },
-            "medium": { "thinkingLevel": "medium" },
-            "high": { "thinkingLevel": "high" }
+            "minimal": {
+              "thinkingLevel": "minimal"
+            },
+            "low": {
+              "thinkingLevel": "low"
+            },
+            "medium": {
+              "thinkingLevel": "medium"
+            },
+            "high": {
+              "thinkingLevel": "high"
+            }
           }
         },
         "antigravity-claude-sonnet-4-6": {
           "name": "Claude Sonnet 4.6 (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "antigravity-claude-opus-4-6-thinking": {
           "name": "Claude Opus 4.6 Thinking (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] },
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
           "variants": {
-            "low": { "thinkingConfig": { "thinkingBudget": 8192 } },
-            "max": { "thinkingConfig": { "thinkingBudget": 32768 } }
+            "low": {
+              "thinkingConfig": {
+                "thinkingBudget": 8192
+              }
+            },
+            "max": {
+              "thinkingConfig": {
+                "thinkingBudget": 32768
+              }
+            }
           }
         },
         "gemini-2.5-flash": {
           "name": "Gemini 2.5 Flash (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65536 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "gemini-2.5-pro": {
           "name": "Gemini 2.5 Pro (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65536 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "gemini-3-flash-preview": {
           "name": "Gemini 3 Flash Preview (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65536 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "gemini-3-pro-preview": {
           "name": "Gemini 3 Pro Preview (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "gemini-3.1-pro-preview": {
           "name": "Gemini 3.1 Pro Preview (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "gemini-3.1-pro-preview-customtools": {
           "name": "Gemini 3.1 Pro Preview Custom Tools (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         }
       }
     },
@@ -88,69 +243,187 @@
       "name": "wb-core-tools",
       "npm": "@ai-sdk/openai-compatible",
       "options": {
+        "baseURL": "https://llm.wb.ru/api/v1",
         "apiKey": "{env:CORELLM_API_KEY}"
       },
       "models": {
+        "coder-medium": {
+          "name": "coder-medium (DeepSeek-v4-Flash)",
+          "reasoning": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "limit": {
+            "context": 256000,
+            "output": 16192
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "high"
+            }
+          }
+        },
+        "llm-medium": {
+          "name": "llm-medium (DeepSeek-v4-Flash)",
+          "reasoning": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "limit": {
+            "context": 256000,
+            "output": 16192
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "deepseek-flash": {
+          "name": "deepseek-flash (coder-medium alias)",
+          "reasoning": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "limit": {
+            "context": 256000,
+            "output": 16192
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "coder-mini": {
+          "name": "coder-mini (Qwen3.8-27B)",
+          "reasoning": true,
+          "interleaved": {
+            "field": "reasoning"
+          },
+          "limit": {
+            "context": 262144,
+            "output": 16192
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "llm-small": {
+          "name": "llm-small (Qwen3.8-27B)",
+          "limit": {
+            "context": 262144,
+            "output": 16192
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "coder": {
+          "name": "coder (Kimi-K2.7-Code, deprecated)",
+          "reasoning": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "limit": {
+            "context": 262144,
+            "output": 16192
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "low": {
+              "reasoning_effort": "low"
+            },
+            "medium": {
+              "reasoning_effort": "medium"
+            },
+            "high": {
+              "reasoning_effort": "high"
+            }
+          }
+        },
         "wb-coder": {
-          "name": "wb-coder (Kimi-K2.7-Code)",
+          "name": "wb-coder (Kimi-K2.7-Code, deprecated)",
           "reasoning": true,
-          "interleaved": { "field": "reasoning_content" },
-          "limit": { "context": 202752, "output": 16384 },
-          "modalities": { "input": ["text"], "output": ["text"] },
-          "provider": {
-            "api": "https://corellm.wb.ru/coder/v1"
+          "interleaved": {
+            "field": "reasoning_content"
           },
-          "options": {
-            "reasoning_effort": "low"
+          "limit": {
+            "context": 262144,
+            "output": 16192
           },
-          "variants": {
-            "low": { "reasoning_effort": "low" },
-            "medium": { "reasoning_effort": "medium" },
-            "high": { "reasoning_effort": "high" }
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
           }
         },
-        "glm-51": {
-          "name": "glm-51 (Kimi-K2.7-Code alias)",
-          "reasoning": true,
-          "interleaved": { "field": "reasoning_content" },
-          "limit": { "context": 202752, "output": 16384 },
-          "modalities": { "input": ["text"], "output": ["text"] },
-          "provider": {
-            "api": "https://corellm.wb.ru/coder/v1"
+        "reviewer": {
+          "name": "reviewer (Laguna-2.1)",
+          "limit": {
+            "context": 256000,
+            "output": 16384
           },
-          "variants": {
-            "low": { "reasoning_effort": "low" },
-            "medium": { "reasoning_effort": "medium" },
-            "high": { "reasoning_effort": "high" }
-          }
-        },
-        "berrylm-l": {
-          "name": "BerryLM-L (reviewer-a, deprecated)",
-          "reasoning": true,
-          "interleaved": { "field": "reasoning" },
-          "limit": { "context": 262144, "output": 16384 },
-          "modalities": { "input": ["text"], "output": ["text"] },
-          "provider": {
-            "api": "https://aimodels.wb.ru/reviewer-a/v1"
-          }
-        },
-        "berrylm-l-v2": {
-          "name": "BerryLM-L v2 (autocomplete, deprecated)",
-          "reasoning": true,
-          "interleaved": { "field": "reasoning" },
-          "limit": { "context": 262144, "output": 16384 },
-          "modalities": { "input": ["text"], "output": ["text"] },
-          "provider": {
-            "api": "https://aimodels.wb.ru/reviewer-b/v1"
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
           }
         }
       }
     },
     "llama.cpp": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "llama-server CUDA local",
+      "name": "llama-server ROCm local",
       "options": {
-        "baseURL": "http://compik.home:7070/v1"
+        "baseURL": "http://127.0.0.1:7070/v1"
       },
       "models": {
         "qwen3.6-35b-a3b": {
@@ -180,6 +453,54 @@
             "context": 162144,
             "output": 8192
           }
+        },
+        "qwen3.8-27b-64k": {
+          "name": "Qwen3.8 27B UD-Q4_K_S local (64K GPU)",
+          "reasoning": true,
+          "limit": {
+            "context": 65536,
+            "output": 8192
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "qwen3.8-27b-128k": {
+          "name": "Qwen3.8 27B UD-Q4_K_S local (128K balanced)",
+          "reasoning": true,
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "qwen3.8-27b-262k": {
+          "name": "Qwen3.8 27B UD-Q4_K_S local (262K max)",
+          "reasoning": true,
+          "limit": {
+            "context": 262144,
+            "output": 8192
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         }
       }
     },
@@ -202,15 +523,24 @@
       "models": {
         "glm-5.2": {
           "name": "GLM-5.2",
-          "limit": { "context": 1048576, "output": 307200 }
+          "limit": {
+            "context": 1048576,
+            "output": 307200
+          }
         },
         "glm-5-turbo": {
           "name": "GLM-5 Turbo",
-          "limit": { "context": 204800, "output": 131072 }
+          "limit": {
+            "context": 204800,
+            "output": 131072
+          }
         },
         "glm-auto": {
           "name": "GLM Auto",
-          "limit": { "context": 1048576, "output": 393216 }
+          "limit": {
+            "context": 1048576,
+            "output": 393216
+          }
         }
       }
     },
@@ -224,7 +554,222 @@
       "models": {
         "MiniMax-M3": {
           "name": "MiniMax-M3",
-          "limit": { "context": 1048576, "output": 32768 }
+          "limit": {
+            "context": 1048576,
+            "output": 32768
+          }
+        }
+      }
+    },
+    "commandcode": {
+      "name": "CommandCode Goat",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "https://api.commandcode.ai/provider/v1"
+      },
+      "models": {
+        "deepseek/deepseek-v4-flash": {
+          "name": "DeepSeek V4 Flash",
+          "reasoning": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "deepseek/deepseek-v4-pro": {
+          "name": "DeepSeek V4 Pro",
+          "reasoning": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "limit": {
+            "context": 1048576,
+            "output": 1048576
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "claude-sonnet-4-6": {
+          "name": "Claude Sonnet 4.6",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "claude-opus-5": {
+          "name": "Claude Opus 5",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gpt-5.6-luna": {
+          "name": "GPT-5.6 Luna",
+          "limit": {
+            "context": 1153433,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "google/gemini-3.7-flash": {
+          "name": "Gemini 3.7 Flash",
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "Qwen/Qwen3.8-Max": {
+          "name": "Qwen 3.8 Max",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "moonshotai/Kimi-K2.7-Code": {
+          "name": "Kimi K2.7 Code",
+          "limit": {
+            "context": 262144,
+            "output": 262144
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "zai-org/GLM-5.3": {
+          "name": "GLM 5.3",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        }
+      }
+    },
+    "tokenrouter": {
+      "name": "TokenRouter",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "https://api.tokenrouter.com/v1"
+      },
+      "models": {
+        "deepseek/deepseek-v4-flash": {
+          "name": "DeepSeek V4 Flash",
+          "reasoning": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          }
+        },
+        "moonshotai/kimi-k2.7-code": {
+          "name": "Kimi K2.7 Code",
+          "limit": {
+            "context": 262144,
+            "output": 262144
+          }
+        },
+        "qwen/qwen3.8-max": {
+          "name": "Qwen 3.8 Max",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          }
+        },
+        "z-ai/glm-5.3": {
+          "name": "GLM 5.3",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          }
+        },
+        "openai/gpt-5.6-luna": {
+          "name": "GPT-5.6 Luna",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          }
+        },
+        "anthropic/claude-sonnet-4.6": {
+          "name": "Claude Sonnet 4.6",
+          "limit": {
+            "context": 1048576,
+            "output": 131072
+          }
         }
       }
     },
@@ -236,6 +781,17 @@
     "external_directory": {
       "/tmp/**": "allow",
       "/tmp/*": "allow"
-		}
+    }
+  },
+  "mcp": {
+    "postgres": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://localhost:5432/postgres"
+      ]
+    }
   }
 }
