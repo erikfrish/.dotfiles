@@ -1,0 +1,22 @@
+#!/bin/bash
+# Быстрый замер t/s на длинном контексте.
+# Первый запрос греет кэш слота (медленно), последующие — мгновенно.
+# Usage: longbench.sh <prompt_file> [port] [model_alias]
+P=${1:?usage: longbench.sh <prompt_file> [port] [alias]}
+PORT=${2:-8080}; ALIAS=${3:-qwen3.8-27b}
+python3 - "$P" "$PORT" "$ALIAS" <<'PY'
+import json,sys,time,urllib.request
+p,port,alias=sys.argv[1],sys.argv[2],sys.argv[3]
+prompt=open(p).read()
+body=json.dumps({"model":alias,"messages":[{"role":"user","content":prompt}],
+  "max_tokens":64,"chat_template_kwargs":{"thinking":False}}).encode()
+for i in (1,2):
+    req=urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions",
+        data=body,headers={"Content-Type":"application/json"})
+    t=time.time(); d=json.load(urllib.request.urlopen(req,timeout=7200)); el=time.time()-t
+    u,tm=d["usage"],d.get("timings",{})
+    print(f"run{i}: {el:7.2f}s  prompt={u['prompt_tokens']:>7} "
+          f"cached={u['prompt_tokens_details'].get('cached_tokens','?'):>7}  "
+          f"prefill={tm.get('prompt_per_second',0):7.1f} t/s  "
+          f"decode={tm.get('predicted_per_second',0):6.1f} t/s")
+PY

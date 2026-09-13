@@ -32,3 +32,12 @@ ignore_me
 .config/opencode/package-lock.json
 __pycache__/
 *.pyc
+# Generated OpenCode extension state
+.config/opencode/opencode-notifier-state.json
+.config/opencode/opencode-quota/
+
+# Generated local tool shims and backups
+.local/bin/hf
+.local/bin/huggingface-cli
+.local/bin/tiny-agents
+.local/bin/qwen38.bak-*

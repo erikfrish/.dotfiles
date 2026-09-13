@@ -167,7 +167,7 @@
     "return-type": "json",
     "interval": 10,
     "exec": "~/.config/waybar/scripts/gpu",
-    "on-click": "alacritty -e amdgpu_top",
+    "on-click": "alacritty -e amdgpu_top --dark",
     "on-click-right": "~/.config/waybar/scripts/gpu --toggle",
     "tooltip": true
   },

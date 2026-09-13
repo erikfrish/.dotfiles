@@ -59,7 +59,8 @@ export GOPATH="$HOME/go"
 export PATH="$GOPATH/bin/:$PATH"
 export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/.cargo/bin"
-export PATH="/home/erikfrish/.bun/bin:$PATH" 
+export PATH="/home/erikfrish/.bun/bin:$PATH"
+export PATH="$HOME/.opencode/bin:$PATH"
 
 # Prompt
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

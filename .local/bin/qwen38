@@ -1,70 +1,133 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-profile="${1:-}"
+UNIT=llama-qwen38
+PORT=7070
+D=/home/erikfrish/.cache/llama.cpp
+BIN=/home/erikfrish/.local/src/llama.cpp-rocm/build/bin/llama-server
+MTP_DRAFT=$D/mtp-Qwen3.8-27B-Q4_0.gguf
 
-case "$profile" in
-  64k)
-    context=65536
-    model_id=qwen3.8-27b-64k
-    fit_target=512
-    ;;
-  128k)
-    context=131072
-    model_id=qwen3.8-27b-128k
-    fit_target=768
-    ;;
-  262k)
-    context=262144
-    model_id=qwen3.8-27b-262k
-    fit_target=1024
-    ;;
-  stop)
-    systemctl --user stop llama-qwen38 2>/dev/null || true
+Q4_K_S=Qwen3.8-27B-UD-Q4_K_S.gguf
+IQ3_XXS=Qwen3.8-27B-UD-IQ3_XXS.gguf
+IQ2_S=Qwen3.8-27B-UD-IQ2_S.gguf
+
+usage() {
+  cat >&2 <<EOF
+Usage: qwen38 {64k|128k|262k|iq3-180k|iq2-64k|iq2-128k|iq2-190k|iq2-262k|list|stop|status}
+
+  MTP (спекулятивное декодирование) включён там, где он влезает в VRAM:
+  на IQ2_S до ~200k. На Q4_K_S и IQ3_XXS draft-контекст не помещается,
+  и --fit начинает вытеснять слои на CPU (падает до 3-10 t/s).
+
+  Замеры на RX 9070 XT (короткий контекст):
+    64k        Q4_K_S    27.6 t/s
+    128k       Q4_K_S    15.3 t/s   (частичный offload)
+    262k       Q4_K_S     9.0 t/s   (сильный offload)
+    iq3-180k   IQ3_XXS   30.5 t/s
+    iq2-64k    IQ2_S     48.2 t/s   + MTP
+    iq2-128k   IQ2_S     52.5 t/s   + MTP
+    iq2-190k   IQ2_S     51.8 t/s   + MTP   (проверен recall на 190k)
+    iq2-262k   IQ2_S     32.5 t/s
+EOF
+}
+
+case "${1:-}" in
+  64k)       model=$Q4_K_S;  context=65536;  mtp=no;  fit_target=512  ;;
+  128k)      model=$Q4_K_S;  context=131072; mtp=no;  fit_target=768  ;;
+  262k)      model=$Q4_K_S;  context=262144; mtp=no;  fit_target=1024 ;;
+  iq3-180k)  model=$IQ3_XXS; context=180000; mtp=no;  fit_target=512  ;;
+  iq2-64k)   model=$IQ2_S;   context=65536;  mtp=yes; fit_target=512  ;;
+  iq2-128k)  model=$IQ2_S;   context=131072; mtp=yes; fit_target=512  ;;
+  iq2-190k)  model=$IQ2_S;   context=190000; mtp=yes; fit_target=512  ;;
+  iq2-262k)  model=$IQ2_S;   context=262144; mtp=no;  fit_target=512  ;;
+
+  list)
+    usage
     exit 0
     ;;
+
+  stop)
+    if systemctl --user is-active --quiet "$UNIT"; then
+      systemctl --user stop "$UNIT"
+      echo "stopped $UNIT"
+    else
+      echo "$UNIT is not running"
+      # чужой llama-server на нашем порту держит VRAM и не виден в systemd
+      if ss -ltn 2>/dev/null | grep -q ":$PORT "; then
+        echo "WARNING: порт $PORT занят процессом вне systemd:" >&2
+        ss -ltnp 2>/dev/null | grep ":$PORT " >&2 || true
+      fi
+    fi
+    exit 0
+    ;;
+
   status)
-    systemctl --user status llama-qwen38 --no-pager
-    exit $?
+    if systemctl --user is-active --quiet "$UNIT"; then
+      systemctl --user status "$UNIT" --no-pager
+    else
+      echo "$UNIT is not running"
+      ss -ltnp 2>/dev/null | grep ":$PORT " || echo "порт $PORT свободен"
+    fi
+    exit 0
     ;;
-  *)
-    printf 'Usage: qwen38 {64k|128k|262k|stop|status}\n' >&2
-    exit 2
-    ;;
+
+  ""|-h|--help) usage; exit 2 ;;
+
+  *) usage; exit 2 ;;
 esac
 
-systemctl --user stop llama-qwen38 2>/dev/null || true
+# --- остановка предыдущего экземпляра -------------------------------------
+if systemctl --user is-active --quiet "$UNIT"; then
+  systemctl --user stop "$UNIT"
+  echo "остановлен предыдущий $UNIT"
+fi
 
+# чужой процесс на порту -> предупреждаем, а не молча падаем позже
+if ss -ltn 2>/dev/null | grep -q ":$PORT "; then
+  echo "WARNING: порт $PORT уже занят, запуск скорее всего упадёт:" >&2
+  ss -ltnp 2>/dev/null | grep ":$PORT " >&2 || true
+fi
+
+# --- сборка аргументов ----------------------------------------------------
+args=(
+  --model "$D/$model"
+  --ctx-size "$context"
+  --parallel 1
+  --host 127.0.0.1
+  --port "$PORT"
+  --device ROCm0
+  --n-gpu-layers auto
+  --fit on
+  --fit-target "$fit_target"
+  --flash-attn on
+  --cache-type-k q4_0
+  --cache-type-v q4_0
+  --threads 8
+  --threads-batch 16
+  --batch-size 2048
+  --ubatch-size 512
+  --cache-ram 2048
+  --no-mmproj
+  --temp 1.0
+  --top-p 0.95
+  --top-k 20
+  --min-p 0.0
+  --reasoning-effort medium
+  --alias "qwen3.8-27b-${1}"
+)
+
+if [ "$mtp" = yes ]; then
+  [ -f "$MTP_DRAFT" ] || { echo "нет draft-модели: $MTP_DRAFT" >&2; exit 1; }
+  args+=(--spec-draft-model "$MTP_DRAFT" --n-gpu-layers-draft 99)
+fi
+
+echo "запуск qwen38 $1: $(basename "$model") ctx=$context mtp=$mtp"
 exec systemd-run --user \
-  --unit=llama-qwen38 \
-  --description="Qwen3.8 27B llama.cpp ROCm ${profile}" \
+  --unit="$UNIT" \
+  --description="Qwen3.8 27B llama.cpp ROCm ${1}" \
   --property=Restart=on-failure \
   --property=RestartSec=5 \
   --setenv=HIP_VISIBLE_DEVICES=0 \
   --setenv=ROCR_VISIBLE_DEVICES=0 \
   --setenv=LD_LIBRARY_PATH=/opt/rocm/lib:/opt/rocm/lib64 \
-  /home/erikfrish/.local/src/llama.cpp-rocm/build/bin/llama-server \
-  --model /home/erikfrish/.cache/llama.cpp/Qwen3.8-27B-UD-Q4_K_S.gguf \
-  --ctx-size "$context" \
-  --parallel 1 \
-  --host 127.0.0.1 \
-  --port 7070 \
-  --device ROCm0 \
-  --n-gpu-layers auto \
-  --fit on \
-  --fit-target "$fit_target" \
-  --flash-attn on \
-  --cache-type-k q4_0 \
-  --cache-type-v q4_0 \
-  --threads 8 \
-  --threads-batch 16 \
-  --batch-size 2048 \
-  --ubatch-size 512 \
-  --cache-ram 2048 \
-  --no-mmproj \
-  --temp 1.0 \
-  --top-p 0.95 \
-  --top-k 20 \
-  --min-p 0.0 \
-  --reasoning-effort medium \
-  --alias "$model_id"
+  "$BIN" "${args[@]}"
