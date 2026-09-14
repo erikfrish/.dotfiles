@@ -28,10 +28,12 @@
   ],
   "modules-center": [
     "clock",
-    "custom/notification"
+    "custom/notification",
+    "custom/media"
   ],
   "modules-right": [
     "tray",
+    "network",
     "custom/vpn1",
     "custom/vpn2",
     "custom/gammastep",
@@ -92,9 +94,10 @@
   "clock": {
     "format": " {:%H:%M   %F, %a}",
     "format-alt": " {:%H:%M}",
-    "format-alt-click": "click-right",
+    "format-alt-click": "click-middle",
     "locale": "en_US.UTF-8",
     "on-click": "swaync-client -t -sw",
+    "on-click-right": "~/.config/desktop/scripts/quickshell-panel calendar",
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
     "calendar": {
       "mode": "year",
@@ -214,7 +217,8 @@
     "interval": 5,
     "return-type": "json",
     "on-click": "~/.config/desktop/scripts/brightness --cycle",
-    "on-click-right": "~/.config/desktop/scripts/brightness --set 1",
+    "on-click-middle": "~/.config/desktop/scripts/brightness --set 1",
+    "on-click-right": "~/.config/desktop/scripts/quickshell-panel display",
     "on-scroll-up": "~/.config/desktop/scripts/brightness --inc",
     "on-scroll-down": "~/.config/desktop/scripts/brightness --dec",
     "smooth-scrolling-threshold": 1,
@@ -227,7 +231,7 @@
     "interval": "once",
     "signal": 8,
     "on-click": "~/.config/desktop/scripts/volume --toggle",
-    "on-click-right": "pavucontrol",
+    "on-click-right": "~/.config/desktop/scripts/quickshell-panel audio",
     "on-scroll-up": "~/.config/desktop/scripts/volume --inc",
     "on-scroll-down": "~/.config/desktop/scripts/volume --dec",
     "smooth-scrolling-threshold": 1
@@ -238,7 +242,7 @@
     "format-source": " {volume} %",
     "format-source-muted": " muted",
     "on-click": "~/.config/desktop/scripts/volume --toggle-mic",
-    "on-click-right": "pavucontrol",
+    "on-click-right": "~/.config/desktop/scripts/audio-panel",
     "on-scroll-up": "~/.config/desktop/scripts/volume --mic-inc",
     "on-scroll-down": "~/.config/desktop/scripts/volume --mic-dec",
     "scroll-step": 5
@@ -253,7 +257,7 @@
       "warning": 30,
       "critical": 15
     },
-    "format": "{icon}  {capacity}%",
+    "on-click": "~/.config/desktop/scripts/quickshell-panel power",
     "format-charging": "󰂄 {capacity}%",
     "format-plugged": " {capacity}%",
     "format-full": "{icon} Full",
@@ -286,7 +290,8 @@
   "custom/power": {
     "format": "<span rise='3072'>󰐥</span>",
     "tooltip": false,
-    "on-click": "sh -c '(sleep 0.1s; ~/.config/desktop/scripts/power_menu)' & disown"
+    "on-click": "~/.config/desktop/scripts/quickshell-panel power",
+    "on-click-right": "~/.config/desktop/scripts/power_menu"
   },
 
   // ---------------------------------------------------------------------------
@@ -297,6 +302,28 @@
     "spacing": 6
   },
 
+  "network": {
+    "interval": 1,
+    "format-wifi": " {essid}",
+    "format-ethernet": "󰈀 eth",
+    "format-disconnected": "󰖪",
+    "tooltip-format-wifi": "{essid}\n{ifname}: {ipaddr}/{cidr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}",
+    "tooltip-format-ethernet": "{ifname}: {ipaddr}/{cidr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}",
+    "tooltip-format-disconnected": "Disconnected",
+    "on-click": "~/.config/desktop/scripts/quickshell-panel network"
+  },
+
+
+  "custom/media": {
+    "exec": "~/.config/desktop/scripts/media_status",
+    "return-type": "json",
+    "interval": 3,
+    "on-click": "~/.config/desktop/scripts/quickshell-panel media",
+    "on-click-middle": "playerctl play-pause",
+    "on-click-right": "~/.config/desktop/scripts/quickshell-panel media",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous"
+  },
   "custom/vpn1": {
     "format": "{}",
     "exec": "~/.config/desktop/scripts/vpn_status vpn1",

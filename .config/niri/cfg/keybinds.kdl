@@ -165,6 +165,14 @@ binds {
     Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-window-to-workspace-down; }
     Mod+Ctrl+WheelScrollUp cooldown-ms=150 { move-window-to-workspace-up; }
 
+    // Quickshell control panels.
+    Mod+Ctrl+A { spawn-sh "~/.config/desktop/scripts/quickshell-panel audio"; }
+    Mod+Ctrl+W { spawn-sh "~/.config/desktop/scripts/quickshell-panel network"; }
+    Mod+Ctrl+P { spawn-sh "~/.config/desktop/scripts/quickshell-panel power"; }
+    Mod+Ctrl+Shift+D { spawn-sh "~/.config/desktop/scripts/quickshell-panel display"; }
+    Mod+Ctrl+Alt+D { spawn-sh "~/.config/desktop/scripts/quickshell-panel calendar"; }
+    Mod+Ctrl+Shift+M { spawn-sh "~/.config/desktop/scripts/quickshell-panel media"; }
+
     // -------------------------------------------------------------------------
     // Screenshots And Session
     // -------------------------------------------------------------------------

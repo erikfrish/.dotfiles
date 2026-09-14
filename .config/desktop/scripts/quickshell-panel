@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+panel="${1:-}"
+case "$panel" in
+  audio|network|power|display|media|calendar) ;;
+  *) exit 2 ;;
+esac
+
+config="$HOME/.config/quickshell/${panel}-panel.qml"
+runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+pid_file="$runtime_dir/dotfiles-${panel}-panel.pid"
+lock_file="$runtime_dir/dotfiles-${panel}-panel.lock"
+
+command -v quickshell >/dev/null 2>&1 || {
+  notify-send "${panel^} panel" "Quickshell is not installed" 2>/dev/null || true
+  exit 1
+}
+
+exec 9>"$lock_file"
+flock -n 9 || exit 0
+
+if [[ -r "$pid_file" ]]; then
+  read -r pid < "$pid_file" || pid=""
+  if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null; then
+    kill "$pid" 2>/dev/null || true
+    rm -f "$pid_file"
+    exit 0
+  fi
+  rm -f "$pid_file"
+fi
+
+exec 9>&-
+setsid quickshell --no-duplicate --path "$config" </dev/null >/dev/null 2>&1 &
+printf '%s\n' "$!" > "$pid_file"

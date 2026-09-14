@@ -12,7 +12,7 @@ have() {
 }
 
 refresh_waybar() {
-  pkill -RTMIN+8 waybar 2>/dev/null || true
+  pkill --signal RTMIN+8 waybar 2>/dev/null || true
 }
 
 wob_fifo() {

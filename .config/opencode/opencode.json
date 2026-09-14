@@ -795,12 +795,56 @@
     }
   },
   "mcp": {
-    "pg": {
-      "type": "local",
-      "command": [
-        "python3",
-        "/home/erikfrish/.agents/mcp/pg/pg-mcp.py"
-      ]
+    "servers": {
+      "pg": {
+        "type": "local",
+        "command": [
+          "python3",
+          "/home/erikfrish/.agents/mcp/pg/pg-mcp.py"
+        ]
+      },
+      "redis": {
+        "type": "local",
+        "command": [
+          "python3",
+          "/home/erikfrish/.agents/mcp/redis/redis-mcp.py"
+        ]
+      },
+      "clickhouse": {
+        "type": "local",
+        "command": [
+          "python3",
+          "/home/erikfrish/.agents/mcp/clickhouse/clickhouse-mcp.py"
+        ]
+      },
+      "youtrack": {
+        "type": "local",
+        "command": [
+          "python3",
+          "/home/erikfrish/.agents/mcp/youtrack/youtrack-mcp.py"
+        ]
+      },
+      "gitlab": {
+        "type": "local",
+        "command": [
+          "python3",
+          "/home/erikfrish/.agents/mcp/gitlab/gitlab-mcp.py"
+        ]
+      },
+      "kafka": {
+        "type": "local",
+        "command": [
+          "python3",
+          "/home/erikfrish/.agents/mcp/kafka/kafka-mcp.py"
+        ]
+      },
+      "gmail": {
+        "type": "local",
+        "command": [
+          "python3",
+          "/home/erikfrish/.agents/mcp/gmail/gmail-mcp.py"
+        ]
+      }
     }
   }
 }

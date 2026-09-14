@@ -17,10 +17,13 @@ wireplumber
 pipewire-alsa
 pipewire-pulse
 pavucontrol
+quickshell
 pamixer
 brightnessctl
 ddcutil
 wob
+upower
+power-profiles-daemon
 swayosd
 swaync
 libnotify

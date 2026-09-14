@@ -8,8 +8,8 @@ The setup is intentionally boring in the places that should be reliable: one com
 
 - **Compositor:** Niri, split into small `cfg/*.kdl` files.
 - **Bar:** Waybar with Niri workspaces, VPN state, Wakatime, audio, brightness, battery, language, and notification state.
+- **Popups:** Quickshell panels for audio, network/VPN, power, display, media, and calendar.
 - **Launcher:** Rofi for apps, clipboard, wallpapers, and theme selection.
-- **Notifications:** swaync with compact controls, MPRIS, and click-to-focus for source apps through Niri IPC.
 - **Locking:** hyprlock with PAM fingerprint support and password fallback.
 - **Idle:** swayidle, calling `hyprlock` and Niri monitor power actions.
 - **Display manager:** ly on `tty1`.
@@ -18,9 +18,11 @@ The setup is intentionally boring in the places that should be reliable: one com
 
 ## Layout
 
-```text
+```
 .config/niri/          Niri session, outputs, input, rules, keybinds, autostart
 .config/waybar/        Bar config, active theme layers, Wakatime/status scripts
+.config/quickshell/   Native Wayland panels for audio, network, power,
+                      display, media, and calendar.
 .config/themes/        Unified theme presets and generator
 .config/rofi/          Launcher, clipboard, wallpaper, and theme menus
 .config/swaync/        Notification center config, CSS template, focus helper

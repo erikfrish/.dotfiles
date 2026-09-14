@@ -55,7 +55,7 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `pipewire` | Audio server |
 | `wireplumber` | PipeWire session manager |
 | `pipewire-pulse` | PulseAudio compatibility |
-| `pavucontrol` | Volume mixer (floating window rule) |
+| `quickshell` | Native Wayland audio popup with output, input, and per-application controls |
 | `wpctl` | WirePlumber CLI (part of `wireplumber`) |
 | `pactl` | PulseAudio CLI (part of `libpulse`) |
 | `uv` | Creates the Python venv for the local STT server |
@@ -85,6 +85,13 @@ systemctl --user disable --now stt-server.service
 | `ddcci-driver-linux-dkms` | Kernel driver for DDC/CI as `/sys/class/backlight/ddcci*` |
 | `wob` | Volume/brightness overlay bar |
 | `swayosd` | Layout/CapsLock/volume OSD |
+
+## Power & Session
+
+| Package | Purpose |
+|---|---|
+| `upower` | Battery and power-source data for the Quickshell power panel |
+| `power-profiles-daemon` | Performance, balanced, and power-saver profiles |
 
 ## Notifications
 

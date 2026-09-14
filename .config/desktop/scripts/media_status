@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+metadata=$(playerctl metadata --format '{{status}}\t{{artist}} - {{title}}' 2>/dev/null || true)
+status=${metadata%%$'\t'*}
+label=${metadata#*$'\t'}
+
+if [[ -z "$metadata" || "$status" == "$metadata" ]]; then
+  printf '{"text":"","class":"inactive","tooltip":"No active media player"}\n'
+  exit 0
+fi
+
+case "$status" in
+  Playing) icon="" ;;
+  Paused) icon="" ;;
+  *) printf '{"text":"","class":"inactive","tooltip":"No active media player"}\n'; exit 0 ;;
+esac
+
+printf '{"text":"%s","class":"%s","tooltip":"%s"}\n' "$icon" "$status" "${label:-$status}"
