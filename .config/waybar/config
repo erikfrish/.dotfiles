@@ -242,7 +242,7 @@
     "format-source": " {volume} %",
     "format-source-muted": " muted",
     "on-click": "~/.config/desktop/scripts/volume --toggle-mic",
-    "on-click-right": "~/.config/desktop/scripts/audio-panel",
+    "on-click-right": "pavucontrol",
     "on-scroll-up": "~/.config/desktop/scripts/volume --mic-inc",
     "on-scroll-down": "~/.config/desktop/scripts/volume --mic-dec",
     "scroll-step": 5
@@ -258,8 +258,9 @@
       "critical": 15
     },
     "on-click": "~/.config/desktop/scripts/quickshell-panel power",
-    "format-charging": "󰂄 {capacity}%",
-    "format-plugged": " {capacity}%",
+    "format": "{icon} {capacity}%",
+    "format-charging": "{icon} {capacity}%",
+    "format-plugged": "{icon} {capacity}%",
     "format-full": "{icon} Full",
     "format-alt": "{icon} {time}",
     "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
@@ -290,8 +291,8 @@
   "custom/power": {
     "format": "<span rise='3072'>󰐥</span>",
     "tooltip": false,
-    "on-click": "~/.config/desktop/scripts/quickshell-panel power",
-    "on-click-right": "~/.config/desktop/scripts/power_menu"
+    "on-click": "~/.config/desktop/scripts/power_menu",
+    "on-click-right": "~/.config/desktop/scripts/quickshell-panel power"
   },
 
   // ---------------------------------------------------------------------------
