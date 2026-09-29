@@ -1,0 +1,3 @@
+# Turn displays off after idle and lock later; never suspend automatically.
+timeout 330 '/usr/sbin/niri msg action power-off-monitors' resume '/usr/sbin/niri msg action power-on-monitors'
+timeout 1800 'pidof hyprlock || /usr/sbin/hyprlock'
