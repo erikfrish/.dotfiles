@@ -262,6 +262,8 @@ Brightness uses backlight first and DDC/CI fallback for external monitors:
 ~/.config/desktop/scripts/brightness --cycle
 ```
 
+The backlight path requires the `ddcci` DKMS module built for the running kernel and bound to the monitor's current I2C bus. `scripts/setup-ddcci` reads `DOTFILES_DDCCI_BUS` from `~/.config/dotfiles/machine.conf`; use `ddcutil detect --brief` if bus numbering changes. Without `/sys/class/backlight/ddcci*`, brightness falls back to `ddcutil`, which can take several seconds per VCP query. After a kernel update, verify `dkms status` includes `uname -r`. The installed ddcci 0.4.5 source needs `<linux/string.h>` and `strncpy(..., PAGE_SIZE)` replaced with `strscpy(...)` in its five attribute readers to build against Linux 7.2.
+
 Both scripts write to `/tmp/niri.wob` for the on-screen value display.
 
 ## Wallpaper
