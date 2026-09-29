@@ -118,7 +118,11 @@ args=(
 
 if [ "$mtp" = yes ]; then
   [ -f "$MTP_DRAFT" ] || { echo "нет draft-модели: $MTP_DRAFT" >&2; exit 1; }
-  args+=(--spec-draft-model "$MTP_DRAFT" --n-gpu-layers-draft 99)
+  # -ctkd/-ctvd q4_0: замерено +0.5 t/s на всех профилях (65536/131072/190000).
+  # draft-n-max оставлен дефолтным (3): окна 2/5/7/11 на 64k..196k дают хуже
+  # (56-65 t/s против 62.8), acceptance падает с 67% до 55% при росте окна.
+  args+=(--spec-draft-model "$MTP_DRAFT" --n-gpu-layers-draft 99
+         -ctkd q4_0 -ctvd q4_0)
 fi
 
 echo "запуск qwen38 $1: $(basename "$model") ctx=$context mtp=$mtp"
