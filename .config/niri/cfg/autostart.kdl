@@ -10,7 +10,7 @@ spawn-at-startup "nm-applet" "--indicator"
 spawn-at-startup "blueman-applet"
 
 // User services shared by the desktop session.
-spawn-sh-at-startup "dbus-update-activation-environment --systemd SSH_AUTH_SOCK XDG_RUNTIME_DIR WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP"
+spawn-sh-at-startup "dbus-update-activation-environment --systemd SSH_AUTH_SOCK XDG_RUNTIME_DIR WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP GTK_THEME QT_QPA_PLATFORMTHEME"
 
 // Authentication prompts for privileged actions such as fingerprint enrollment.
 spawn-sh-at-startup "systemctl --user start plasma-polkit-agent.service"
