@@ -1,9 +1,11 @@
 niri
+hyprland
 xwayland-satellite
 xorg-xwayland
 waybar
 polkit-kde-agent
 xdg-desktop-portal-gtk
+xdg-desktop-portal-hyprland
 uwsm
 ly
 hyprlock
@@ -52,6 +54,7 @@ playerctl
 zsh
 alacritty
 jq
+socat
 gsimplecal
 btop
 paru

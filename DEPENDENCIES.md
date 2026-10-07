@@ -7,6 +7,8 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | Package | Purpose |
 |---|---|
 | `niri` | Scrollable-tiling Wayland compositor |
+| `hyprland` | Alternative Wayland compositor; 0.55+ Lua config API |
+| `uwsm` | Managed graphical-session lifecycle for Hyprland |
 
 ## Core Wayland
 
@@ -16,6 +18,8 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `waybar` | Status bar |
 | `polkit-kde-agent` | Authentication dialog (`/usr/lib/polkit-kde-authentication-agent-1`) |
 | `xdg-desktop-portal-gtk` | File picker portal (Niri fallback) |
+| `xdg-desktop-portal-hyprland` | Hyprland screen capture and portal backend |
+| `socat` | Hyprland IPC layout-event stream for language OSD |
 | `dbus-update-activation-environment` | DBus env sync (part of `dbus`) |
 | `stow` | Dotfile symlink management |
 | `shellcheck` | Optional script lint used by `scripts/doctor` |
@@ -29,7 +33,7 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `qt6ct` | Qt6 palette/config loader for generated theme files |
 | `breeze` | KDE/Qt6 widget style and icons used by KDE Frameworks apps, including Dolphin |
 
-`scripts/test` runs portable checks in a temporary home: Bash syntax, Niri validation, Stow simulation, theme generation, and local override behavior.
+`scripts/test` runs Bash syntax checks, Niri and Hyprland config validation when installed, and temporary-home checks for Stow, theme generation, and local override behavior.
 
 ## Display Manager & Lock
 
@@ -204,6 +208,7 @@ systemctl --user disable --now stt-server.service
 
 The custom layout lives in `~/.config/xkb/symbols/dotfiles` and is activated by:
 - **Niri**: `layout "us,dotfiles"` + `variant ",ru_ctrl_shortcuts"` + `options "grp:alt_shift_toggle"` in `cfg/input.kdl`
+- **Hyprland**: the matching `input.kb_layout`, `kb_variant`, and `kb_options` settings in `hyprland.lua`
 
 ## Install Everything (Arch/CachyOS)
 

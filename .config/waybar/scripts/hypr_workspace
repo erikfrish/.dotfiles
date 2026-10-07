@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+id="${1:?workspace id required}"
+active_id="$(hyprctl -j activeworkspace 2>/dev/null | jq -r '.id // 0')"
+
+class="inactive"
+if [ "$active_id" = "$id" ]; then
+    class="active"
+fi
+
+jq -cn --arg text "$id" --arg class "$class" --arg tooltip "Workspace $id" '{text: $text, class: $class, tooltip: $tooltip}'

@@ -1,17 +1,17 @@
 # Dotfiles
 
-Personal Linux desktop configuration built around Niri, Waybar, Rofi, swaync, hyprlock, ly, systemd user services, and a small set of shell scripts. The repository is managed with GNU Stow and keeps generated files out of Git, so the checked-in files remain the source of truth.
+Personal Linux desktop configuration for Niri and Hyprland, with Waybar, Rofi, swaync, hyprlock, ly, systemd user services, and shared shell scripts. Both compositors live on `main`; select the session at login, not by switching Git branches. GNU Stow manages the files, with generated files kept out of Git.
 
-The setup is intentionally boring in the places that should be reliable: one compositor, one launcher stack, one theme switcher, one volume path, one wallpaper path.
+Both sessions share one launcher stack, one theme switcher, one volume path, one wallpaper path, and the same session services.
 
 ## Desktop
 
-- **Compositor:** Niri, split into small `cfg/*.kdl` files.
-- **Bar:** Waybar with Niri workspaces, VPN state, Wakatime, audio, brightness, battery, language, and notification state.
-- **Popups:** Quickshell panels for audio, network/VPN, power, display, media, and calendar.
+- **Compositors:** Niri in `cfg/*.kdl`, or Hyprland 0.55+ in `hyprland.lua`.
+- **Bar:** Waybar selects the compositor's workspace config automatically, with shared VPN, Wakatime, audio, brightness, battery, language, and notification modules.
+- **Popups:** Niri uses Quickshell panels; Hyprland keeps native menu, pavucontrol, and wlogout actions.
 - **Launcher:** Rofi for apps, clipboard, wallpapers, and theme selection.
 - **Locking:** hyprlock with PAM fingerprint support and password fallback.
-- **Idle:** swayidle, calling `hyprlock` and Niri monitor power actions.
+- **Idle:** swayidle, calling `hyprlock` and the current compositor's monitor power actions.
 - **Display manager:** ly on `tty1`.
 - **Wallpaper:** `awww` for images and `mpvpaper` for videos.
 - **Themes:** one preset system applies Waybar, Rofi, GTK/libadwaita, Qt/KDE, swaync, hyprlock, and wlogout together.
@@ -28,7 +28,7 @@ The setup is intentionally boring in the places that should be reliable: one com
 .config/swaync/        Notification center config, CSS template, focus helper
 .config/desktop/       Shared scripts for menu, volume, brightness, wallpaper
 .config/dotfiles/      Shared helper library and machine-local profile example
-.config/hypr/          hyprlock only; Hyprland compositor configs are removed
+.config/hypr/          Hyprland Lua session, app autostart, shared hyprlock config
 .config/ly/            TTY display manager config and deploy helper
 .config/systemd/user/  Session services started by dotfiles-session.target
 .config/xkb/           Custom Russian shortcut-friendly XKB layout
@@ -154,6 +154,22 @@ niri msg action load-config-file
 
 The laptop panel is fixed at `3072x1920@120.000` with VRR disabled for stable frame pacing. External DP output can keep VRR in `display.kdl`.
 
+## Hyprland
+
+The settings from the former `hypr` branch live in `.config/hypr/hyprland.lua` on `main`, without reverting current Niri settings, shared services, themes, or Herdr integration. The disabled hyprexpo experiment is not included.
+
+Select **Hyprland (uwsm-managed)** in ly so `graphical-session.target` owns the session lifecycle. The startup hook imports the Wayland environment, finalizes UWSM, and starts the same `dotfiles-session.target`, Gammastep, and swaync as Niri.
+
+```sh
+Hyprland --verify-config --config ~/.config/hypr/hyprland.lua
+hyprctl configerrors
+hyprctl monitors
+```
+
+Waybar selects `.config/waybar/config.hyprland` when `XDG_CURRENT_DESKTOP` contains `Hyprland`; Niri keeps its existing generated/theme config. Hyprland workspace buttons use the Lua dispatch API. Language OSD, notification-source focus, power-menu layout restoration, and idle DPMS actions select the current compositor too.
+
+The former branch's complete history is retained under the `archive/hypr` tag; `main` is the only working branch.
+
 ## Themes
 
 Themes are flat presets in `.config/themes/*.conf`. Applying a theme generates runtime files for the rest of the desktop. Each preset has `theme_mode=dark` or `theme_mode=light`; this drives GTK/libadwaita `color-scheme`, shell exports, and portal-aware apps such as browsers.
@@ -229,10 +245,10 @@ The Waybar wallpaper button is the main theme entrypoint:
 
 The XKB layout is `us,dotfiles` with the `,ru_ctrl_shortcuts` variant. Russian typing stays normal, but common `Ctrl` and `Ctrl+Shift` shortcuts resolve to the matching Latin physical keys.
 
-Niri uses both layers:
+Both compositors use the same layouts:
 
-- `Alt+Shift` switches layout at XKB level for XWayland apps.
-- `Mod+Space` calls Niri `switch-layout` for Wayland-native apps.
+- `Alt+Shift` switches layout at XKB level.
+- `Mod+Space` calls `lang_indicator next`, which dispatches through Niri or Hyprland and refreshes Waybar.
 
 The source files live in:
 
@@ -286,7 +302,7 @@ Video thumbnails are generated with `ffmpeg`. Video wallpapers use `mpvpaper`; i
 
 ## Lock And Idle
 
-`hyprlock` is kept only as the screen locker. The compositor is Niri.
+`hyprlock` is the screen locker for both Niri and Hyprland.
 
 Session services are grouped under `dotfiles-session.target`:
 
@@ -298,13 +314,14 @@ swayidle.service
 clipboard-history.service
 herdr.service
 wallpaper.service
+stt-server.service
 ```
 
-Niri imports the Wayland environment before starting this target, Gammastep,
+Both compositors import the Wayland environment before starting this target, Gammastep,
 and swaync. The dotfiles session services are tied to `graphical-session.target`
 and stop when the graphical session ends; Herdr remains persistent by design.
 
-The Herdr user service is started from this target only after Niri imports the Wayland environment. Its drop-in skips the earlier `default.target` start, which otherwise leaves Herdr-spawned agents without `WAYLAND_DISPLAY` and breaks image paste.
+The Herdr user service is started from this target only after the compositor imports the Wayland environment. Its drop-in skips the earlier `default.target` start, which otherwise leaves Herdr-spawned agents without `WAYLAND_DISPLAY` and breaks image paste.
 
 The update tray applet belongs to XDG autostart, not the shared service start
 command. The local `~/.config/autostart/arch-update-tray.desktop` override waits
@@ -312,8 +329,8 @@ for `org.kde.StatusNotifierWatcher` before launching `arch-update --tray`.
 
 Idle flow:
 
-- `swayidle` starts from Niri autostart.
-- 5.5 minutes: monitors turn off through `niri msg action power-off-monitors`.
+- `swayidle` starts from the shared session target.
+- 5.5 minutes: monitors turn off through Niri power actions or Hyprland Lua DPMS dispatch; input turns them back on.
 - 30 minutes: lock through `hyprlock`.
 - Before sleep: lock through `hyprlock`.
 
@@ -347,5 +364,5 @@ iw dev wlan0 get power_save
 - `DEPENDENCIES.md` lists the package set and post-install commands.
 - `notes/yubikey_pool.md` documents the dynamic YubiKey/SSH signing pool.
 - `notes/thinkpad_setup_process.md` keeps hardware and migration notes.
-- Hyprland compositor configs, Wofi, Swaylock, legacy Waybar styles, and unused Waybar modules were removed to keep the tree focused on the active Niri desktop.
+- Niri and Hyprland are maintained together on `main`. Wofi, Swaylock, legacy Waybar styles, and unused Waybar modules remain removed.
 - Machine-specific knobs live in `~/.config/dotfiles/machine.conf`; keep host quirks there instead of hardcoding them into shared scripts.

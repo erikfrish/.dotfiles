@@ -9,15 +9,15 @@ set -euo pipefail
 previous_layout=""
 
 current_layout_index() {
-    if niri msg keyboard-layouts >/dev/null 2>&1; then
-        niri msg keyboard-layouts | awk '/^ \*/ { print $2; exit }'
-    fi
+    "$HOME/.config/desktop/scripts/lang_indicator" index
 }
 
 switch_layout() {
     local index="$1"
 
-    if niri msg keyboard-layouts >/dev/null 2>&1; then
+    if [[ ":${XDG_CURRENT_DESKTOP:-}:" == *:Hyprland:* ]]; then
+        hyprctl switchxkblayout all "$index" >/dev/null 2>&1 || true
+    elif niri msg keyboard-layouts >/dev/null 2>&1; then
         niri msg action switch-layout "$index" >/dev/null 2>&1 || true
     fi
 }

@@ -67,7 +67,7 @@
         },
         {
           "label": "󰍃",
-          "command": "niri msg action quit"
+          "command": "case \":${XDG_CURRENT_DESKTOP:-}:\" in *:Hyprland:*) hyprctl dispatch 'hl.dsp.exit()' ;; *) niri msg action quit ;; esac"
         },
         {
           "label": "󰖁",

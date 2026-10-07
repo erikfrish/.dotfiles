@@ -1,5 +1,5 @@
 [Unit]
-Description=Niri idle handling
+Description=Wayland idle handling
 PartOf=dotfiles-session.target
 After=graphical-session.target
 

@@ -48,6 +48,16 @@ watch_niri_layout() {
   done
 }
 
+watch_hyprland_layout() {
+  local socket="${XDG_RUNTIME_DIR}/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.socket2.sock"
+  socat -u "UNIX-CONNECT:$socket" - |
+  while IFS= read -r line; do
+    case "$line" in
+      activelayout\>\>*) show_layout "${line#*,}" ;;
+    esac
+  done
+}
+
 watch_caps_lock() {
   leds=(/sys/class/leds/*::capslock)
   [ -e "${leds[0]}" ] || return 0
@@ -77,7 +87,9 @@ watch_caps_lock() {
 
 watch_caps_lock &
 
-if niri msg keyboard-layouts >/dev/null 2>&1; then
+if [[ ":${XDG_CURRENT_DESKTOP:-}:" == *:Hyprland:* ]]; then
+  watch_hyprland_layout &
+elif niri msg keyboard-layouts >/dev/null 2>&1; then
   watch_niri_layout &
 fi
 

@@ -27,6 +27,7 @@ script_files() {
       '.config/desktop/scripts/*' \
       '.config/waybar/scripts/*' \
       '.config/niri/scripts/*' \
+      '.config/hypr/scripts/*' \
       '.config/themes/theme-switch' \
       '.config/ly/apply.sh' \
       '.local/bin/*'
@@ -35,6 +36,7 @@ script_files() {
       '.config/desktop/scripts/*' \
       '.config/waybar/scripts/*' \
       '.config/niri/scripts/*' \
+      '.config/hypr/scripts/*' \
       '.config/themes/theme-switch' \
       '.config/ly/apply.sh' \
       '.local/bin/*'
@@ -42,10 +44,15 @@ script_files() {
 }
 
 test_bash_syntax() {
-  local file ok=0
+  local file shebang ok=0
   while IFS= read -r file; do
     [ -f "$repo_dir/$file" ] || continue
     case "$file" in scripts/packages.*) continue ;; esac
+    IFS= read -r shebang <"$repo_dir/$file" || true
+    case "$shebang" in
+      '#!'*'/bash'|'#!'*' bash'|'#!'*'/sh'|'#!'*' sh') ;;
+      *) continue ;;
+    esac
     bash -n "$repo_dir/$file" || ok=1
   done < <(script_files)
   return "$ok"
@@ -127,6 +134,9 @@ test_stt_server_compiles() {
 
 run "bash syntax" test_bash_syntax
 run "niri config" test_niri_config
+if command -v Hyprland >/dev/null 2>&1; then
+  run "hyprland config" Hyprland --verify-config --config "$repo_dir/.config/hypr/hyprland.lua"
+fi
 run "stow clean target" test_stow_clean_home
 run "theme-switch generation" test_theme_switch_generates
 run "vpn status local override" test_vpn_status_without_connection

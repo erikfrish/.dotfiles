@@ -9,6 +9,31 @@ normalize_layout() {
   esac
 }
 
+if [[ ":${XDG_CURRENT_DESKTOP:-}:" == *:Hyprland:* ]]; then
+  if [ "${1:-}" = "index" ]; then
+    hyprctl -j devices | jq -r 'first(.keyboards[] | select(.main) | .active_layout_index) // empty'
+    exit 0
+  fi
+  if [ "${1:-}" = "next" ]; then
+    hyprctl switchxkblayout all next >/dev/null
+  fi
+  if ! layout=$(hyprctl -j devices 2>/dev/null | jq -r 'first(.keyboards[] | select(.main) | .active_keymap) // empty'); then
+    printf -- '--\n'
+    exit 0
+  fi
+  if [ -n "$layout" ]; then
+    normalize_layout "$layout"
+  else
+    printf -- '--\n'
+  fi
+  exit 0
+fi
+
+if [ "${1:-}" = "index" ]; then
+  niri msg -j keyboard-layouts | jq -r '.current_idx'
+  exit 0
+fi
+
 if ! niri msg keyboard-layouts >/dev/null 2>&1; then
   printf -- '--\n'
   exit 0
