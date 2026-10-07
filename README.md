@@ -296,8 +296,19 @@ wob.service
 swayosd.service
 swayidle.service
 clipboard-history.service
+herdr.service
 wallpaper.service
 ```
+
+Niri imports the Wayland environment before starting this target, Gammastep,
+and swaync. The dotfiles session services are tied to `graphical-session.target`
+and stop when the graphical session ends; Herdr remains persistent by design.
+
+The Herdr user service is started from this target only after Niri imports the Wayland environment. Its drop-in skips the earlier `default.target` start, which otherwise leaves Herdr-spawned agents without `WAYLAND_DISPLAY` and breaks image paste.
+
+The update tray applet belongs to XDG autostart, not the shared service start
+command. The local `~/.config/autostart/arch-update-tray.desktop` override waits
+for `org.kde.StatusNotifierWatcher` before launching `arch-update --tray`.
 
 Idle flow:
 
