@@ -75,6 +75,8 @@ hl.config({
         disable_splash_rendering = true,
         focus_on_activate = true,
         vrr = 1,
+        mouse_move_enables_dpms = true,
+        key_press_enables_dpms = true,
     },
 
     render = {

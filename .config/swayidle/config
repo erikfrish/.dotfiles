@@ -1,4 +1,4 @@
 # Turn displays off after idle and lock later; never suspend automatically.
 timeout 330 'case ":${XDG_CURRENT_DESKTOP:-}:" in *:Hyprland:*) hyprctl dispatch "hl.dsp.dpms({ action = [[disable]] })" ;; *) niri msg action power-off-monitors ;; esac' resume 'case ":${XDG_CURRENT_DESKTOP:-}:" in *:Hyprland:*) hyprctl dispatch "hl.dsp.dpms({ action = [[enable]] })" ;; *) niri msg action power-on-monitors ;; esac'
-timeout 1800 'pidof hyprlock || /usr/sbin/hyprlock'
+timeout 1800 'pidof hyprlock || /usr/sbin/hyprlock &'
 before-sleep 'pidof hyprlock || /usr/sbin/hyprlock'

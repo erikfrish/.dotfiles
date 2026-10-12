@@ -933,6 +933,10 @@ button:hover {
 #reboot {
     background-image: image(url("/usr/share/wlogout/icons/reboot.png"), url("/usr/local/share/wlogout/icons/reboot.png"));
 }
+
+#screen-off {
+    background-image: url("$config_dir/wlogout/icons/screen-off.svg");
+}
 WLOGOUT
 }
 

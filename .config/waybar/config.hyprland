@@ -336,7 +336,7 @@
   "custom/power": {
     "format": "<span rise='3072'>󰐥</span>",
     "tooltip": false,
-    "on-click": "sh -c '(sleep 0.1s; ~/.config/desktop/scripts/power_menu)' & disown"
+    "on-click": "~/.config/desktop/scripts/power_menu"
   },
 
   "tray": {

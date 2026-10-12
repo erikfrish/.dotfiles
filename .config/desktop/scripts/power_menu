@@ -1,12 +1,44 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# wlogout binds actions to plain letters (l/h/e/s/u/r). Unlike Ctrl-based app
+case "${1:-}" in
+    screen-off)
+        # Let the activating key/button release and the menu close before DPMS.
+        sleep 1
+        case ":${XDG_CURRENT_DESKTOP:-}:" in
+            *:Hyprland:*) exec hyprctl dispatch 'hl.dsp.dpms({ action = "disable" })' ;;
+            *) exec niri msg action power-off-monitors ;;
+        esac
+        ;;
+    lock)
+        pidof hyprlock >/dev/null || exec hyprlock --grace 10
+        exit 0
+        ;;
+    sleep|hibernate)
+        # Close the menu and restore its layout before requesting sleep.
+        sleep 1
+        exec systemctl "$1"
+        ;;
+    logout)
+        case ":${XDG_CURRENT_DESKTOP:-}:" in
+            *:Hyprland:*) exec hyprctl dispatch 'hl.dsp.exit()' ;;
+            *) exec niri msg action quit "${@:2}" ;;
+        esac
+        ;;
+    "") ;;
+    *)
+        printf 'Usage: %s [screen-off|lock|sleep|hibernate|logout [--skip-confirmation]]\n' "$0" >&2
+        exit 2
+        ;;
+esac
+
+# wlogout binds actions to plain letters (l/h/e/s/u/r/d). Unlike Ctrl-based app
 # shortcuts, plain-letter binds cannot be fixed by the Russian Ctrl shortcut XKB
 # variant, so this wrapper opens wlogout on the US layout and restores the
 # previous layout when the menu exits.
 
 previous_layout=""
+layout_file=""
 
 current_layout_index() {
     "$HOME/.config/desktop/scripts/lang_indicator" index
@@ -26,10 +58,18 @@ restore_layout() {
     if [ -n "$previous_layout" ]; then
         switch_layout "$previous_layout"
     fi
+    rm -f "$layout_file"
 }
 
 previous_layout=$(current_layout_index || true)
 trap restore_layout EXIT
+layout_file=$(mktemp "${XDG_RUNTIME_DIR:-/tmp}/dotfiles-power-menu.XXXXXX")
+can_hibernate=$(busctl --system --json=short call org.freedesktop.login1 \
+    /org/freedesktop/login1 org.freedesktop.login1.Manager CanHibernate |
+    jq -r '.data[0]')
+jq --arg capability "$can_hibernate" \
+    'select(.label != "hibernate" or $capability == "yes" or $capability == "challenge")' \
+    "$HOME/.config/wlogout/layout" >"$layout_file"
 
 switch_layout 0
-wlogout --protocol layer-shell
+wlogout --protocol layer-shell --layout "$layout_file"

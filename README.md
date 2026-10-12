@@ -331,12 +331,22 @@ Idle flow:
 
 - `swayidle` starts from the shared session target.
 - 5.5 minutes: monitors turn off through Niri power actions or Hyprland Lua DPMS dispatch; input turns them back on.
-- 30 minutes: lock through `hyprlock`.
-- Before sleep: lock through `hyprlock`.
+- 30 minutes: launch `hyprlock` asynchronously so idle monitor-wake callbacks remain responsive.
+- Before sleep: start `hyprlock` with `swayidle -w`. Waiting is retained to avoid starting sleep before the locker acquires the session lock; because hyprlock does not daemonize, this may use logind's default five-second delay-inhibitor window.
 
 Fingerprint unlock is enabled in `~/.config/hypr/hyprlock.conf` through `auth.fingerprint`. `/etc/pam.d/hyprlock` intentionally stays password-only so hyprlock does not run a second `pam_fprintd` flow in parallel with its built-in fingerprint auth. ly intentionally does not use fingerprint PAM because TTY display managers can hang or behave poorly with fingerprint prompts.
 
 ## Power
+
+Left-click Waybar's power icon for the full wlogout menu. In Niri, right-click it or use `Mod+Ctrl+P` for the compact Quickshell power panel.
+
+- **Screen off** (wlogout key `d`): disable all displays through Niri monitor power actions or Hyprland Lua DPMS. The computer and applications keep running; this does not suspend or lock the session. Keyboard/mouse input wakes the displays; Hyprland enables both DPMS wake options explicitly.
+- **Sleep** (wlogout key `u`): use `systemctl sleep`, respecting logind's supported `SleepOperation` policy instead of forcing `suspend`.
+- **Hibernate**: shown in wlogout only when logind reports `CanHibernate=yes` or `challenge`. Zram alone is not a hibernation target.
+- **Lock**: launch hyprlock directly; this does not depend on an unconfigured logind `Lock` listener.
+- **Logout**: dispatch to the current compositor. Shutdown and reboot retain their standard systemctl commands.
+
+Session actions close the menu before starting. Screen-off and sleep requests wait one second for the activating input and wlogout's layout restoration to settle, avoiding an immediate wake. The Quickshell session buttons use detached processes and do not leave an exclusive-focus overlay open during sleep.
 
 Power source changes are handled by `/etc/udev/rules.d/90-dotfiles-power-profile.rules`, which starts `dotfiles-power-profile.service`.
 

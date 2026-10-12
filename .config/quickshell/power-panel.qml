@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import Quickshell
 import Quickshell.Io
 import "PopupBase.qml"
 
@@ -85,23 +86,31 @@ PopupBase {
             spacing: 8
             Repeater {
                 model: [
-                    { label: "Lock", icon: "", command: ["loginctl", "lock-session"] },
-                    { label: "Sleep", icon: "", command: ["systemctl", "suspend"] },
-                    { label: "Logout", icon: "", command: ["niri", "msg", "action", "quit", "--skip-confirmation"] }
+                    { label: "Lock", icon: "", command: [Quickshell.env("HOME") + "/.config/desktop/scripts/power_menu", "lock"] },
+                    { label: "Sleep", icon: "", command: [Quickshell.env("HOME") + "/.config/desktop/scripts/power_menu", "sleep"] },
+                    { label: "Logout", icon: "", command: [Quickshell.env("HOME") + "/.config/desktop/scripts/power_menu", "logout", "--skip-confirmation"] },
+                    { label: "Screen off", icon: "󰍹", command: [Quickshell.env("HOME") + "/.config/desktop/scripts/power_menu", "screen-off"] }
                 ]
                 delegate: Rectangle {
                     required property var modelData
-                    width: (parent ? parent.width : 0) / 3 - 6
+                    width: (parent ? parent.width : 0) / 4 - 6
                     height: 52
                     radius: 8
                     color: "#171717"
                     Column {
                         anchors.centerIn: parent
+                        width: parent.width
                         spacing: 3
                         Text { text: modelData.icon; color: "#ffffff"; font.family: "Symbols Nerd Font"; font.pixelSize: 16; horizontalAlignment: Text.AlignHCenter; width: parent.width }
                         Text { text: modelData.label; color: "#a0a0a0"; font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; width: parent.width }
                     }
-                    MouseArea { anchors.fill: parent; onClicked: root.run(modelData.command) }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            Quickshell.execDetached(modelData.command)
+                            root.dismiss()
+                        }
+                    }
                 }
             }
         }

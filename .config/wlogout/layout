@@ -1,18 +1,18 @@
 {
     "label" : "lock",
-    "action" : "pidof hyprlock || hyprlock --grace 10",
+    "action" : "~/.config/desktop/scripts/power_menu lock &",
     "text" : "Lock [l]",
     "keybind" : "l"
 }
 {
     "label" : "hibernate",
-    "action" : "systemctl hibernate",
+    "action" : "~/.config/desktop/scripts/power_menu hibernate &",
     "text" : "Hibernate [h]",
     "keybind" : "h"
 }
 {
     "label" : "logout",
-    "action" : "niri msg action quit",
+    "action" : "~/.config/desktop/scripts/power_menu logout &",
     "text" : "Logout [e]",
     "keybind" : "e"
 }
@@ -24,8 +24,8 @@
 }
 {
     "label" : "suspend",
-    "action" : "systemctl suspend",
-    "text" : "Suspend [u]",
+    "action" : "~/.config/desktop/scripts/power_menu sleep &",
+    "text" : "Sleep [u]",
     "keybind" : "u"
 }
 {
@@ -33,4 +33,10 @@
     "action" : "systemctl reboot",
     "text" : "Reboot [r]",
     "keybind" : "r"
+}
+{
+    "label" : "screen-off",
+    "action" : "~/.config/desktop/scripts/power_menu screen-off &",
+    "text" : "Screen off [d]",
+    "keybind" : "d"
 }
