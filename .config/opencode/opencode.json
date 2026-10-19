@@ -291,6 +291,25 @@
             ]
           }
         },
+        "llm-medium-prod": {
+          "name": "llm-medium-prod (DeepSeek-v4-Flash)",
+          "reasoning": true,
+          "interleaved": {
+            "field": "reasoning_content"
+          },
+          "limit": {
+            "context": 256000,
+            "output": 16192
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
         "deepseek-flash": {
           "name": "deepseek-flash (coder-medium alias)",
           "reasoning": true,
@@ -317,7 +336,7 @@
             "field": "reasoning"
           },
           "limit": {
-            "context": 262144,
+            "context": 150000,
             "output": 16192
           },
           "modalities": {
@@ -346,8 +365,24 @@
             ]
           }
         },
+        "llm-small-prod": {
+          "name": "llm-small-prod (Qwen3.8-27B)",
+          "limit": {
+            "context": 256000,
+            "output": 16192
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
         "coder": {
-          "name": "coder (Kimi-K2.7-Code, deprecated)",
+          "name": "coder (GLM-5.3-Flash)",
           "reasoning": true,
           "interleaved": {
             "field": "reasoning_content"
@@ -378,7 +413,7 @@
           }
         },
         "wb-coder": {
-          "name": "wb-coder (Kimi-K2.7-Code, deprecated)",
+          "name": "wb-coder (GLM-5.3-Flash)",
           "reasoning": true,
           "interleaved": {
             "field": "reasoning_content"
@@ -785,6 +820,95 @@
       }
     },
     "openai": {}
+  },
+  "providers": {
+    "astra-proxy": {
+      "name": "Astra Proxy",
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
+        "baseURL": "http://127.0.0.1:6447/v1",
+        "apiKey": "{file:/home/erikfrish/.local/share/astra-proxy/client-api-key}"
+      },
+      "models": {
+        "gpt-6-astra": {
+          "name": "gpt-6-astra",
+          "package": "@opencode/ai/providers/openai/responses",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "gpt-6.1-sol": {
+          "name": "gpt-6.1-sol",
+          "package": "@opencode/ai/providers/openai/responses",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "gpt-6-luna": {
+          "name": "gpt-6-luna",
+          "package": "@opencode/ai/providers/openai/responses",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "claude-fable-5-1": {
+          "name": "claude-fable-5-1",
+          "package": "@opencode/ai/providers/anthropic",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "claude-opus-5-5": {
+          "name": "claude-opus-5-5",
+          "package": "@opencode/ai/providers/anthropic",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "claude-opus-4-6": {
+          "name": "claude-opus-4-6",
+          "package": "@opencode/ai/providers/anthropic",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "claude-sonnet-5": {
+          "name": "Claude Sonnet 5.5 (Astra Proxy)",
+          "package": "@opencode/ai/providers/anthropic",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "claude-haiku-5-5": {
+          "name": "claude-haiku-5-5",
+          "package": "@opencode/ai/providers/anthropic",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "gemini-4-argon": {
+          "name": "gemini-4-argon",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "gemini-3.8-flash": {
+          "name": "gemini-3.8-flash",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "grok-4.7": {
+          "name": "grok-4.7",
+          "package": "@opencode/ai/providers/openai/responses",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "kimi-k3": {
+          "name": "kimi-k3",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "glm-5.3": {
+          "name": "GLM 5.3 (Astra Proxy)",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "glm-5.3-flash": {
+          "name": "glm-5.3-flash",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "kimi-k2.7-code": {
+          "name": "kimi-k2.7-code",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "deepseek-v4-flash": {
+          "name": "deepseek-v4-flash",
+          "capabilities": { "reasoning": { "supported": true } }
+        },
+        "deepseek-v4-pro": {
+          "name": "deepseek-v4-pro",
+          "capabilities": { "reasoning": { "supported": true } }
+        }
+      }
+    }
   },
   "model": "openai/gpt-5",
   "small_model": "openai/gpt-5-mini",

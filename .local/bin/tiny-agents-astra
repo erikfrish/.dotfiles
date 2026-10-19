@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+HF_TOKEN=$(cat "$HOME/.local/share/astra-proxy/client-api-key")
+export HF_TOKEN
+exec "$HOME/.local/bin/tiny-agents" run "$HOME/.config/tiny-agents/astra-proxy.json" "$@"

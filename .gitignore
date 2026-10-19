@@ -41,3 +41,6 @@ __pycache__/
 .local/bin/huggingface-cli
 .local/bin/tiny-agents
 .local/bin/qwen38.bak-*
+.local/bin/gcx
+.local/bin/omp
+.local/bin/tern
