@@ -53,13 +53,17 @@ window#waybar > box {
 }
 
 #custom-vpn1,
-#custom-kvn,
 #custom-vpn2,
 #custom-theme,
 #custom-power {
     min-width: 26px;
     padding-left: 6px;
     padding-right: 6px;
+}
+
+#custom-kvn {
+    padding-left: 7px;
+    padding-right: 5px;
 }
 
 #custom-notification {

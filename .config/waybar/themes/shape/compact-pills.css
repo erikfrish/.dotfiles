@@ -45,13 +45,17 @@ window#waybar > box {
 }
 
 #custom-vpn1,
-#custom-kvn,
 #custom-vpn2,
 #custom-theme,
 #custom-power {
     min-width: 24px;
     padding-left: 5px;
     padding-right: 5px;
+}
+
+#custom-kvn {
+    padding-left: 6px;
+    padding-right: 4px;
 }
 
 #custom-notification {

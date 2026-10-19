@@ -91,11 +91,15 @@ window#waybar > box {
 }
 
 #custom-vpn1,
-#custom-kvn,
 #custom-vpn2 {
     min-width: 22px;
     padding-left: 8px;
     padding-right: 11px;
+}
+
+#custom-kvn {
+    padding-left: 9px;
+    padding-right: 10px;
 }
 
 #custom-power {

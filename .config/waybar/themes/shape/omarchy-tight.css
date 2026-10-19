@@ -57,13 +57,17 @@ window#waybar > box {
 }
 
 #custom-vpn1,
-#custom-kvn,
 #custom-vpn2 {
     min-width: 13px;
     padding-left: 2px;
     padding-right: 6px;
     margin-left: 1px;
     margin-right: 1px;
+}
+
+#custom-kvn {
+    padding-left: 3px;
+    padding-right: 5px;
 }
 
 #tray {
