@@ -185,6 +185,8 @@ Theme previews are captured on an empty Niri workspace with each preset's `bg` c
 
 GTK3 uses the configured `gtk_theme` plus generated `gtk.css`. GTK4/libadwaita apps read the generated `gtk-4.0/gtk.css` and `org.gnome.desktop.interface color-scheme`. GTK surfaces get a subtle automatic tint by blending each theme's `bg`, `muted`, and `accent`; presets can override this with `gtk_surface`, `gtk_sidebar`, and `gtk_header`. Already-running GTK apps may need to be restarted manually to reload generated CSS. Qt apps are themed globally through `QT_QPA_PLATFORMTHEME=qt6ct`, generated `qt5ct`/`qt6ct` palettes, and a small `dotfiles.qss` for menus and popups. Dolphin is the exception: it is launched through `~/.local/bin/dolphin` with the KDE platform theme so it uses KDE's native dark palette instead of Qt stylesheet file-view hacks.
 
+`throne-bin` bundles its own Qt 6.11 without the `qt6ct` platform theme, so `~/.local/bin/throne` sets `LD_LIBRARY_PATH=/usr/lib` to make it load the system Qt (and the qt6ct plugin) instead. Restart Throne after Qt updates only if it fails to start; the bundled `ThroneCore` is unaffected.
+
 Toolkit styling expects `adw-gtk-theme`, `qt5ct`, `qt6ct`, and `breeze` to be installed. `adw-gtk-theme` provides the GTK theme presets use, `qt5ct`/`qt6ct` load generated Qt palettes, and `breeze` provides KDE/Qt styling for Dolphin.
 
 | Theme | Preview |
