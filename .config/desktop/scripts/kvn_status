@@ -25,13 +25,13 @@ fi
 
 if [ "$connected" = true ]; then
   jq -nc --arg profile "$profile" '{
-    text: "󰦝",
+    text: "󰒘",
     class: "active",
     tooltip: ("kvn VPN\n" + $profile + ": включен\nЛКМ: выключить · ПКМ: выбрать")
   }'
 else
   jq -nc '{
-    text: "󰦜",
+    text: "󰒙",
     class: "inactive",
     tooltip: "kvn VPN: выключен\nЛКМ: включить · ПКМ: выбрать"
   }'

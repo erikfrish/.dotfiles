@@ -54,6 +54,7 @@ window#waybar > box {
 }
 
 #custom-kvn {
+    min-width: 20px;
     padding-left: 5px;
     padding-right: 3px;
 }

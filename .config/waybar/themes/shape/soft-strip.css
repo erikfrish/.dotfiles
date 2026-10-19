@@ -98,6 +98,7 @@ window#waybar > box {
 }
 
 #custom-kvn {
+    min-width: 22px;
     padding-left: 9px;
     padding-right: 10px;
 }
