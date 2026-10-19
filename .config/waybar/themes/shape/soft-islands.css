@@ -14,6 +14,7 @@ window#waybar > box {
 #custom-notification,
 #custom-wakatime,
 #custom-vpn1,
+#custom-kvn,
 #custom-vpn2,
 #custom-cycle_wall,
 #custom-theme,
@@ -52,6 +53,7 @@ window#waybar > box {
 }
 
 #custom-vpn1,
+#custom-kvn,
 #custom-vpn2,
 #custom-theme,
 #custom-power {

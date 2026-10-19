@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Connect the last profile, or disconnect. Returns before the tunnel is up, so
+# refresh the bar now and once more after the connection settles.
+kvn toggle || notify-send -u critical "kvn" "$(kvn status 2>&1 || true)" || true
+
+pkill -RTMIN+11 -x waybar || true
+sleep 2
+pkill -RTMIN+11 -x waybar || true

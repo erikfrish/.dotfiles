@@ -7,7 +7,7 @@ Both sessions share one launcher stack, one theme switcher, one volume path, one
 ## Desktop
 
 - **Compositors:** Niri in `cfg/*.kdl`, or Hyprland 0.55+ in `hyprland.lua`.
-- **Bar:** Waybar selects the compositor's workspace config automatically, with shared VPN, Wakatime, audio, brightness, battery, language, and notification modules.
+- **Bar:** Waybar selects the compositor's workspace config automatically, with shared VPN, Wakatime, audio, brightness, battery, language, and notification modules. The `custom/kvn` button drives the [kvn](https://github.com/yarikov/kvn) VLESS client: left click runs `kvn toggle`, right click picks a profile in Rofi and connects to it.
 - **Popups:** Niri uses Quickshell panels; Hyprland keeps native menu, pavucontrol, and wlogout actions.
 - **Launcher:** Rofi for apps, clipboard, wallpapers, and theme selection.
 - **Locking:** hyprlock with PAM fingerprint support and password fallback.

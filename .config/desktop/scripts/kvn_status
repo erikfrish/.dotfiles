@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Waybar status for the kvn VLESS client. Reads the state file the kvn daemon
+# keeps in $XDG_RUNTIME_DIR, so polling never talks to the daemon.
+
+state_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/kvn/state.json"
+
+connected=false
+profile=""
+pid=""
+if [ -r "$state_file" ]; then
+  mapfile -t fields < <(
+    jq -r '(.connected // false), (.profile_name // ""), (.singbox_pid // "")' "$state_file" 2>/dev/null || true
+  )
+  connected="${fields[0]:-false}"
+  profile="${fields[1]:-}"
+  pid="${fields[2]:-}"
+fi
+
+# A killed daemon leaves the last state behind; require the tunnel process.
+if [ "$connected" = true ] && { [ -z "$pid" ] || [ ! -d "/proc/$pid" ]; }; then
+  connected=false
+fi
+
+if [ "$connected" = true ]; then
+  jq -nc --arg profile "$profile" '{
+    text: "󰦝",
+    class: "active",
+    tooltip: ("kvn VPN\n" + $profile + ": включен\nЛКМ: выключить · ПКМ: выбрать")
+  }'
+else
+  jq -nc '{
+    text: "󰦜",
+    class: "inactive",
+    tooltip: "kvn VPN: выключен\nЛКМ: включить · ПКМ: выбрать"
+  }'
+fi

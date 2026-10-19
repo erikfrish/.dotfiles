@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Pick a kvn profile in rofi and connect to it (kvn switches an active tunnel).
+
+profiles_file="${XDG_CONFIG_HOME:-$HOME/.config}/kvn-tui/profiles.json"
+state_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/kvn/state.json"
+
+[ -r "$profiles_file" ] || exit 0
+
+mapfile -t names < <(jq -r '.profiles[].name' "$profiles_file")
+((${#names[@]})) || exit 0
+
+current="$(jq -r '.profile_name // ""' "$state_file" 2>/dev/null || true)"
+selected_row=0
+for i in "${!names[@]}"; do
+  if [[ "${names[$i]}" == "$current" ]]; then
+    selected_row="$i"
+    break
+  fi
+done
+
+choice="$(printf '%s\n' "${names[@]}" | rofi -dmenu \
+  -i \
+  -no-custom \
+  -p "kvn VPN" \
+  -selected-row "$selected_row" \
+  -format s \
+  -sync)" || exit 0
+[[ -n "$choice" ]] || exit 0
+
+id="$(jq -r --arg name "$choice" '.profiles[] | select(.name == $name) | .id' "$profiles_file" | head -n 1)"
+[[ -n "$id" ]] || exit 0
+
+kvn connect "$id" || notify-send -u critical "kvn" "$(kvn status 2>&1 || true)" || true
+
+pkill -RTMIN+11 -x waybar || true
+sleep 2
+pkill -RTMIN+11 -x waybar || true

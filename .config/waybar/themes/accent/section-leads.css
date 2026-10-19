@@ -35,7 +35,8 @@
     color: @ok;
 }
 
-#custom-vpn1.active {
+#custom-vpn1.active,
+#custom-kvn.active {
     background: @accent;
     color: @bg;
     border-color: @accent;
@@ -48,6 +49,7 @@
 }
 
 #custom-vpn1.inactive,
+#custom-kvn.inactive,
 #custom-vpn2.inactive {
     background: transparent;
     color: @muted;

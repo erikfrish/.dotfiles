@@ -32,7 +32,8 @@
     color: @accent_alt;
 }
 
-#custom-vpn1.active {
+#custom-vpn1.active,
+#custom-kvn.active {
     color: @fg;
     background: @accent;
 }
@@ -43,6 +44,7 @@
 }
 
 #custom-vpn1.inactive,
+#custom-kvn.inactive,
 #custom-vpn2.inactive {
     color: @muted;
     background: transparent;

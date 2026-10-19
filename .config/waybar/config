@@ -36,6 +36,7 @@
     "network",
     "custom/vpn1",
     "custom/vpn2",
+    "custom/kvn",
     "custom/gammastep",
     "custom/backlight",
     "custom/audio-volume",
@@ -341,5 +342,15 @@
     "interval": 2,
     "on-click": "~/.config/desktop/scripts/vpn_toggle vpn2",
     "on-click-right": "~/.config/desktop/scripts/vpn_select vpn2"
+  },
+
+  "custom/kvn": {
+    "format": "{}",
+    "exec": "~/.config/desktop/scripts/kvn_status",
+    "return-type": "json",
+    "interval": 2,
+    "signal": 11,
+    "on-click": "~/.config/desktop/scripts/kvn_toggle",
+    "on-click-right": "~/.config/desktop/scripts/kvn_select"
   }
 }

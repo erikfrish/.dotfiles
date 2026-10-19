@@ -140,6 +140,7 @@ systemctl --user disable --now stt-server.service
 | `amneziawg-dkms` | AmneziaWG kernel module (required for NM plugin) |
 | `amneziawg-tools` | `awg`, `awg-quick` CLI utilities |
 | `network-manager-amneziawg` | NM VPN plugin (built from [vovochka404/network-manager-amneziawg](https://github.com/vovochka404/network-manager-amneziawg)) |
+| `kvn-bin` | VLESS/sing-box TUN client (AUR); the Waybar `custom/kvn` button drives it via `kvn toggle` / `kvn connect` (pulls in `sing-box`) |
 
 ## Input & Fingerprint
 

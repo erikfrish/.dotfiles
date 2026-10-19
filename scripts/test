@@ -119,6 +119,18 @@ test_vpn_status_without_connection() {
   PATH="$fakebin:$PATH" XDG_CONFIG_HOME="$tmp/config" "$script" vpn1 | grep -q 'not configured'
 }
 
+test_kvn_status_ignores_stale_state() {
+  local tmp script
+  tmp=$(mktemp -d)
+  tmp_dirs+=("$tmp")
+  mkdir -p "$tmp/kvn"
+  printf '{"connected":true,"profile_name":"x","singbox_pid":%s}\n' 2147483646 > "$tmp/kvn/state.json"
+  script="$repo_dir/.config/desktop/scripts/kvn_status"
+  XDG_RUNTIME_DIR="$tmp" "$script" | grep -q '"class":"inactive"' || return 1
+  printf '{"connected":true,"profile_name":"x","singbox_pid":%s}\n' "$$" > "$tmp/kvn/state.json"
+  XDG_RUNTIME_DIR="$tmp" "$script" | grep -q '"class":"active"'
+}
+
 test_battery_notifier_without_battery() {
   local tmp script
   tmp=$(mktemp -d)
@@ -140,6 +152,7 @@ fi
 run "stow clean target" test_stow_clean_home
 run "theme-switch generation" test_theme_switch_generates
 run "vpn status local override" test_vpn_status_without_connection
+run "kvn status stale state" test_kvn_status_ignores_stale_state
 run "battery notifier without battery" test_battery_notifier_without_battery
 run "STT server compiles" test_stt_server_compiles
 
