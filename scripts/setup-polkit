@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+rule=50-dotfiles-vpn-resolved.rules
+
+if [[ $EUID -ne 0 ]]; then
+  printf 'Run as root: sudo %s\n' "$0" >&2
+  exit 1
+fi
+
+install -Dm644 "$repo_dir/etc/polkit-1/rules.d/$rule" "/etc/polkit-1/rules.d/$rule"
+printf 'Installed /etc/polkit-1/rules.d/%s\n' "$rule"
