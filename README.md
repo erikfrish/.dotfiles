@@ -426,7 +426,7 @@ iw dev wlan0 get power_save
 - Creates the top-level subvolume `@swap`, mounted at `/swap`, so snapper snapshots of `/` never contain the swapfile and snapshots stay possible while swap is active.
 - Creates `/swap/swapfile` sized to RAM with `btrfs filesystem mkswapfile` and enables it with priority 10, below zram (100). Normal paging stays in zram; systemd skips zram when choosing the hibernation device.
 - Backs up `/etc/fstab` before adding the `/swap` mount and swap entries. Rerunning is idempotent.
-- Installs `etc/systemd/sleep.conf.d/10-dotfiles-hibernate.conf`: hibernate after 2 hours of suspend on battery, or earlier below 5% battery. On AC the system stays suspended; the countdown starts after unplugging.
+- Installs `etc/systemd/sleep.conf.d/10-dotfiles-hibernate.conf`: hibernate after 6 hours of suspend on battery, or earlier below 5% battery. On AC the system stays suspended; the countdown starts after unplugging.
 - Installs `etc/systemd/logind.conf.d/10-dotfiles-sleep.conf`: lid close and the sleep key use `sleep`, the same policy as the power menu. Without hibernation swap it falls back to plain suspend. It reloads logind, never restarts it.
 
 Resume needs no `resume=` kernel argument or Limine change: systemd stores the swapfile location in the `HibernateLocation` EFI variable and the `systemd` initramfs hook resumes from it.
