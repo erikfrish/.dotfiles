@@ -33,7 +33,6 @@ Both sessions share one launcher stack, one theme switcher, one volume path, one
 .config/systemd/user/  Session services started by dotfiles-session.target
 .config/xkb/           Custom Russian shortcut-friendly XKB layout
 etc/pam.d/hyprlock     PAM config for fingerprint unlock with password fallback
-etc/polkit-1/rules.d/  Polkit rule letting user-run VPN clients set resolved DNS
 etc/systemd/            Root units plus logind/sleep drop-ins for hardware/session integration
 etc/udev/rules.d/       Udev rules for power-source automation
 scripts/               Package lists, setup helpers, doctor, PAM, SSH, DDC/CI
@@ -63,7 +62,7 @@ Apply privileged pieces when needed:
 sudo ~/.dotfiles/scripts/setup-pam
 sudo ~/.dotfiles/scripts/setup-power
 sudo ~/.dotfiles/scripts/setup-hibernate
-sudo ~/.dotfiles/scripts/setup-polkit
+sudo kvn setup --polkit
 sudo ~/.dotfiles/scripts/setup-ddcci
 ~/.dotfiles/scripts/setup-ssh-agent
 ~/.dotfiles/scripts/setup-home-dns
