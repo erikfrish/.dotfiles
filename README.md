@@ -33,7 +33,7 @@ Both sessions share one launcher stack, one theme switcher, one volume path, one
 .config/systemd/user/  Session services started by dotfiles-session.target
 .config/xkb/           Custom Russian shortcut-friendly XKB layout
 etc/pam.d/hyprlock     PAM config for fingerprint unlock with password fallback
-etc/systemd/system/     Root systemd units for hardware/session integration
+etc/systemd/            Root units plus logind/sleep drop-ins for hardware/session integration
 etc/udev/rules.d/       Udev rules for power-source automation
 scripts/               Package lists, setup helpers, doctor, PAM, SSH, DDC/CI
 notes/                 Hardware and operational notes
@@ -61,6 +61,7 @@ Apply privileged pieces when needed:
 ```sh
 sudo ~/.dotfiles/scripts/setup-pam
 sudo ~/.dotfiles/scripts/setup-power
+sudo ~/.dotfiles/scripts/setup-hibernate
 sudo ~/.dotfiles/scripts/setup-ddcci
 ~/.dotfiles/scripts/setup-ssh-agent
 ~/.dotfiles/scripts/setup-home-dns
@@ -389,7 +390,7 @@ Fingerprint unlock is enabled in `~/.config/hypr/hyprlock.conf` through `auth.fi
 Left-click Waybar's power icon for the full wlogout menu. In Niri, right-click it or use `Mod+Ctrl+P` for the compact Quickshell power panel.
 
 - **Screen off** (wlogout key `d`): disable all displays through Niri monitor power actions or Hyprland Lua DPMS. The computer and applications keep running; this does not suspend or lock the session. Keyboard/mouse input wakes the displays; Hyprland enables both DPMS wake options explicitly.
-- **Sleep** (wlogout key `u`): use `systemctl sleep`, respecting logind's supported `SleepOperation` policy instead of forcing `suspend`.
+- **Sleep** (wlogout key `u`): use `systemctl sleep`, respecting logind's supported `SleepOperation` policy instead of forcing `suspend`. With hibernation configured this is `suspend-then-hibernate`.
 - **Hibernate**: shown in wlogout only when logind reports `CanHibernate=yes` or `challenge`. Zram alone is not a hibernation target.
 - **Lock**: launch hyprlock directly; this does not depend on an unconfigured logind `Lock` listener.
 - **Logout**: dispatch to the current compositor. Shutdown and reboot retain their standard systemctl commands.
@@ -415,6 +416,27 @@ Check the active state:
 powerprofilesctl get
 cat /sys/module/pcie_aspm/parameters/policy
 iw dev wlan0 get power_save
+```
+
+### Hibernation
+
+`sudo ~/.dotfiles/scripts/setup-hibernate` prepares suspend-then-hibernate on btrfs:
+
+- Creates the top-level subvolume `@swap`, mounted at `/swap`, so snapper snapshots of `/` never contain the swapfile and snapshots stay possible while swap is active.
+- Creates `/swap/swapfile` sized to RAM with `btrfs filesystem mkswapfile` and enables it with priority 10, below zram (100). Normal paging stays in zram; systemd skips zram when choosing the hibernation device.
+- Backs up `/etc/fstab` before adding the `/swap` mount and swap entries. Rerunning is idempotent.
+- Installs `etc/systemd/sleep.conf.d/10-dotfiles-hibernate.conf`: hibernate after 2 hours of suspend on battery, or earlier below 5% battery. On AC the system stays suspended; the countdown starts after unplugging.
+- Installs `etc/systemd/logind.conf.d/10-dotfiles-sleep.conf`: lid close and the sleep key use `sleep`, the same policy as the power menu. Without hibernation swap it falls back to plain suspend. It reloads logind, never restarts it.
+
+Resume needs no `resume=` kernel argument or Limine change: systemd stores the swapfile location in the `HibernateLocation` EFI variable and the `systemd` initramfs hook resumes from it.
+
+The root filesystem is not encrypted, so the hibernation image (RAM contents, including unlocked secrets) is written to disk in plain form.
+
+Test after setup, then check the resume in the next boot's journal:
+
+```sh
+systemctl hibernate
+journalctl -b -u systemd-hibernate-resume.service
 ```
 
 ## Notes

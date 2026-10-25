@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# Create a btrfs hibernation swapfile and enable suspend-then-hibernate.
+# Resume uses systemd's HibernateLocation EFI variable, so no resume= kernel
+# argument or bootloader change is required.
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_dir="$(cd -- "$script_dir/.." && pwd)"
+swap_dir=/swap
+swap_file="$swap_dir/swapfile"
+swap_subvol=@swap
+# Below zram (priority 100): normal paging stays in RAM, the disk only receives
+# hibernation images. systemd skips zram when choosing a hibernation device.
+swap_priority=10
+
+if [ "$(id -u)" -ne 0 ]; then
+  printf 'Run with sudo: sudo %s\n' "$0" >&2
+  exit 1
+fi
+
+if [ "$(findmnt -no FSTYPE /)" != btrfs ]; then
+  printf 'Root filesystem is not btrfs; this script only supports btrfs.\n' >&2
+  exit 1
+fi
+root_source="$(findmnt -no SOURCE /)"
+root_device="${root_source%%\[*}"
+root_uuid="$(blkid -s UUID -o value "$root_device")"
+
+mem_kib="$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)"
+size_gib=$(( (mem_kib + 1048575) / 1048576 ))
+
+fstab_backed_up=0
+add_fstab_line() {
+  local target="$1" line="$2"
+  # Mounts are matched by mount point, swap entries by their source path.
+  if awk -v target="$target" '$1 !~ /^#/ && ($2 == target || ($1 == target && $3 == "swap")) {found = 1}
+      END {exit !found}' /etc/fstab; then
+    return
+  fi
+  if [ "$fstab_backed_up" -eq 0 ]; then
+    cp -a /etc/fstab "/etc/fstab.bak.$(date +%Y%m%d-%H%M%S)"
+    fstab_backed_up=1
+  fi
+  printf '%s\n' "$line" >> /etc/fstab
+  printf 'Added to /etc/fstab: %s\n' "$line"
+}
+
+top_level=""
+cleanup() {
+  if [ -n "$top_level" ]; then
+    umount "$top_level" 2>/dev/null || true
+    rmdir "$top_level" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT
+
+if ! findmnt -n "$swap_dir" >/dev/null; then
+  top_level="$(mktemp -d)"
+  mount -o subvolid=5 "$root_device" "$top_level"
+  if [ ! -d "$top_level/$swap_subvol" ]; then
+    btrfs subvolume create "$top_level/$swap_subvol"
+  fi
+  umount "$top_level"
+  rmdir "$top_level"
+  top_level=""
+  mkdir -p "$swap_dir"
+  add_fstab_line "$swap_dir" "UUID=$root_uuid $swap_dir btrfs subvol=/$swap_subvol,noatime 0 0"
+  systemctl daemon-reload
+  mount "$swap_dir"
+fi
+
+if [ ! -f "$swap_file" ]; then
+  btrfs filesystem mkswapfile --size "${size_gib}g" "$swap_file"
+fi
+add_fstab_line "$swap_file" "$swap_file none swap defaults,pri=$swap_priority 0 0"
+if ! swapon --show=NAME --noheadings | grep -qxF "$swap_file"; then
+  swapon --priority "$swap_priority" "$swap_file"
+fi
+
+install -Dm644 "$repo_dir/etc/systemd/sleep.conf.d/10-dotfiles-hibernate.conf" \
+  /etc/systemd/sleep.conf.d/10-dotfiles-hibernate.conf
+install -Dm644 "$repo_dir/etc/systemd/logind.conf.d/10-dotfiles-sleep.conf" \
+  /etc/systemd/logind.conf.d/10-dotfiles-sleep.conf
+printf 'Installed sleep and logind drop-ins\n'
+
+systemctl daemon-reload
+# Reload, never restart: restarting logind terminates the graphical session.
+systemctl reload systemd-logind.service
+
+printf '\nDone. Current state:\n'
+swapon --show
+for method in CanHibernate CanSuspendThenHibernate; do
+  printf '%s: ' "$method"
+  busctl call org.freedesktop.login1 /org/freedesktop/login1 \
+    org.freedesktop.login1.Manager "$method" | awk '{print $2}'
+done
