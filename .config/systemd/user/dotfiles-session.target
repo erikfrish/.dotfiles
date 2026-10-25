@@ -2,4 +2,4 @@
 Description=Dotfiles Wayland session services
 PartOf=graphical-session.target
 After=graphical-session.target
-Wants=waybar.service wob.service swayosd.service swayidle.service clipboard-history.service wallpaper.service stt-server.service herdr.service
+Wants=waybar.service wob.service swayosd.service swayidle.service clipboard-history.service wallpaper.service stt-server.service herdr.service desktop-layout.service

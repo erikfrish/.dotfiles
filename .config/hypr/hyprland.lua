@@ -110,8 +110,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("blueman-applet")
     hl.exec_cmd("~/.config/desktop/scripts/fix-xkb-wayland")
     hl.exec_cmd("systemctl --user start plasma-polkit-agent.service")
-    hl.exec_cmd("dbus-update-activation-environment --systemd SSH_AUTH_SOCK XDG_RUNTIME_DIR WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP GTK_THEME QT_QPA_PLATFORMTHEME && if uwsm check is-active hyprland.desktop; then uwsm finalize SSH_AUTH_SOCK XDG_CURRENT_DESKTOP GTK_THEME QT_QPA_PLATFORMTHEME; fi && systemctl --user daemon-reload && systemctl --user start gammastep.service swaync.service dotfiles-session.target")
-    hl.exec_cmd("~/.config/desktop/scripts/lang_switch_osd")
+    hl.exec_cmd("dbus-update-activation-environment --systemd SSH_AUTH_SOCK XDG_RUNTIME_DIR HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP GTK_THEME QT_QPA_PLATFORMTHEME && if uwsm check is-active hyprland.desktop; then uwsm finalize SSH_AUTH_SOCK XDG_CURRENT_DESKTOP GTK_THEME QT_QPA_PLATFORMTHEME; fi && systemctl --user daemon-reload && systemctl --user start gammastep.service swaync.service dotfiles-session.target")
     hl.exec_cmd("~/.config/desktop/scripts/battery_notify")
     hl.exec_cmd("~/.config/hypr/scripts/hyprland_autostart_apps")
 end)
@@ -119,7 +118,7 @@ end)
 -- Keybindings -----------------------------------------------------------------
 
 bind(mod .. " + SHIFT + SLASH", exec("hyprctl binds"), { description = "Show keybinds" })
-bind(mod .. " + SPACE", exec("~/.config/desktop/scripts/lang_indicator next; pkill -RTMIN+1 waybar"))
+bind(mod .. " + SPACE", exec("~/.config/desktop/scripts/lang_indicator next"))
 
 bind(mod .. " + I", exec("code"), { description = "Open VSCode" })
 bind(mod .. " + Z", exec("rofi -show window"), { description = "Open window switcher" })

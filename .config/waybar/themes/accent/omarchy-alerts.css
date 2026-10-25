@@ -23,7 +23,6 @@
 }
 
 #custom-notification,
-#custom-language,
 #language {
     color: @accent_alt;
 }

@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Waybar status for the kvn VLESS client. Reads the state file the kvn daemon
-# keeps in $XDG_RUNTIME_DIR, so polling never talks to the daemon.
+if [[ "${1:-}" == --watch ]]; then
+  exec python3 "${0%/*}/status_events.py" kvn
+fi
+
+# One-shot Waybar status; --watch also observes state replacement and process exit.
 
 state_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/kvn/state.json"
 

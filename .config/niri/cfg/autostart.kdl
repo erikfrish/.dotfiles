@@ -13,10 +13,8 @@ spawn-at-startup "blueman-applet"
 spawn-sh-at-startup "systemctl --user start plasma-polkit-agent.service"
 
 // Import the session environment before starting shared user services.
-spawn-sh-at-startup "dbus-update-activation-environment --systemd SSH_AUTH_SOCK XDG_RUNTIME_DIR WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP GTK_THEME QT_QPA_PLATFORMTHEME && systemctl --user daemon-reload && systemctl --user start gammastep.service swaync.service dotfiles-session.target"
+spawn-sh-at-startup "dbus-update-activation-environment --systemd SSH_AUTH_SOCK XDG_RUNTIME_DIR NIRI_SOCKET WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP GTK_THEME QT_QPA_PLATFORMTHEME && systemctl --user daemon-reload && systemctl --user start gammastep.service swaync.service dotfiles-session.target"
 
-// OSD helper for layout/Caps Lock notifications.
-spawn-sh-at-startup "~/.config/desktop/scripts/lang_switch_osd"
 
 // Low battery notifier
 spawn-sh-at-startup "~/.config/desktop/scripts/battery_notify"

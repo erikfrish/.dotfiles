@@ -54,7 +54,8 @@ playerctl
 zsh
 alacritty
 jq
-socat
+python
+python-gobject
 gsimplecal
 btop
 paru

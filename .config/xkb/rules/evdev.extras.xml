@@ -5,8 +5,8 @@
     <layout>
       <configItem>
         <name>dotfiles</name>
-        <shortDescription>ru_ctrl</shortDescription>
-        <description>Russian (Ctrl shortcuts — Latin keysyms on Ctrl/Ctrl+Shift)</description>
+        <shortDescription>ru</shortDescription>
+        <description>Russian (Ctrl shortcuts)</description>
         <languageList>
           <iso639Id>rus</iso639Id>
           <iso639Id>eng</iso639Id>
@@ -16,8 +16,8 @@
         <variant>
           <configItem>
             <name>ru_ctrl_shortcuts</name>
-            <shortDescription>ru_ctrl</shortDescription>
-            <description>Russian with Ctrl→Latin shortcut layer</description>
+            <shortDescription>ru</shortDescription>
+            <description>Russian (Ctrl shortcuts)</description>
           </configItem>
         </variant>
       </variantList>

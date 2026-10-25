@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-scripts="${0%/*}"
-before="$("$scripts/kvn_status")"
-
 kvn toggle || notify-send -u critical "kvn" "$(kvn status 2>&1 || true)" || true
-
-"$scripts/kvn_refresh" "$before"

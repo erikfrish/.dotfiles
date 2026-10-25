@@ -32,9 +32,4 @@ choice="$(printf '%s\n' "${names[@]}" | rofi -dmenu \
 id="$(jq -r --arg name "$choice" '.profiles[] | select(.name == $name) | .id' "$profiles_file" | head -n 1)"
 [[ -n "$id" ]] || exit 0
 
-scripts="${0%/*}"
-before="$("$scripts/kvn_status")"
-
 kvn connect "$id" || notify-send -u critical "kvn" "$(kvn status 2>&1 || true)" || true
-
-"$scripts/kvn_refresh" "$before"

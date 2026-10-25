@@ -32,7 +32,7 @@
   "modules-center": [
     "clock",
     "custom/notification",
-    "custom/media"
+    "mpris"
   ],
   "modules-right": [
     "tray",
@@ -46,7 +46,7 @@
     "pulseaudio#microphone",
     "battery",
     "idle_inhibitor",
-    "custom/language",
+    "hyprland/language",
     "custom/power"
   ],
 
@@ -236,15 +236,15 @@
   },
 
   "custom/gammastep": {
-    "interval": 5,
     "return-type": "json",
-    "exec": {
-      "pre": "if unit_status=\"$(systemctl --user is-active gammastep)\"; then\nstatus=\"$unit_status ($(journalctl --user -u gammastep.service -g 'Period: ' | tail -1 | cut -d ':' -f6 | xargs))\"\nelse\nstatus=\"$unit_status\"\nfi",
-      "alt": "${status:-inactive}",
-      "tooltip": "Gammastep is $status"
-    },
+    "exec": "~/.config/desktop/scripts/gammastep_status --watch",
+    "exec-on-event": false,
+    "restart-interval": 5,
     "format": "{icon}",
     "format-icons": {
+      "active": "󰖨 ",
+      "active (Transition)": "󰖨 ",
+      "failed": " ",
       "activating": "󰁪 ",
       "deactivating": "󰁪 ",
       "inactive": "? ",
@@ -324,14 +324,11 @@
     "on-click-right": "~/.config/desktop/scripts/screenshot_area"
   },
 
-  "custom/language": {
-    "exec": "~/.config/desktop/scripts/lang_indicator",
-    "interval": 1,
-    "format": "{}",
-    "on-click": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
-    "on-scroll-up": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
-    "on-scroll-down": "~/.config/desktop/scripts/lang_indicator next && pkill -RTMIN+1 waybar",
-    "signal": 1
+  "hyprland/language": {
+    "format": "{shortDescription}",
+    "on-click": "~/.config/desktop/scripts/lang_indicator next",
+    "on-scroll-up": "~/.config/desktop/scripts/lang_indicator next",
+    "on-scroll-down": "~/.config/desktop/scripts/lang_indicator next"
   },
 
   "custom/power": {
@@ -355,10 +352,17 @@
     "tooltip-format-disconnected": "Disconnected"
   },
 
-  "custom/media": {
-    "exec": "~/.config/desktop/scripts/media_status",
-    "return-type": "json",
-    "interval": 3,
+  "mpris": {
+    "format": "{status_icon}",
+    "format-stopped": "",
+    "tooltip-format": "{dynamic}",
+    "dynamic-order": ["artist", "title"],
+    "status-icons": {
+      "playing": "",
+      "paused": ""
+    },
+    "on-click": "",
+    "on-click-right": "",
     "on-click-middle": "playerctl play-pause",
     "on-scroll-up": "playerctl next",
     "on-scroll-down": "playerctl previous"
@@ -366,9 +370,10 @@
 
   "custom/vpn1": {
     "format": "{}",
-    "exec": "~/.config/desktop/scripts/vpn_status vpn1",
+    "exec": "~/.config/desktop/scripts/vpn_status vpn1 --watch",
     "return-type": "json",
-    "interval": 2,
+    "exec-on-event": false,
+    "restart-interval": 5,
     "on-click": "~/.config/desktop/scripts/vpn_toggle vpn1",
     "on-click-middle": "alacritty --class nmtui --title NetworkManager -e nmtui",
     "on-click-right": "~/.config/desktop/scripts/vpn_select vpn1"
@@ -376,9 +381,10 @@
 
   "custom/vpn2": {
     "format": "{}",
-    "exec": "~/.config/desktop/scripts/vpn_status vpn2",
+    "exec": "~/.config/desktop/scripts/vpn_status vpn2 --watch",
     "return-type": "json",
-    "interval": 2,
+    "exec-on-event": false,
+    "restart-interval": 5,
     "on-click": "~/.config/desktop/scripts/vpn_toggle vpn2",
     "on-click-middle": "alacritty --class nmtui --title NetworkManager -e nmtui",
     "on-click-right": "~/.config/desktop/scripts/vpn_select vpn2"
@@ -386,10 +392,10 @@
 
   "custom/kvn": {
     "format": "{}",
-    "exec": "~/.config/desktop/scripts/kvn_status",
+    "exec": "~/.config/desktop/scripts/kvn_status --watch",
     "return-type": "json",
-    "interval": 2,
-    "signal": 11,
+    "exec-on-event": false,
+    "restart-interval": 5,
     "on-click": "~/.config/desktop/scripts/kvn_toggle",
     "on-click-middle": "gio launch ~/.local/share/applications/kvn.desktop",
     "on-click-right": "~/.config/desktop/scripts/kvn_select"

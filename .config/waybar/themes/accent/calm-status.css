@@ -23,7 +23,6 @@
 }
 
 #clock,
-#custom-language,
 #language {
     color: @fg;
 }

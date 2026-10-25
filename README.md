@@ -250,7 +250,7 @@ The XKB layout is `us,dotfiles` with the `,ru_ctrl_shortcuts` variant. Russian t
 Both compositors use the same layouts:
 
 - `Alt+Shift` switches layout at XKB level.
-- `Mod+Space` calls `lang_indicator next`, which dispatches through Niri or Hyprland and refreshes Waybar.
+- `Mod+Space` calls `lang_indicator next`, which dispatches through Niri or Hyprland; Waybar follows the compositor event.
 
 The source files live in:
 
@@ -258,6 +258,52 @@ The source files live in:
 .config/xkb/symbols/dotfiles
 .config/xkb/rules/evdev.extras.xml
 ```
+
+## Event-Driven Desktop Status
+
+Waybar uses native `niri/language` / `hyprland/language` and `mpris` modules.
+The custom Russian XKB registry description matches its compiled group name so
+the native language modules can resolve it and show `ru`.
+
+`desktop-layout.service` subscribes to Niri's JSON event stream or Hyprland's
+layout IPC events. It writes the current layout to
+`$XDG_RUNTIME_DIR/desktop-state/layout`, shows the layout OSD only on changes,
+and sends `SIGUSR2` to Hyprlock. The lock-screen label reads this cache on startup
+and on a signal (`cmd[update:0:true]`), not every 250 ms. `lang_indicator index`
+and `lang_indicator next` remain available for keybinds and the power menu.
+Caps Lock OSD retains a 0.5-second sysfs fallback inside the persistent process:
+LED sysfs files do not reliably provide filesystem change notifications.
+
+Other custom modules produce an initial JSON record and then emit only changes:
+
+- `vpn_status vpn1 --watch` / `vpn_status vpn2 --watch`: NetworkManager D-Bus
+  events, local machine settings and persisted slot-selection changes.
+- `kvn_status --watch`: state-file changes, including atomic replacement and
+  creation after startup; Linux pidfds detect tunnel exit even when stale state
+  or a zombie PID remains.
+- `gammastep_status --watch`: systemd unit state plus the native
+  `gammastep/hooks/waybar-status` period-change hook. Its cached period is tied
+  to the current Gammastep PID, so restarting the service cannot reuse stale
+  day/night state. The hook also runs on Gammastep startup.
+
+Continuous custom modules disable `exec-on-event`; mouse actions do not spawn
+another subscription. `restart-interval` recovers an exited watcher, not a
+periodic status poll. Directory monitors follow atomic file replacements.
+CPU, temperature, brightness and the existing Hyprland workspace buttons
+still use their configured measurement intervals.
+
+After installing or updating these files:
+
+```sh
+systemctl --user daemon-reload
+systemctl --user restart desktop-layout.service gammastep.service
+~/.config/themes/theme-switch apply "$(~/.config/themes/theme-switch current)"
+```
+
+The compositor startup imports its IPC environment before starting shared
+services. `scripts/test` checks both compositor configurations and runs
+`scripts/test_desktop_events.py` for layout transitions, native XKB registry
+compatibility and actual file/process lifecycle events.
 
 ## Audio And Brightness
 

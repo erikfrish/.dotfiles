@@ -40,11 +40,16 @@ script_files() {
   } | sort -u
 }
 
-for cmd in bash stow niri Hyprland hyprctl uwsm socat waybar rofi jq ffmpeg awww mpvpaper wl-paste cliphist wob swayosd-server uv python3; do
+for cmd in bash stow niri Hyprland hyprctl uwsm waybar rofi jq ffmpeg awww mpvpaper wl-paste cliphist wob swayosd-server uv python3; do
   check_command "$cmd"
 done
 
 if command -v python3 >/dev/null 2>&1; then
+  if python3 -c 'import gi; gi.require_version("Gio", "2.0"); gi.require_version("GLibUnix", "2.0"); from gi.repository import Gio, GLibUnix'; then
+    ok "desktop event libraries available"
+  else
+    fail "desktop event libraries missing (install python-gobject)"
+  fi
   if python3 -m py_compile "$repo_dir/.config/stt-server/server.py"; then
     ok "STT server compiles"
   else

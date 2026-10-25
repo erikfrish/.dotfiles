@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "${1:-}" == period-changed ]] || exit 0
+[[ "${3:-}" =~ ^(daytime|night|transition)$ ]] || exit 1
+umask 077
+directory="${XDG_RUNTIME_DIR:-/run/user/$UID}/desktop-state"
+mkdir -p "$directory"
+pending="$directory/gammastep.$$"
+trap 'rm -f "$pending"' EXIT
+printf '%s %s %s\n' "$PPID" "${2:-none}" "$3" > "$pending"
+mv "$pending" "$directory/gammastep"

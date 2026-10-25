@@ -1,0 +1,16 @@
+[Unit]
+Description=Compositor layout events, OSD and Hyprlock updates
+PartOf=dotfiles-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.config/desktop/scripts/lang_switch_osd
+Restart=on-failure
+RestartSec=2
+UMask=0077
+NoNewPrivileges=yes
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+[Install]
+WantedBy=dotfiles-session.target

@@ -32,7 +32,6 @@
     color: @fg;
 }
 
-#custom-language,
 #language,
 #battery {
     color: @ok;

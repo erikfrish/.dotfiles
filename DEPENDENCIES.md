@@ -19,7 +19,6 @@ Packages required for these dotfiles to work. Arch Linux / CachyOS package names
 | `polkit-kde-agent` | Authentication dialog (`/usr/lib/polkit-kde-authentication-agent-1`) |
 | `xdg-desktop-portal-gtk` | File picker portal (Niri fallback) |
 | `xdg-desktop-portal-hyprland` | Hyprland screen capture and portal backend |
-| `socat` | Hyprland IPC layout-event stream for language OSD |
 | `dbus-update-activation-environment` | DBus env sync (part of `dbus`) |
 | `stow` | Dotfile symlink management |
 | `shellcheck` | Optional script lint used by `scripts/doctor` |
@@ -175,6 +174,7 @@ systemctl --user disable --now stt-server.service
 | Package | Purpose |
 |---|---|
 | `jq` | JSON parsing for desktop scripts |
+| `python` + `python-gobject` | Persistent compositor IPC, D-Bus and file-event subscribers |
 | `gsimplecal` | Calendar popup |
 | `btop` | System monitor |
 | `paru` | AUR helper (update check module) |

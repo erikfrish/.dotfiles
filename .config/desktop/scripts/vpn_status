@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "${2:-}" == --watch ]]; then
+  exec python3 "${0%/*}/status_events.py" vpn "${1:-vpn1}"
+fi
+
 lib_file="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/lib.sh"
 [ -r "$lib_file" ] && . "$lib_file"
 type dotfiles_load_machine_config >/dev/null 2>&1 && dotfiles_load_machine_config

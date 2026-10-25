@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" == --watch ]]; then
+  exec python3 "${0%/*}/status_events.py" gammastep
+fi
+exec python3 "${0%/*}/status_events.py" gammastep --once

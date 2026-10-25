@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "${1:-}" == cached ]]; then
+  cache="${XDG_RUNTIME_DIR:-/tmp/desktop-$UID}/desktop-state/layout"
+  if [[ -r "$cache" ]]; then
+    cat "$cache"
+    exit 0
+  fi
+fi
+
 normalize_layout() {
   case "$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')" in
     *russian*|*ru*) printf 'ru\n' ;;

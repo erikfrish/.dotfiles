@@ -155,5 +155,6 @@ run "vpn status local override" test_vpn_status_without_connection
 run "kvn status stale state" test_kvn_status_ignores_stale_state
 run "battery notifier without battery" test_battery_notifier_without_battery
 run "STT server compiles" test_stt_server_compiles
+run "desktop event transitions" python3 -B "$repo_dir/scripts/test_desktop_events.py"
 
 exit "$failed"
