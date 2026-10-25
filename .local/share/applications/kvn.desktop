@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=kvn
+Comment=Manage VPN profiles in a terminal
+TryExec=alacritty
+Exec=alacritty --class kvn --title kvn -e kvn
+Terminal=false
+Icon=network-vpn
+Categories=Network;
+Keywords=kvn;vpn;vless;proxy;
+StartupNotify=false

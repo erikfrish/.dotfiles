@@ -254,7 +254,8 @@
           },
           "modalities": {
             "input": [
-              "text"
+              "text",
+              "image"
             ],
             "output": [
               "text"
@@ -436,7 +437,7 @@
           "name": "reviewer (Laguna-2.1)",
           "limit": {
             "context": 256000,
-            "output": 16384
+            "output": 24576
           },
           "modalities": {
             "input": [

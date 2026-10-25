@@ -84,3 +84,10 @@ fi
 [ -r "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
 if [ -e /home/erikfrish/.nix-profile/etc/profile.d/nix.sh ]; then . /home/erikfrish/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+
+# bun completions
+[ -s "/home/erikfrish/.bun/_bun" ] && source "/home/erikfrish/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

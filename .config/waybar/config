@@ -260,9 +260,9 @@
     },
     "on-click": "~/.config/desktop/scripts/quickshell-panel power",
     "format": "{icon} {capacity}%",
-    "format-charging": "{icon} {capacity}%",
-    "format-plugged": "{icon} {capacity}%",
-    "format-full": "{icon} Full",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰚥 {capacity}%",
+    "format-full": "󰚥 Full",
     "format-alt": "{icon} {time}",
     "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
     "format-time": "{H}h {M}min",
@@ -332,6 +332,7 @@
     "return-type": "json",
     "interval": 2,
     "on-click": "~/.config/desktop/scripts/vpn_toggle vpn1",
+    "on-click-middle": "alacritty --class nmtui --title NetworkManager -e nmtui",
     "on-click-right": "~/.config/desktop/scripts/vpn_select vpn1"
   },
 
@@ -341,6 +342,7 @@
     "return-type": "json",
     "interval": 2,
     "on-click": "~/.config/desktop/scripts/vpn_toggle vpn2",
+    "on-click-middle": "alacritty --class nmtui --title NetworkManager -e nmtui",
     "on-click-right": "~/.config/desktop/scripts/vpn_select vpn2"
   },
 
@@ -351,6 +353,7 @@
     "interval": 2,
     "signal": 11,
     "on-click": "~/.config/desktop/scripts/kvn_toggle",
+    "on-click-middle": "gio launch ~/.local/share/applications/kvn.desktop",
     "on-click-right": "~/.config/desktop/scripts/kvn_select"
   }
 }

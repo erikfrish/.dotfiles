@@ -1,0 +1,6 @@
+// Laptop Herdr terminal fills the workspace without hiding panels.
+window-rule {
+    match app-id=r#"^herdr$"#
+    default-column-width { proportion 1.0; }
+    open-fullscreen false
+}

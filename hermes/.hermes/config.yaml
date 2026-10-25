@@ -1,56 +1,45 @@
-model:
-  provider: openai-codex
-  base_url: ''
-  default: gpt-5.6-luna
-  context_length: 202752
-agent:
-  max_turns: 150
-  reasoning_effort: xhigh
-display:
-  tool_progress: all
-  timestamps: true
-  skin: ares
-  show_reasoning: true
-_config_version: 33
-session_reset:
-  mode: none
 onboarding:
   seen:
-    tool_progress_prompt: true
-    busy_input_prompt: true
-custom_providers:
-  - name: wb-corellm-coder
-    base_url: https://corellm.wb.ru/coder/v1
-    key_env: CORELLM_API_KEY
+    openclaw_residue_cleanup: true
+plugins:
+  enabled:
+    - herdr-agent-state
+providers:
+  astra:
+    name: Astra Proxy
+    base_url: http://127.0.0.1:6447/v1
+    key_cmd: /usr/bin/cat -- /home/erikfrish/.local/share/astra-proxy/client-api-key
     api_mode: chat_completions
+    default_model: glm-5.3
     models:
-      wb-coder:
-        context_length: 202752
-      glm-51:
-        context_length: 202752
-  - name: wb-corellm-reviewer-a
-    base_url: https://aimodels.wb.ru/reviewer-a/v1
-    key_env: CORELLM_API_KEY
-    api_mode: chat_completions
+      gemini-4-argon: {}
+      gemini-3.8-flash: {}
+      kimi-k3: {}
+      glm-5.3: {}
+      glm-5.3-flash: {}
+      kimi-k2.7-code: {}
+      deepseek-v4-flash: {}
+      deepseek-v4-pro: {}
+  astra-openai:
+    name: Astra Proxy Responses
+    base_url: http://127.0.0.1:6447/v1
+    key_cmd: /usr/bin/cat -- /home/erikfrish/.local/share/astra-proxy/client-api-key
+    api_mode: codex_responses
+    default_model: gpt-6.1-sol
     models:
-      berrylm-l:
-        context_length: 262144
-  - name: wb-corellm-reviewer-b
-    base_url: https://aimodels.wb.ru/reviewer-b/v1
-    key_env: CORELLM_API_KEY
-    api_mode: chat_completions
+      gpt-6-astra: {}
+      gpt-6.1-sol: {}
+      gpt-6-luna: {}
+      grok-4.7: {}
+  astra-anthropic:
+    name: Astra Proxy Messages
+    base_url: http://127.0.0.1:6447
+    key_cmd: /usr/bin/cat -- /home/erikfrish/.local/share/astra-proxy/client-api-key
+    api_mode: anthropic_messages
+    default_model: claude-sonnet-5
     models:
-      berrylm-l-v2:
-        context_length: 262144
-  - name: llama-cpp
-    base_url: http://compik.home:7070/v1
-    api_mode: chat_completions
-    models:
-      qwen3.6-35b-a3b:
-        context_length: 80072
-      Qwen3-Coder-Next-UD-Q4_K_M-80072:
-        context_length: 80072
-      Qwen3-Coder-Next-UD-Q4_K_M-262144:
-        context_length: 162144
-      Qwen3-Coder-Next-UD-Q4_K_M-162144:
-        context_length: 162144
+      claude-fable-5-1: {}
+      claude-opus-5-5: {}
+      claude-opus-4-6: {}
+      claude-sonnet-5: {}
+      claude-haiku-5-5: {}
