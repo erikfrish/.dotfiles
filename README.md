@@ -431,7 +431,7 @@ iw dev wlan0 get power_save
 
 Resume needs no `resume=` kernel argument or Limine change: systemd stores the swapfile location in the `HibernateLocation` EFI variable and the `systemd` initramfs hook resumes from it.
 
-The root filesystem is not encrypted, so the hibernation image (RAM contents, including unlocked secrets) is written to disk in plain form.
+The swapfile lives inside the LUKS-encrypted root (see Disk Encryption), so the hibernation image is encrypted at rest; resume runs after the initramfs unlocks `root`.
 
 Test after setup, then check the resume in the next boot's journal:
 
@@ -439,6 +439,24 @@ Test after setup, then check the resume in the next boot's journal:
 systemctl hibernate
 journalctl -b -u systemd-hibernate-resume.service
 ```
+
+### Disk Encryption
+
+On laptopchik the btrfs root partition is LUKS2 (`aes-xts-plain64`, 512-bit key). It was converted in place with `cryptsetup reencrypt --encrypt --reduce-device-size 32m`, so the btrfs UUID and Limine `root=UUID=...` stayed unchanged; only the ESP (`/boot`) is unencrypted. The setup is system state, not stowed files:
+
+- `/etc/mkinitcpio.conf`: `sd-encrypt` sits between `plymouth` and `filesystems`, so plymouth draws the PIN prompt.
+- `/etc/crypttab`: `root UUID=<luks-uuid> none fido2-device=auto,discard,x-initrd.attach`. mkinitcpio copies `x-initrd.attach` entries into the initramfs; `/etc/crypttab.initramfs` is deprecated.
+- Rebuild with `sudo limine-mkinitcpio`, not plain `mkinitcpio -P`: `limine.conf` pins initramfs hashes.
+- Keyslots: one `systemd-fido2` token per YubiKey (PIN + touch) and a `systemd-recovery` key stored in Bitwarden. No passphrase slot.
+
+Enroll a new or replacement YubiKey (only that key plugged in) or rotate the recovery key, authenticating with an enrolled YubiKey:
+
+```sh
+sudo systemd-cryptenroll --unlock-fido2-device=auto --fido2-device=auto /dev/nvme0n1p2
+sudo systemd-cryptenroll --unlock-fido2-device=auto --wipe-slot=recovery --recovery-key /dev/nvme0n1p2
+```
+
+Snapper snapshots taken before the conversion boot an initramfs without `sd-encrypt` and cannot unlock the root.
 
 ## Notes
 
