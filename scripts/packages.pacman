@@ -64,6 +64,8 @@ git
 openssh
 libfido2
 yubikey-manager
+yubikey-touch-detector
+socat
 curl
 stow
 shellcheck

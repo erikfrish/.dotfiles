@@ -9,7 +9,7 @@
 output "eDP-1" {
     mode "3072x1920@120.000"
     scale 1.75
-    variable-refresh-rate
+    // VRR makes i915 disable panel self-refresh (PSR); measured PSR2 only with it off.
 }
 
 output "DP-4" {

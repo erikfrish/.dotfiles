@@ -1,7 +1,9 @@
 * {
     border: none;
     border-radius: 0;
-    font-family: "JetBrainsMono ExtraBold", "Symbols Nerd Font", "Font Awesome 6 Free", sans-serif;
+    /* Symbols first: JetBrainsMono Nerd Font clips icons (see omarchy-strip.css). */
+    font-family: "Symbols Nerd Font", "JetBrainsMono Nerd Font", "Font Awesome 6 Free", sans-serif;
+    font-weight: 800;
     font-size: 14px;
     min-height: 0;
     margin: 0;

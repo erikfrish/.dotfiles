@@ -3,7 +3,11 @@
     border: none;
     border-radius: 0;
     color: @fg;
-    font-family: "JetBrainsMono Nerd Font", "JetBrainsMono ExtraBold", "Symbols Nerd Font", sans-serif;
+    /* Symbols Nerd Font first: it has only icon glyphs with real advance
+       widths, so text still comes from JetBrainsMono. JetBrainsMono Nerd
+       Font squeezes icons into a 600-unit cell while drawing them up to
+       twice as wide, which clips icon-only modules such as Wi-Fi. */
+    font-family: "Symbols Nerd Font", "JetBrainsMono Nerd Font", sans-serif;
     font-size: 12px;
     min-height: 0;
     margin: 0;

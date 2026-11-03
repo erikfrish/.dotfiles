@@ -8,6 +8,7 @@ PopupBase {
     panelTitle: "Media"
     panelSubtitle: currentTitle || "No active player"
     panelIcon: "󰐊"
+    panelAtPointer: true
 
     property string playersText: ""
     property string metadataText: ""

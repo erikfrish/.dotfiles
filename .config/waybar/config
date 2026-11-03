@@ -24,12 +24,12 @@
     "temperature",
     "memory",
     "custom/gpu",
-    "custom/wakatime"
+    "custom/wakatime",
+    "mpris"
   ],
   "modules-center": [
     "clock",
-    "custom/notification",
-    "mpris"
+    "custom/notification"
   ],
   "modules-right": [
     "tray",
@@ -298,12 +298,12 @@
   // ---------------------------------------------------------------------------
   "tray": {
     "icon-size": 16,
-    "spacing": 6
+    "spacing": 4
   },
 
   "network": {
     "interval": 1,
-    "format-wifi": " {essid}",
+    "format-wifi": "",
     "format-ethernet": "󰈀 eth",
     "format-disconnected": "󰖪",
     "tooltip-format-wifi": "{essid}\n{ifname}: {ipaddr}/{cidr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}",
@@ -318,12 +318,12 @@
     "format-stopped": "",
     "tooltip-format": "{dynamic}",
     "dynamic-order": ["artist", "title"],
+    // Shows the action a click performs, not the current state.
     "status-icons": {
-      "playing": "",
-      "paused": ""
+      "playing": "",
+      "paused": ""
     },
-    "on-click": "~/.config/desktop/scripts/quickshell-panel media",
-    "on-click-middle": "playerctl play-pause",
+    "on-click": "playerctl play-pause",
     "on-click-right": "~/.config/desktop/scripts/quickshell-panel media",
     "on-scroll-up": "playerctl next",
     "on-scroll-down": "playerctl previous"

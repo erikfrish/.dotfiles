@@ -102,6 +102,8 @@ systemctl --user disable --now stt-server.service
 |---|---|
 | `swaync` | Notification center |
 | `libnotify` | `notify-send` CLI |
+| `yubikey-touch-detector` | Detects when a YubiKey waits for touch (`yubikey-touch-notify.service`) |
+| `socat` | Reads the touch-detector socket |
 
 ## Clipboard
 

@@ -63,8 +63,8 @@ window#waybar > box {
 #custom-vpn1,
 #custom-vpn2 {
     min-width: 13px;
-    padding-left: 2px;
-    padding-right: 6px;
+    padding-left: 4px;
+    padding-right: 4px;
     margin-left: 1px;
     margin-right: 1px;
 }
@@ -73,6 +73,6 @@ window#waybar > box {
     min-width: 13px;
     margin-left: 1px;
     margin-right: 1px;
-    padding-left: 3px;
-    padding-right: 5px;
+    padding-left: 4px;
+    padding-right: 4px;
 }

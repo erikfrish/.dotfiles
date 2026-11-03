@@ -28,7 +28,7 @@ alias ls='eza'
 alias files='yazi'
 alias goupdate='curl -sL https://raw.githubusercontent.com/DieTime/go-up/master/go-up.sh | bash'
 alias oc='opencode'
-alias tsh='tsh-17'
+alias tsh17='tsh-17'
 alias luks-fido-open='luks-fido open'
 alias luks-fido-mount='luks-fido open'
 alias luks-fido-umount='luks-fido close'
@@ -91,3 +91,14 @@ if [ -e /home/erikfrish/.nix-profile/etc/profile.d/nix.sh ]; then . /home/erikfr
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# YAM-панель Миди: yamd слушает только 127.0.0.1:8099 на колонке.
+# yam-panel — SSH-туннель на http://localhost (порт 80, нужен sudo), Ctrl-C закрывает.
+export YAM_URL=http://127.0.0.1:8099
+yam-panel() {
+  local sock=${XDG_RUNTIME_DIR:-/tmp}/yam-panel.sock
+  ssh -M -S "$sock" -o ExitOnForwardFailure=yes -fN -L 8099:127.0.0.1:8099 midi1 || return 1
+  trap "ssh -S '$sock' -O exit midi1 2>/dev/null" EXIT
+  echo "YAM: http://localhost  (Ctrl-C — закрыть)"
+  sudo socat TCP-LISTEN:80,bind=127.0.0.1,reuseaddr,fork TCP:127.0.0.1:8099
+}

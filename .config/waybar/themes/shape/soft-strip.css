@@ -44,7 +44,7 @@ window#waybar > box {
     border-radius: 14px;
     margin: 0 2px;
     min-height: 20px;
-    padding: 0 8px;
+    padding: 0 6px;
 }
 
 #workspaces {
@@ -65,8 +65,8 @@ window#waybar > box {
 #custom-power,
 #idle_inhibitor {
     min-width: 24px;
-    padding-left: 6px;
-    padding-right: 8px;
+    padding-left: 7px;
+    padding-right: 7px;
 }
 
 #custom-menu,
@@ -77,12 +77,14 @@ window#waybar > box {
 
 #custom-cycle_wall {
     min-width: 19px;
-    padding-right: 4px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 #custom-menu {
     min-width: 21px;
-    padding-right: 2px;
+    padding-left: 1px;
+    padding-right: 1px;
 }
 
 #custom-notification {
@@ -92,14 +94,14 @@ window#waybar > box {
 #custom-vpn1,
 #custom-vpn2 {
     min-width: 22px;
-    padding-left: 8px;
-    padding-right: 11px;
+    padding-left: 7px;
+    padding-right: 7px;
 }
 
 #custom-kvn {
     min-width: 22px;
-    padding-left: 9px;
-    padding-right: 10px;
+    padding-left: 7px;
+    padding-right: 7px;
 }
 
 #custom-power {

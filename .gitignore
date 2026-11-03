@@ -3,6 +3,8 @@
 ignore_me
 .gitconfig.local
 .ssh/config.local
+.zshrc.local
+.config/opencode/antigravity-accounts.json
 .ssh/yubikeys.tsv
 .config/waybar/style.css
 .config/rofi/theme.rasi
@@ -44,3 +46,14 @@ __pycache__/
 .local/bin/gcx
 .local/bin/omp
 .local/bin/tern
+.local/bin/camoufox
+.local/bin/fpgen
+.local/bin/httpx
+.local/bin/playwright
+.local/bin/rich-click
+.local/bin/tsh-17
+.local/bin/gws
+.local/bin/obsidian-wiki
+.local/bin/trafilatura
+.local/bin/yt
+.local/bin/yt-dlp

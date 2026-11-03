@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Desktop notification while a YubiKey is actually waiting for touch.
+# yubikey-touch-detector reads the FIDO "user presence needed" keepalive from
+# hidraw, so this fires for git signing, ssh and sudo alike, never for
+# operations that do not block on the key, and closes once the wait ends.
+set -uo pipefail
+
+SOCKET="${XDG_RUNTIME_DIR:?}/yubikey-touch-detector.socket"
+SOUND="${KEY_TOUCH_SOUND:-/usr/share/sounds/freedesktop/stereo/dialog-warning.oga}"
+
+notification_id=""
+declare -A waiting=()
+
+show() {
+  notification_id="$(notify-send --print-id --app-name=YubiKey --urgency=critical --expire-time=0 \
+    '🔑 YubiKey — нужен тап' 'Коснитесь ключа, чтобы продолжить.' 2>/dev/null)" || notification_id=""
+  if [ -f "$SOUND" ]; then
+    paplay "$SOUND" >/dev/null 2>&1 &
+  fi
+}
+
+close() {
+  gdbus call --session --dest org.freedesktop.Notifications \
+    --object-path /org/freedesktop/Notifications \
+    --method org.freedesktop.Notifications.CloseNotification "$notification_id" >/dev/null 2>&1 || true
+  notification_id=""
+}
+
+trap '[ -z "$notification_id" ] || close' EXIT
+
+# Events are fixed 5-byte messages without separators: U2F_1, U2F_0, MAC_1, ...
+while IFS= read -r -N 5 event; do
+  kind="${event%_*}"
+  case "${event#*_}" in
+    1) waiting[$kind]=1 ;;
+    0) unset "waiting[$kind]" ;;
+    *) continue ;;
+  esac
+
+  if [ "${#waiting[@]}" -gt 0 ]; then
+    [ -n "$notification_id" ] || show
+  else
+    [ -z "$notification_id" ] || close
+  fi
+done < <(socat -u "UNIX-CONNECT:$SOCKET" -)
+
+# The detector closed the socket; exit non-zero so systemd reconnects.
+exit 1

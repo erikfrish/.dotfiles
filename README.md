@@ -7,7 +7,9 @@ Both sessions share one launcher stack, one theme switcher, one volume path, one
 ## Desktop
 
 - **Compositors:** Niri in `cfg/*.kdl`, or Hyprland 0.55+ in `hyprland.lua`.
-- **Bar:** Waybar selects the compositor's workspace config automatically, with shared VPN, Wakatime, audio, brightness, battery, language, and notification modules. The `custom/kvn` button drives the [kvn](https://github.com/yarikov/kvn) VLESS client: left click runs `kvn toggle`, right click picks a profile in Rofi and connects to it.
+- **Bar:** Waybar selects the compositor's workspace config automatically, with shared VPN, Wakatime, audio, brightness, battery, language, and notification modules. The `custom/kvn` button drives the [kvn](https://github.com/yarikov/kvn) VLESS client: left click runs `kvn toggle`, right click picks a profile in Rofi and connects to it, and middle click opens the kvn TUI in Alacritty through the shared `kvn.desktop` launcher. Opening the TUI does not connect a VPN.
+- **NetworkManager VPN slots:** left click toggles the selected connection, right click selects a profile, and middle click opens `nmtui` in Alacritty. Opening the interface does not change connections.
+- **Battery:** charging uses a battery-with-lightning icon; plugged and full states use a power-plug icon, so external power remains visible at 100%.
 - **Popups:** Niri uses Quickshell panels; Hyprland keeps native menu, pavucontrol, and wlogout actions.
 - **Launcher:** Rofi for apps, clipboard, wallpapers, and theme selection.
 - **Locking:** hyprlock with PAM fingerprint support and password fallback.
@@ -120,6 +122,12 @@ These files are intentionally ignored and should stay outside Git:
 ~/.config/Code/User/settings.json
 ~/.zshrc.local
 ```
+
+Installed binaries and package-manager entry points are machine-local too:
+`camoufox`, `fpgen`, `httpx`, `playwright`, `rich-click`, `tsh-17`, `gws`,
+`obsidian-wiki`, `trafilatura`, `yt`, and `yt-dlp` under `~/.local/bin` are
+ignored, not distributed by Git. Keep installed copies in place; Git tracks
+the repository's own wrappers, not these tools or their absolute symlinks.
 
 On a machine that already has local Git or SSH config, move it into the local override files before stowing:
 
@@ -266,6 +274,9 @@ The source files live in:
 Waybar uses native `niri/language` / `hyprland/language` and `mpris` modules.
 The custom Russian XKB registry description matches its compiled group name so
 the native language modules can resolve it and show `ru`.
+The media module sits on the left: left click toggles playback, right click
+opens the Quickshell media panel near the pointer, and scrolling changes tracks.
+The Wi-Fi module shows an icon; its tooltip retains the SSID and connection details.
 
 `desktop-layout.service` subscribes to Niri's JSON event stream or Hyprland's
 layout IPC events. It writes the current layout to
@@ -365,11 +376,16 @@ clipboard-history.service
 herdr.service
 wallpaper.service
 stt-server.service
+yubikey-touch-notify.service
 ```
 
 Both compositors import the Wayland environment before starting this target, Gammastep,
 and swaync. The dotfiles session services are tied to `graphical-session.target`
 and stop when the graphical session ends; Herdr remains persistent by design.
+
+YubiKey touch notifications use the packaged `yubikey-touch-detector` socket
+and `socat`, rather than an `ssh-keygen` wrapper. Install both dependencies
+before starting `yubikey-touch-notify.service`; see `notes/yubikey_pool.md`.
 
 The Herdr user service is started from this target only after the compositor imports the Wayland environment. Its drop-in skips the earlier `default.target` start, which otherwise leaves Herdr-spawned agents without `WAYLAND_DISPLAY` and breaks image paste.
 

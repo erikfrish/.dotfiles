@@ -156,3 +156,7 @@ ControlPersist 4h
 ```
 
 Для GitHub persist длиннее, для остальных хостов короче. Это снижает количество повторных YubiKey touch/password prompts.
+
+## Уведомление о касании
+
+`yubikey-touch-notify.service` (в `dotfiles-session.target`) слушает сокет `yubikey-touch-detector`. Детектор читает с `/dev/hidraw*` FIDO keepalive «нужно присутствие пользователя», поэтому уведомление появляется только когда ключ реально ждёт тап (git-подпись, ssh, sudo) и закрывается после касания или таймаута. Обёртки вокруг `ssh-keygen` нет: угадывать по команде нельзя, подпись может упасть до запроса к ключу, а ssh через `ControlMaster` не трогает ключ вовсе.

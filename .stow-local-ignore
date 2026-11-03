@@ -12,3 +12,6 @@
 .*\.sh
 .*\.png
 ^\.zshrc\.local$
+^\.gitconfig\.local$
+^/\.ssh/config\.local$
+^/\.config/opencode/antigravity-accounts\.json$

@@ -1,0 +1,15 @@
+[Unit]
+Description=YubiKey touch notifications
+PartOf=dotfiles-session.target
+# Connecting to the socket activates the packaged yubikey-touch-detector.service.
+Requires=yubikey-touch-detector.socket
+After=graphical-session.target yubikey-touch-detector.socket
+
+[Service]
+Type=simple
+ExecStart=%h/.config/desktop/scripts/yubikey_touch_notify
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=dotfiles-session.target
