@@ -1,0 +1,7 @@
+# Work split-DNS zones for scripts/setup-wb-dns, one per line or space-separated.
+# Copy to wb-dns-zones (gitignored) and list the real zones there.
+# Each zone becomes a ~zone routing domain on the WB VPN profile.
+# Check a zone exists first: dig @<wb-dns> <zone> SOA
+example.corp
+10.in-addr.arpa
+k8s.example-cluster

@@ -38,6 +38,11 @@
 # DOTFILES_HOME_DNS_ROUTE_METRIC=5
 # DOTFILES_HOME_DNS_RECONNECT=0
 
+# Work split DNS for scripts/setup-wb-dns. Zones live in the gitignored
+# ~/.config/dotfiles/wb-dns-zones (template: wb-dns-zones.example).
+# DOTFILES_WB_DNS_CONNECTION=wb
+# DOTFILES_WB_DNS_ZONES_FILE="$HOME/.config/dotfiles/wb-dns-zones"
+
 # DDC/CI setup defaults for scripts/setup-ddcci.
 # DOTFILES_DDCCI_BUS=10
 # DOTFILES_DDCCI_ADDR=0x37

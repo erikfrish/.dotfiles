@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_dir="$(cd -- "$script_dir/.." && pwd)"
+
+# shellcheck source=../.config/dotfiles/lib.sh
+. "$repo_dir/.config/dotfiles/lib.sh"
+dotfiles_load_machine_config
+
+connection="${1:-${DOTFILES_WB_DNS_CONNECTION:-wb}}"
+zones_file="${DOTFILES_WB_DNS_ZONES_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/wb-dns-zones}"
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [networkmanager-connection]
+
+Add work split-DNS routing domains (~zone) to the WB VPN profile, so work
+hosts resolve through the VPN DNS servers while another VPN keeps ~. for
+public names. Existing search domains are kept.
+
+If the connection is active, the domains are applied live with resolvectl.
+The VPN is never reconnected and routes are not changed.
+
+Zones are read from $zones_file
+(gitignored; template: wb-dns-zones.example), one per line or space-separated,
+# comments allowed.
+
+Machine-local overrides live in ~/.config/dotfiles/machine.conf:
+  DOTFILES_WB_DNS_CONNECTION=wb
+  DOTFILES_WB_DNS_ZONES_FILE=~/.config/dotfiles/wb-dns-zones
+EOF
+}
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+  usage
+  exit 0
+fi
+
+for command_name in nmcli resolvectl; do
+  command -v "$command_name" >/dev/null 2>&1 || {
+    printf 'missing command: %s\n' "$command_name" >&2
+    exit 1
+  }
+done
+
+nmcli connection show "$connection" >/dev/null 2>&1 || {
+  printf 'NetworkManager connection not found: %s\n' "$connection" >&2
+  exit 1
+}
+
+[ -r "$zones_file" ] || {
+  printf 'zones file not found: %s\n' "$zones_file" >&2
+  printf 'create it from %s.example\n' "$repo_dir/.config/dotfiles/wb-dns-zones" >&2
+  exit 1
+}
+zones="$(sed 's/#.*//' "$zones_file")"
+[ -n "${zones//[[:space:]]/}" ] || {
+  printf 'zones file is empty: %s\n' "$zones_file" >&2
+  exit 1
+}
+
+current="$(nmcli -g ipv4.dns-search connection show "$connection")"
+declare -a domains=()
+declare -A seen=()
+IFS=',' read -r -a existing <<<"$current"
+for domain in "${existing[@]}"; do
+  domain="${domain# }"
+  [ -n "$domain" ] || continue
+  [ -z "${seen[$domain]:-}" ] || continue
+  seen[$domain]=1
+  domains+=("$domain")
+done
+
+declare -a added=()
+for zone in $zones; do
+  domain="~$zone"
+  [ -z "${seen[$domain]:-}" ] || continue
+  seen[$domain]=1
+  domains+=("$domain")
+  added+=("$domain")
+done
+
+if [ "${#added[@]}" -eq 0 ]; then
+  printf '==> %s already has all work DNS zones\n' "$connection"
+else
+  printf '==> Adding to %s: %s\n' "$connection" "${added[*]}"
+  joined="$(IFS=','; printf '%s' "${added[*]}")"
+  nmcli connection modify "$connection" +ipv4.dns-search "$joined"
+fi
+
+# For VPN profiles GENERAL.IP-IFACE/DEVICES name the underlying link (wlan0),
+# not the tunnel. Resolve the tunnel as the route to the VPN DNS server.
+dns_server="$(nmcli -g IP4.DNS connection show "$connection" 2>/dev/null | cut -d'|' -f1 || true)"
+dns_server="${dns_server%% *}"
+if [ -z "$dns_server" ]; then
+  printf '==> %s is not active; domains apply on next connect\n' "$connection"
+  exit 0
+fi
+
+device="$(ip -o route get "$dns_server" | sed -n 's/.* dev \([^ ]*\).*/\1/p')"
+base_device="$(nmcli -g GENERAL.DEVICES connection show "$connection" 2>/dev/null || true)"
+if [ -z "$device" ] || { [ "$(nmcli -g connection.type connection show "$connection")" = vpn ] && [ "$device" = "$base_device" ]; }; then
+  printf 'Cannot find the VPN tunnel for %s (DNS %s routes via %s); live apply skipped\n' \
+    "$connection" "$dns_server" "${device:-?}" >&2
+  exit 1
+fi
+
+printf '==> Applying live on %s (no reconnect)\n' "$device"
+resolvectl domain "$device" "${domains[@]}"
+resolvectl flush-caches
+resolvectl domain "$device"
+
+# Check only newly added zones: SERVFAIL zones time out, so a full sweep is slow.
+for domain in "${added[@]}"; do
+  zone="${domain#\~}"
+  case "$zone" in
+    *.in-addr.arpa) continue ;;
+  esac
+  if answer="$(resolvectl query --type=SOA "$zone" 2>&1)" && printf '%s\n' "$answer" | grep -q -- "link: $device"; then
+    printf 'OK   %s via %s\n' "$zone" "$device"
+  else
+    printf 'WARN %s: %s\n' "$zone" "$(printf '%s\n' "$answer" | head -n1)" >&2
+  fi
+done

@@ -19,6 +19,7 @@ ignore_me
 .config/wob/wob.ini
 .config/swayosd/style.css
 .config/dotfiles/machine.conf
+.config/dotfiles/wb-dns-zones
 .config/alacritty/theme.toml
 .config/kdeglobals
 .local/share/color-schemes/Dotfiles.colors

@@ -68,6 +68,7 @@ sudo kvn setup --polkit
 sudo ~/.dotfiles/scripts/setup-ddcci
 ~/.dotfiles/scripts/setup-ssh-agent
 ~/.dotfiles/scripts/setup-home-dns
+~/.dotfiles/scripts/setup-wb-dns
 ~/.dotfiles/scripts/setup-stt
 ```
 
@@ -97,6 +98,22 @@ in `machine.conf` if it is not `eth`:
 This routes `*.home` to the local OPNsense DNS while VPN default DNS (`~.`)
 continues to handle public names. It also adds a persistent `10.69.0.0/16`
 route through the local gateway so home VLANs bypass full-tunnel VPNs.
+
+Configure work split DNS on the WB NetworkManager VPN profile:
+
+```sh
+~/.dotfiles/scripts/setup-wb-dns
+```
+
+This adds a `~zone` routing domain for every zone in the gitignored
+`~/.config/dotfiles/wb-dns-zones` (seeded by `scripts/setup` from
+`wb-dns-zones.example`; internal names stay out of Git), keeping any domains
+already on the profile. Work names then resolve through the WB DNS while kvn
+keeps `~.` for public names. An active VPN is updated live with `resolvectl`;
+it is never reconnected, and routes are untouched. systemd-resolved matches
+suffixes only, so each cluster zone must be listed explicitly; check it first
+with `dig @<wb-dns> k8s.<cluster> SOA`. Copy the zones file between machines
+out of band.
 
 Validate a machine after install:
 
