@@ -9,10 +9,16 @@ repo_dir="$(cd -- "$script_dir/.." && pwd)"
 dotfiles_load_machine_config
 
 connection="${1:-${DOTFILES_HOME_DNS_CONNECTION:-}}"
-domain="${DOTFILES_HOME_DNS_DOMAIN:-home}"
-dns_server="${DOTFILES_HOME_DNS_SERVER:-10.69.1.1}"
-vpn_connections="${DOTFILES_HOME_DNS_VPN_CONNECTIONS:-wb vpnchik}"
-home_route_prefixes="${DOTFILES_HOME_DNS_ROUTE_PREFIXES:-10.69.0.0/16}"
+domain="${DOTFILES_HOME_DNS_DOMAIN:-home.arpa}"
+dns_server="${DOTFILES_HOME_DNS_SERVER:-10.69.11.1}"
+dns_priority="${DOTFILES_HOME_DNS_PRIORITY:-20}"
+check_host="${DOTFILES_HOME_DNS_CHECK_HOST:-pve}"
+# 91.230.107.224/32 is the WB OpenVPN server (openvpn.wb.ru). It must be in the
+# main table before wb connects: kvn's rule 9002 ignores the main default route,
+# so without a specific route the handshake leaves via kvn0, wb's own routes
+# then move the socket to the LAN, and the session stalls (tls-crypt
+# "packet replay", zero RX on tun0).
+home_route_prefixes="${DOTFILES_HOME_DNS_ROUTE_PREFIXES:-10.69.0.0/16 10.13.0.0/16 91.230.107.224/32}"
 home_route_gateway="${DOTFILES_HOME_DNS_ROUTE_GATEWAY:-}"
 home_route_metric="${DOTFILES_HOME_DNS_ROUTE_METRIC:-5}"
 restart_services="${DOTFILES_HOME_DNS_RESTART_SERVICES:-auto}"
@@ -22,18 +28,19 @@ usage() {
 Usage: $(basename "$0") [networkmanager-connection]
 
 Configure NetworkManager split DNS so *.$domain resolves through $dns_server,
-while VPN connections can keep the default DNS route (~.). Also add home
-network routes so local VLANs bypass full-tunnel VPNs.
+while VPN connections can keep the default DNS route (~.). Also add routes so
+home VLANs and the WB VPN server bypass full-tunnel VPNs and kvn.
 
 If networkmanager-connection is omitted, the first active ethernet/Wi-Fi
 connection is used.
 
 Machine-local overrides live in ~/.config/dotfiles/machine.conf:
   DOTFILES_HOME_DNS_CONNECTION=eth
-  DOTFILES_HOME_DNS_SERVER=10.69.1.1
-  DOTFILES_HOME_DNS_DOMAIN=home
-  DOTFILES_HOME_DNS_VPN_CONNECTIONS="wb vpnchik"
-  DOTFILES_HOME_DNS_ROUTE_PREFIXES="10.69.0.0/16"
+  DOTFILES_HOME_DNS_SERVER=10.69.11.1
+  DOTFILES_HOME_DNS_DOMAIN=home.arpa
+  DOTFILES_HOME_DNS_PRIORITY=20
+  DOTFILES_HOME_DNS_CHECK_HOST=pve
+  DOTFILES_HOME_DNS_ROUTE_PREFIXES="10.69.0.0/16 10.13.0.0/16 91.230.107.224/32"
   DOTFILES_HOME_DNS_ROUTE_GATEWAY=10.69.11.1
   DOTFILES_HOME_DNS_ROUTE_METRIC=5
   DOTFILES_HOME_DNS_RESTART_SERVICES=auto
@@ -70,13 +77,14 @@ resolved_has_home_dns() {
   command -v resolvectl >/dev/null 2>&1 || return 1
   resolvectl status "$device" 2>/dev/null |
     grep -F "DNS Servers: $dns_server" >/dev/null || return 1
+  # resolved shows ~domain merged into "domain" when DHCP also sends it as search.
   resolvectl status "$device" 2>/dev/null |
-    grep -F "DNS Domain:" | grep -F "~$domain" >/dev/null || return 1
+    grep -F "DNS Domain:" | grep -E "[ ~]${domain//./\\.}( |\$)" >/dev/null || return 1
 }
 
 home_dns_resolves() {
   command -v resolvectl >/dev/null 2>&1 || return 1
-  resolvectl query "compik.$domain" >/dev/null 2>&1
+  resolvectl query "$check_host.$domain" >/dev/null 2>&1
 }
 
 if [ -z "$connection" ]; then
@@ -109,12 +117,12 @@ fi
 active_device="$(nmcli -g GENERAL.DEVICES connection show "$connection" 2>/dev/null || true)"
 
 printf '==> Configuring split DNS on connection: %s\n' "$connection"
+# DHCP DNS and search domains stay enabled; ~domain only pins routing for it.
 nmcli connection modify "$connection" \
   ipv4.dns "$dns_server" \
-  ipv4.dns-search "$domain ~${domain}" \
-  ipv4.dns-priority 0 \
-  ipv4.ignore-auto-dns yes \
-  ipv4.routed-dns yes
+  ipv4.dns-search "~${domain}" \
+  ipv4.dns-priority "$dns_priority" \
+  ipv4.ignore-auto-dns no
 
 if [ -n "$home_route_prefixes" ]; then
   if [ -z "$home_route_gateway" ] && [ -n "$active_device" ] && [ "$active_device" != "--" ]; then
@@ -139,19 +147,6 @@ if [ -n "$home_route_prefixes" ]; then
       esac
     done
   fi
-fi
-
-if [ -n "$vpn_connections" ]; then
-  for vpn_connection in $vpn_connections; do
-    if nmcli connection show "$vpn_connection" >/dev/null 2>&1; then
-      printf '==> Normalizing VPN DNS priority: %s\n' "$vpn_connection"
-      nmcli connection modify "$vpn_connection" \
-        ipv4.dns-priority 0 \
-        ipv6.dns-priority 0
-    else
-      printf 'WARN VPN connection not found, skipped: %s\n' "$vpn_connection" >&2
-    fi
-  done
 fi
 
 if [ -n "$active_device" ] && [ "$active_device" != "--" ]; then
@@ -192,8 +187,8 @@ if command -v resolvectl >/dev/null 2>&1; then
 fi
 
 if home_dns_resolves; then
-  printf '\nValidation: compik.%s resolves successfully.\n' "$domain"
+  printf '\nValidation: %s.%s resolves successfully.\n' "$check_host" "$domain"
 else
-  printf '\nWARN compik.%s still does not resolve through systemd-resolved.\n' "$domain" >&2
-  printf 'Direct DNS test: dig +short @%s compik.%s\n' "$dns_server" "$domain" >&2
+  printf '\nWARN %s.%s still does not resolve through systemd-resolved.\n' "$check_host" "$domain" >&2
+  printf 'Direct DNS test: dig +short @%s %s.%s\n' "$dns_server" "$check_host" "$domain" >&2
 fi

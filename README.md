@@ -95,9 +95,12 @@ in `machine.conf` if it is not `eth`:
 ~/.dotfiles/scripts/setup-home-dns
 ```
 
-This routes `*.home` to the local OPNsense DNS while VPN default DNS (`~.`)
-continues to handle public names. It also adds a persistent `10.69.0.0/16`
-route through the local gateway so home VLANs bypass full-tunnel VPNs.
+This routes `*.home.arpa` to the home router DNS (`10.69.11.1`) while VPN
+default DNS (`~.`) continues to handle public names. It also adds persistent
+`10.69.0.0/16` and `10.13.0.0/16` routes through the local gateway so home
+VLANs bypass full-tunnel VPNs, plus `91.230.107.224/32` (the WB OpenVPN
+server) so the wb tunnel never starts through kvn. Current per-host profiles
+for `compik` and `laptopchik` are recorded in `notes/network.md`.
 
 Configure work split DNS on the WB NetworkManager VPN profile:
 
