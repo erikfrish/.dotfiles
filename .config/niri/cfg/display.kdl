@@ -12,7 +12,9 @@ output "eDP-1" {
     // VRR makes i915 disable panel self-refresh (PSR); measured PSR2 only with it off.
 }
 
-output "DP-4" {
+// Samsung Odyssey G5, matched by make/model/serial: its connector moves
+// between DP-3 and DP-4.
+output "Samsung Electric Company Odyssey G5 HK2X500523" {
     mode "2560x1440@164.833"
     variable-refresh-rate
 }

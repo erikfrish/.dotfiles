@@ -54,7 +54,7 @@ launch_band() {
     app_path=$(compgen -G "$DOTFILES_BAND_GLOB" | sort | head -n1)
     [ -f "$app_path" ] || return 1
 
-    if [ -z "$(window_id '.app_id == "Band"')" ]; then
+    if [ -z "$(window_id '.app_id | startswith("Band")')" ]; then
         "$app_path" --silent >/dev/null 2>&1 &
     fi
 }
@@ -128,7 +128,7 @@ code_id=$(wait_window ".app_id == \"$DOTFILES_IDE_APP_ID\"" || true)
 if [ "$DOTFILES_ENABLE_BAND" = 1 ]; then
     launch_band || true
 fi
-band_id=$(wait_window '.app_id == "Band"' || true)
+band_id=$(wait_window '.app_id | startswith("Band")' || true)
 [ -n "${band_id:-}" ] && move_to_workspace "$band_id" 3
 
 if [ -z "$(window_id "(.app_id | test(\"$DOTFILES_CHAT_APP_ID_REGEX\"; \"i\"))")" ]; then

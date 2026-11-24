@@ -42,13 +42,22 @@ sync_pip_to_focused_workspace() {
   done
 }
 
-sync_pip_to_focused_workspace
+# One failed `niri msg`/`jq` call must not kill the daemon: errexit is
+# suspended inside `||`, and a dropped event stream is reopened.
+safe_sync() {
+  sync_pip_to_focused_workspace || log "sync failed (exit $?)"
+}
 
-niri msg -j event-stream 2>/dev/null |
-while read -r line; do
-  case "$(printf '%s' "$line" | jq -r 'keys[0]')" in
-    WorkspaceActivated|WorkspacesChanged|WindowsChanged|WindowOpenedOrChanged|WindowClosed)
-      sync_pip_to_focused_workspace
-      ;;
-  esac
+while niri msg version >/dev/null 2>&1; do
+  safe_sync
+  niri msg -j event-stream 2>/dev/null |
+  while read -r line; do
+    case "$(printf '%s' "$line" | jq -r 'keys[0]' 2>/dev/null)" in
+      WorkspaceActivated|WorkspacesChanged|WindowsChanged|WindowOpenedOrChanged|WindowClosed)
+        safe_sync
+        ;;
+    esac
+  done || true
+  log "event stream ended, reconnecting"
+  sleep 1
 done

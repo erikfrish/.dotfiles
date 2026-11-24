@@ -4,7 +4,6 @@
 
 // Zen Browser opens at half-screen by default. Force it to fill the column
 // like VS Code does, without entering fullscreen mode.
-// Utility dialogs work better as floating windows than as full Niri columns.
 window-rule {
     match app-id=r#"^zen$"#
     default-column-width { proportion 1.0; }
@@ -26,7 +25,7 @@ window-rule {
     default-column-width { proportion 0.4; }
 }
 
-// Picture-in-picture windows should stay small and floating regardless of app.
+// Utility dialogs work better as floating windows than as full Niri columns.
 window-rule {
     match app-id=r#"^org\.pulseaudio\.pavucontrol$"#
     open-floating true

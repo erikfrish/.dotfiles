@@ -37,8 +37,4 @@ input {
         click-method "clickfinger"
         natural-scroll
     }
-
-    // Mouse hover moves focus, but scrolling over another window should not
-    // steal focus from the current one.
-    focus-follows-mouse max-scroll-amount="0%"
 }
